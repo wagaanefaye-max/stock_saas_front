@@ -1,0 +1,82 @@
+<div class="super-admin-dashboard">
+  <div class="page-header">
+    <h1>Tableau de bord - Super Administrateur</h1>
+    <p class="text-muted">Vue d'ensemble de la plateforme</p>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="stats-grid">
+    <div *ngFor="let stat of stats" class="stat-card">
+      <div class="stat-icon" [style.background-color]="stat.color + '20'">
+        <i [class]="stat.icon" [style.color]="stat.color"></i>
+      </div>
+      <div class="stat-content">
+        <p class="stat-title">{{ stat.title }}</p>
+        <h2 class="stat-value">{{ stat.value }}</h2>
+        <span class="stat-change">{{ stat.change }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphiques -->
+  <div class="charts-grid">
+    <p-card class="chart-card">
+      <h3>Évolution des entreprises</h3>
+      <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+    </p-card>
+
+    <p-card class="chart-card">
+      <h3>Répartition par plan</h3>
+      <p-chart 
+        type="doughnut" 
+        [data]="{
+          labels: ['Free', 'Premium', 'Standard', 'Basique'],
+          datasets: [{
+            data: [5, 8, 12, 4],
+            backgroundColor: [
+              'var(--secondary)',
+              'var(--primary)',
+              '#16A34A',
+              'var(--warning)'
+            ]
+          }]
+        }"
+        [options]="{
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }">
+      </p-chart>
+    </p-card>
+  </div>
+
+  <!-- Tableau récent -->
+  <p-card class="recent-card">
+    <h3>Entreprises récemment créées</h3>
+    <div class="recent-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Plan</th>
+            <th>Date création</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let i of [1,2,3,4,5]">
+            <td>Entreprise {{ i }}</td>
+            <td>{{ getEmail(i) }}</td>
+            <td><span class="badge badge-primary">Premium</span></td>
+            <td>15/01/2024</td>
+            <td><span class="badge badge-success">Actif</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </p-card>
+</div>
+

@@ -1,0 +1,206 @@
+/* Import PrimeIcons */
+@import 'primeicons/primeicons.css';
+
+/* Variables de couleurs personnalisées */
+:root {
+  --primary: #2563EB;
+  --secondary: #16A34A;
+  --warning: #F59E0B;
+  --danger: #DC2626;
+
+  --bg-main: #F9FAFB;
+  --bg-card: #FFFFFF;
+
+  --text-main: #111827;
+  --text-muted: #6B7280;
+  --border: #E5E7EB;
+}
+
+/* Override PrimeNG avec nos couleurs */
+.p-component {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+/* Styles globaux */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* Boutons PrimeNG personnalisés */
+.p-button {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+
+  &.p-button-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+
+    &:hover {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+    }
+  }
+
+  &.p-button-success {
+    background: var(--secondary);
+    border-color: var(--secondary);
+
+    &:hover {
+      background: #15803d;
+      border-color: #15803d;
+    }
+  }
+
+  &.p-button-warning {
+    background: var(--warning);
+    border-color: var(--warning);
+
+    &:hover {
+      background: #d97706;
+      border-color: #d97706;
+    }
+  }
+
+  &.p-button-danger {
+    background: var(--danger);
+    border-color: var(--danger);
+
+    &:hover {
+      background: #b91c1c;
+      border-color: #b91c1c;
+    }
+  }
+}
+
+/* Cards */
+.p-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Inputs */
+.p-inputtext,
+.p-dropdown,
+.p-calendar {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-main);
+
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+}
+
+/* Sidebar */
+.p-sidebar {
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+}
+
+/* Menu */
+.p-menu {
+  background: transparent;
+  border: none;
+  padding: 0;
+
+  .p-menuitem-link {
+    border-radius: 6px;
+    margin: 4px 0;
+    transition: all 0.2s;
+
+    &:hover {
+      background: rgba(37, 99, 235, 0.1);
+    }
+
+    &.p-menuitem-link-active {
+      background: var(--primary);
+      color: white;
+
+      .p-menuitem-icon,
+      .p-menuitem-text {
+        color: white;
+      }
+    }
+  }
+}
+
+/* Table */
+.p-datatable {
+  .p-datatable-thead > tr > th {
+    background: var(--bg-main);
+    color: var(--text-main);
+    font-weight: 600;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .p-datatable-tbody > tr {
+    border-bottom: 1px solid var(--border);
+
+    &:hover {
+      background: rgba(37, 99, 235, 0.05);
+    }
+  }
+}
+
+/* Badge */
+.p-badge {
+  border-radius: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+}
+
+/* Dialog */
+.p-dialog {
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+  .p-dialog-header {
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem;
+  }
+}
+
+/* Toast */
+.p-toast {
+  .p-toast-message {
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Utilitaires */
+.text-muted {
+  color: var(--text-muted);
+}
+
+.bg-card {
+  background: var(--bg-card);
+}
+
+.border {
+  border: 1px solid var(--border);
+}
+
+.rounded {
+  border-radius: 8px;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+

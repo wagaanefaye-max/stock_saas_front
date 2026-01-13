@@ -1,0 +1,152 @@
+<div class="platform-users-page">
+  <div class="page-header">
+    <div>
+      <h1>Utilisateurs de la plateforme</h1>
+      <p class="text-muted">Gérez tous les utilisateurs de toutes les entreprises</p>
+    </div>
+    <button pButton label="Nouvel utilisateur" icon="pi pi-plus" (click)="openNew()"></button>
+  </div>
+
+  <p-card>
+    <p-toolbar>
+      <div class="p-toolbar-group-start">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="globalFilter" 
+            placeholder="Rechercher...">
+        </span>
+      </div>
+      <div class="p-toolbar-group-end">
+        <button 
+          pButton 
+          icon="pi pi-file-export" 
+          label="Exporter" 
+          class="p-button-secondary">
+        </button>
+      </div>
+    </p-toolbar>
+
+    <p-table 
+      [value]="users" 
+      [paginator]="true" 
+      [rows]="10"
+      [globalFilterFields]="['name','email','entreprise']"
+      [tableStyle]="{'min-width': '50rem'}"
+      selectionMode="multiple"
+      [(selection)]="selectedUsers"
+      [rowHover]="true">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 3rem">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
+          <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+          <th pSortableColumn="entreprise">Entreprise <p-sortIcon field="entreprise"></p-sortIcon></th>
+          <th>Rôle</th>
+          <th pSortableColumn="status">Statut <p-sortIcon field="status"></p-sortIcon></th>
+          <th>Dernière connexion</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="user"></p-tableCheckbox>
+          </td>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.entreprise }}</td>
+          <td>
+            <p-tag [value]="getRoleLabel(user.role)" severity="info"></p-tag>
+          </td>
+          <td>
+            <p-tag [value]="user.status" [severity]="getSeverity(user.status)"></p-tag>
+          </td>
+          <td>{{ user.lastLogin }}</td>
+          <td>
+            <button 
+              pButton 
+              icon="pi pi-pencil" 
+              class="p-button-text p-button-sm"
+              (click)="editUser(user)">
+            </button>
+            <button 
+              pButton 
+              icon="pi pi-trash" 
+              class="p-button-text p-button-sm p-button-danger"
+              (click)="deleteUser(user)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-dialog 
+    [(visible)]="displayDialog" 
+    [style]="{width: '600px'}"
+    [header]="user.id ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false">
+    <div class="form-group">
+      <label>Nom complet *</label>
+      <input type="text" pInputText [(ngModel)]="user.name" class="w-full" required>
+    </div>
+    <div class="form-group">
+      <label>Email *</label>
+      <input type="email" pInputText [(ngModel)]="user.email" class="w-full" required>
+    </div>
+    <div class="form-group" *ngIf="!user.id">
+      <label>Mot de passe *</label>
+      <p-password 
+        [(ngModel)]="user.password" 
+        [feedback]="false"
+        [toggleMask]="true"
+        placeholder="••••••••"
+        styleClass="w-full"
+        required>
+      </p-password>
+    </div>
+    <div class="form-group">
+      <label>Entreprise *</label>
+      <p-dropdown 
+        [(ngModel)]="user.entreprise" 
+        [options]="entreprises" 
+        placeholder="Sélectionner une entreprise"
+        class="w-full">
+      </p-dropdown>
+    </div>
+    <div class="form-group">
+      <label>Rôle *</label>
+      <p-dropdown 
+        [(ngModel)]="user.role" 
+        [options]="roles" 
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Sélectionner un rôle"
+        class="w-full">
+      </p-dropdown>
+    </div>
+    <div class="form-group">
+      <label>Statut</label>
+      <p-dropdown 
+        [(ngModel)]="user.status" 
+        [options]="statuses" 
+        placeholder="Sélectionner un statut"
+        class="w-full">
+      </p-dropdown>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
+      <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveUser()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+

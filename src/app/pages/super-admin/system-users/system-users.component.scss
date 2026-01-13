@@ -1,0 +1,37 @@
+.system-users-page {
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .w-full {
+      width: 100%;
+    }
+  }
+}
+
+::ng-deep .p-toolbar {
+  background: transparent;
+  border: none;
+  padding: 0 0 1rem 0;
+}
+

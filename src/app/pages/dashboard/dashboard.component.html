@@ -1,0 +1,84 @@
+<div class="dashboard">
+  <div class="page-header">
+    <h1>Tableau de bord</h1>
+    <p class="text-muted">Vue d'ensemble de votre gestion de stock</p>
+  </div>
+
+  <!-- Statistiques -->
+  <div class="stats-grid">
+    <div *ngFor="let stat of stats" class="stat-card">
+      <div class="stat-icon" [style.background-color]="stat.color + '20'">
+        <i [class]="stat.icon" [style.color]="stat.color"></i>
+      </div>
+      <div class="stat-content">
+        <p class="stat-title">{{ stat.title }}</p>
+        <h2 class="stat-value">{{ stat.value }}</h2>
+        <span class="stat-change" [class.positive]="stat.change.startsWith('+')">
+          {{ stat.change }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphiques -->
+  <div class="charts-grid">
+    <p-card class="chart-card">
+      <h3>Mouvements de stock</h3>
+      <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+    </p-card>
+
+    <p-card class="chart-card">
+      <h3>Produits par catégorie</h3>
+      <p-chart 
+        type="doughnut" 
+        [data]="{
+          labels: ['Électronique', 'Vêtements', 'Alimentaire', 'Autres'],
+          datasets: [{
+            data: [300, 450, 280, 204],
+            backgroundColor: [
+              'var(--primary)',
+              'var(--secondary)',
+              'var(--warning)',
+              'var(--text-muted)'
+            ]
+          }]
+        }"
+        [options]="{
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }">
+      </p-chart>
+    </p-card>
+  </div>
+
+  <!-- Tableau récent -->
+  <p-card class="recent-card">
+    <h3>Mouvements récents</h3>
+    <div class="recent-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Produit</th>
+            <th>Type</th>
+            <th>Quantité</th>
+            <th>Entrepôt</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let i of [1,2,3,4,5]">
+            <td>15/01/2024</td>
+            <td>Produit {{ i }}</td>
+            <td><span class="badge badge-success">Entrée</span></td>
+            <td>50</td>
+            <td>Entrepôt A</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </p-card>
+</div>
+

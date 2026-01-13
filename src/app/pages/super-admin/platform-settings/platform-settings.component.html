@@ -1,0 +1,53 @@
+<div class="platform-settings-page">
+
+  <div class="settings-content">
+
+
+    <p-card class="settings-card">
+      <h3>Mode maintenance</h3>
+      <p-divider></p-divider>
+      
+      <div class="form-section">
+        <div class="setting-item">
+          <div>
+            <label>Activer le mode maintenance</label>
+            <p class="text-muted">La plateforme sera inaccessible pour tous les utilisateurs</p>
+          </div>
+          <p-toggleButton [(ngModel)]="platformSettings.maintenanceMode"></p-toggleButton>
+        </div>
+
+        <div class="setting-item">
+          <div>
+            <label>Autoriser les nouvelles inscriptions</label>
+            <p class="text-muted">Permettre aux nouvelles entreprises de s'inscrire</p>
+          </div>
+          <p-toggleButton [(ngModel)]="platformSettings.allowNewRegistrations"></p-toggleButton>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card class="settings-card">
+      <h3>Plans d'abonnement</h3>
+      <p-divider></p-divider>
+      
+      <div class="plans-list">
+        <div *ngFor="let plan of plans" class="plan-item">
+          <div class="plan-header">
+            <h4>{{ plan.name }}</h4>
+            <span class="plan-price">
+              <span *ngIf="plan.name === 'Free'">14 jours d'essai</span>
+              <span *ngIf="plan.name !== 'Free'">{{ plan.price }} €/mois</span>
+            </span>
+          </div>
+          <div class="plan-details">
+            <p><i class="pi pi-users"></i> {{ plan.maxUsers }} utilisateurs max</p>
+            <p><i class="pi pi-building"></i> {{ plan.maxWarehouses }} entrepôts max</p>
+            <p *ngIf="plan.trialDays"><i class="pi pi-calendar"></i> {{ plan.trialDays }} jours d'essai gratuit</p>
+          </div>
+          <button pButton label="Modifier" icon="pi pi-pencil" class="p-button-text"></button>
+        </div>
+      </div>
+    </p-card>
+  </div>
+</div>
+

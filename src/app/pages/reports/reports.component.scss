@@ -1,0 +1,90 @@
+.reports-page {
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+
+    .report-card {
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--text-main);
+      }
+
+      .top-products {
+        .product-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem;
+          border-bottom: 1px solid var(--border);
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          .product-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+
+            .product-rank {
+              font-weight: 700;
+              color: var(--primary);
+              width: 32px;
+              text-align: center;
+            }
+
+            .product-name {
+              color: var(--text-main);
+            }
+          }
+
+          .product-value {
+            font-weight: 600;
+            color: var(--text-main);
+          }
+        }
+      }
+
+      .stats-list {
+        .stat-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem;
+          border-bottom: 1px solid var(--border);
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          span {
+            color: var(--text-muted);
+          }
+
+          strong {
+            color: var(--text-main);
+            font-size: 1.125rem;
+          }
+        }
+      }
+    }
+  }
+}
+

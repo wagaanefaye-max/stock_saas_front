@@ -1,0 +1,363 @@
+<div class="register-container">
+  <div class="register-wrapper">
+    <!-- Left side - Branding -->
+    <div class="register-branding">
+      <div class="branding-content">
+        <div class="logo-container">
+          <div class="logo-icon">
+            <i class="pi pi-building"></i>
+          </div>
+          <h1>Rejoignez Stock SaaS</h1>
+        </div>
+        <h2>Créez votre compte entreprise</h2>
+        <p class="branding-description">
+          Gérez efficacement votre inventaire avec notre plateforme SaaS moderne. 
+          Inscrivez-vous en quelques minutes et commencez dès aujourd'hui.
+        </p>
+        <div class="features-list">
+          <div class="feature-item">
+            <i class="pi pi-check-circle"></i>
+            <span>Essai gratuit de 14 jours</span>
+          </div>
+          <div class="feature-item">
+            <i class="pi pi-check-circle"></i>
+            <span>Configuration en 5 minutes</span>
+          </div>
+          <div class="feature-item">
+            <i class="pi pi-check-circle"></i>
+            <span>Support dédié inclus</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right side - Registration Form -->
+    <div class="register-form-container">
+      <div class="register-form-card">
+        <!-- Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getStepProgress()"></div>
+          </div>
+          <span class="progress-text">Étape {{ currentStep }} sur {{ totalSteps }}</span>
+        </div>
+
+        <div class="form-header">
+          <h2>Créer un compte</h2>
+          <p>Remplissez les informations ci-dessous</p>
+        </div>
+
+        <form (ngSubmit)="register()" class="register-form">
+          <!-- Step 1: Informations entreprise -->
+          <div *ngIf="currentStep === 1" class="form-step">
+            <h3 class="step-title">
+              <i class="pi pi-building"></i>
+              Informations de l'entreprise
+            </h3>
+            
+            <div class="form-group">
+              <label for="companyName">
+                Nom de l'entreprise *
+              </label>
+              <input 
+                id="companyName"
+                type="text" 
+                pInputText 
+                [(ngModel)]="companyName" 
+                name="companyName"
+                placeholder="Ex: Mon Entreprise SARL"
+                class="w-full"
+                required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="companyEmail">
+                  Email de l'entreprise *
+                </label>
+                <input 
+                  id="companyEmail"
+                  type="email" 
+                  pInputText 
+                  [(ngModel)]="companyEmail" 
+                  name="companyEmail"
+                  placeholder="contact@entreprise.com"
+                  class="w-full"
+                  required>
+              </div>
+
+              <div class="form-group">
+                <label for="companyPhone">
+                  Téléphone *
+                </label>
+                <input 
+                  id="companyPhone"
+                  type="tel" 
+                  pInputText 
+                  [(ngModel)]="companyPhone" 
+                  name="companyPhone"
+                  placeholder="77 888 66 55"
+                  class="w-full"
+                  appPhoneFormat
+                  maxlength="12"
+                  required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="companyAddress">
+                Adresse *
+              </label>
+              <input 
+                id="companyAddress"
+                type="text" 
+                pInputText 
+                [(ngModel)]="companyAddress" 
+                name="companyAddress"
+                placeholder="123 Rue Example"
+                class="w-full"
+                required>
+            </div>
+
+            <div class="form-group">
+              <label for="companyCountry">
+                Pays *
+              </label>
+              <input 
+                id="companyCountry"
+                type="text" 
+                pInputText 
+                [(ngModel)]="companyCountry" 
+                name="companyCountry"
+                placeholder="Sénégal"
+                class="w-full"
+                [readonly]="true"
+                required>
+            </div>
+            
+            <div class="form-group">
+              <label for="companyRegion">
+                Région *
+              </label>
+              <p-dropdown 
+                id="companyRegion"
+                [(ngModel)]="companyRegion" 
+                [options]="regions" 
+                placeholder="Sélectionner une région"
+                class="w-full"
+                name="companyRegion"
+                required>
+              </p-dropdown>
+            </div>
+
+            <div class="form-group">
+              <label for="companyLogo">
+                Logo de l'entreprise
+                <span class="optional-badge">(Optionnel)</span>
+              </label>
+              <div class="logo-upload-container">
+                <div *ngIf="!companyLogoPreview" class="logo-upload-area">
+                  <input 
+                    type="file" 
+                    id="companyLogo"
+                    name="companyLogo"
+                    accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                    (change)="onLogoSelected($event)"
+                    class="logo-file-input">
+                  <label for="companyLogo" class="logo-upload-label">
+                    <i class="pi pi-upload"></i>
+                    <span>Cliquez pour télécharger ou glissez une image</span>
+                    <small>PNG, JPG, GIF ou WEBP (max 5MB)</small>
+                  </label>
+                </div>
+                <div *ngIf="companyLogoPreview" class="logo-preview-container">
+                  <img [src]="companyLogoPreview" alt="Logo prévisualisation" class="logo-preview">
+                  <button 
+                    type="button"
+                    pButton 
+                    icon="pi pi-times" 
+                    class="p-button-rounded p-button-danger p-button-text logo-remove-btn"
+                    (click)="removeLogo()"
+                    title="Supprimer le logo">
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Step 2: Administrateur -->
+          <div *ngIf="currentStep === 2" class="form-step">
+            <h3 class="step-title">
+              <i class="pi pi-user"></i>
+              Administrateur principal
+            </h3>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="adminFirstName">
+                  Prénom *
+                </label>
+                <input 
+                  id="adminFirstName"
+                  type="text" 
+                  pInputText 
+                  [(ngModel)]="adminFirstName" 
+                  name="adminFirstName"
+                  placeholder="Jean"
+                  class="w-full"
+                  required>
+              </div>
+
+              <div class="form-group">
+                <label for="adminLastName">
+                  Nom *
+                </label>
+                <input 
+                  id="adminLastName"
+                  type="text" 
+                  pInputText 
+                  [(ngModel)]="adminLastName" 
+                  name="adminLastName"
+                  placeholder="Dupont"
+                  class="w-full"
+                  required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="adminEmail">
+                Email administrateur *
+              </label>
+              <input 
+                id="adminEmail"
+                type="email" 
+                pInputText 
+                [(ngModel)]="adminEmail" 
+                name="adminEmail"
+                placeholder="admin@entreprise.com"
+                class="w-full"
+                required>
+              <small class="text-muted">
+                Un email de bienvenue avec les instructions de connexion sera envoyé à cette adresse.
+              </small>
+            </div>
+          </div>
+
+          <!-- Step 3: Plan et conditions -->
+          <div *ngIf="currentStep === 3" class="form-step">
+            <h3 class="step-title">
+              <i class="pi pi-credit-card"></i>
+              Choisissez votre plan
+            </h3>
+            
+            <div class="plans-selection">
+              <div 
+                *ngFor="let plan of plans" 
+                class="plan-option"
+                [class.selected]="selectedPlan === plan.value"
+                (click)="selectedPlan = plan.value">
+                <div class="plan-header">
+                  <h4>{{ plan.value }}</h4>
+                  <span class="plan-badge" *ngIf="plan.value === 'Free'" style="background: var(--secondary);">Essai gratuit</span>
+                  <span class="plan-badge" *ngIf="plan.value === 'Standard'">Populaire</span>
+                </div>
+                <p class="plan-description">
+                  <span *ngIf="plan.value === 'Free'">Testez toutes les fonctionnalités pendant 14 jours</span>
+                  <span *ngIf="plan.value === 'Basique'">Idéal pour les petites entreprises</span>
+                  <span *ngIf="plan.value === 'Standard'">Parfait pour les entreprises en croissance</span>
+                  <span *ngIf="plan.value === 'Premium'">Pour les grandes organisations</span>
+                </p>
+                <div class="plan-features">
+                  <div *ngIf="plan.value === 'Free'">
+                    <p><i class="pi pi-check"></i> Accès complet à toutes les fonctionnalités</p>
+                    <p><i class="pi pi-check"></i> Jusqu'à 10 utilisateurs</p>
+                    <p><i class="pi pi-check"></i> 3 entrepôts</p>
+                    <p><i class="pi pi-check"></i> Support email</p>
+                    <p><i class="pi pi-check"></i> <strong>14 jours gratuits</strong></p>
+                  </div>
+                  <div *ngIf="plan.value === 'Basique'">
+                    <p><i class="pi pi-check"></i> Jusqu'à 5 utilisateurs</p>
+                    <p><i class="pi pi-check"></i> 2 entrepôts</p>
+                    <p><i class="pi pi-check"></i> Support email</p>
+                  </div>
+                  <div *ngIf="plan.value === 'Standard'">
+                    <p><i class="pi pi-check"></i> Jusqu'à 20 utilisateurs</p>
+                    <p><i class="pi pi-check"></i> 5 entrepôts</p>
+                    <p><i class="pi pi-check"></i> Support prioritaire</p>
+                    <p><i class="pi pi-check"></i> Rapports avancés</p>
+                  </div>
+                  <div *ngIf="plan.value === 'Premium'">
+                    <p><i class="pi pi-check"></i> Utilisateurs illimités</p>
+                    <p><i class="pi pi-check"></i> Entrepôts illimités</p>
+                    <p><i class="pi pi-check"></i> Support 24/7</p>
+                    <p><i class="pi pi-check"></i> API personnalisée</p>
+                    <p><i class="pi pi-check"></i> Formation dédiée</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p-divider></p-divider>
+
+            <div class="form-group terms-group">
+              <div class="terms-checkbox">
+                <p-checkbox 
+                  [(ngModel)]="acceptTerms" 
+                  [binary]="true" 
+                  name="acceptTerms"
+                  [inputId]="'acceptTerms'">
+                </p-checkbox>
+                <label for="acceptTerms">
+                  J'accepte les <a href="#" target="_blank">conditions générales d'utilisation</a> 
+                  et la <a href="#" target="_blank">politique de confidentialité</a> *
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation buttons -->
+          <div class="form-actions">
+            <button 
+              *ngIf="currentStep > 1"
+              pButton 
+              type="button" 
+              label="Précédent" 
+              icon="pi pi-arrow-left"
+              class="p-button-secondary"
+              (click)="previousStep()">
+            </button>
+            
+            <button 
+              *ngIf="currentStep < totalSteps"
+              pButton 
+              type="button" 
+              [label]="'Suivant'"
+              icon="pi pi-arrow-right"
+              iconPos="right"
+              class="p-button-primary"
+              [disabled]="!isStepValid(currentStep)"
+              (click)="nextStep()">
+            </button>
+
+            <button 
+              *ngIf="currentStep === totalSteps"
+              pButton 
+              type="submit" 
+              [label]="loading ? 'Inscription en cours...' : 'Créer mon compte'"
+              icon="pi pi-check"
+              class="p-button-primary"
+              [disabled]="!isStepValid(3) || loading"
+              [loading]="loading">
+            </button>
+          </div>
+        </form>
+
+        <div class="form-footer">
+          <p>Vous avez déjà un compte ? <a routerLink="/login">Se connecter</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,76 @@
+<div class="settings-page">
+  <div class="page-header">
+    <h1>Paramètres</h1>
+    <p class="text-muted">Gérez les paramètres de votre entreprise</p>
+  </div>
+
+  <div class="settings-content">
+    <p-card class="settings-card">
+      <h3>Informations de l'entreprise</h3>
+      <p-divider></p-divider>
+      
+      <div class="form-section">
+        <div class="form-group">
+          <label>Nom de l'entreprise</label>
+          <input type="text" pInputText [(ngModel)]="company.name" class="w-full">
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" pInputText [(ngModel)]="company.email" class="w-full">
+        </div>
+
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input 
+            type="tel" 
+            pInputText 
+            [(ngModel)]="company.phone" 
+            class="w-full"
+            placeholder="77 888 66 55"
+            appPhoneFormat
+            maxlength="12">
+        </div>
+
+        <div class="form-group">
+          <label>Adresse</label>
+          <input type="text" pInputText [(ngModel)]="company.address" class="w-full">
+        </div>
+
+        <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveSettings()"></button>
+      </div>
+    </p-card>
+
+    <p-card class="settings-card">
+      <h3>Notifications</h3>
+      <p-divider></p-divider>
+      
+      <div class="form-section">
+        <div class="notification-item">
+          <div>
+            <label>Alertes de stock faible</label>
+            <p class="text-muted">Recevoir des notifications lorsque le stock est faible</p>
+          </div>
+          <p-toggleButton [(ngModel)]="notifications.lowStock"></p-toggleButton>
+        </div>
+
+        <div class="notification-item">
+          <div>
+            <label>Mouvements de stock</label>
+            <p class="text-muted">Recevoir des notifications pour chaque mouvement</p>
+          </div>
+          <p-toggleButton [(ngModel)]="notifications.movements"></p-toggleButton>
+        </div>
+
+        <div class="notification-item">
+          <div>
+            <label>Rapports hebdomadaires</label>
+            <p class="text-muted">Recevoir un résumé hebdomadaire par email</p>
+          </div>
+          <p-toggleButton [(ngModel)]="notifications.reports"></p-toggleButton>
+        </div>
+      </div>
+    </p-card>
+  </div>
+</div>
+

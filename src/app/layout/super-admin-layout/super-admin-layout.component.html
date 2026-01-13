@@ -1,0 +1,46 @@
+
+  <div class="layout-content">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <div class="sidebar-header">
+          <h2>Administration</h2>
+          <p class="text-muted">Plateforme</p>
+        </div>
+        <p-divider></p-divider>
+        <ul class="nav-list">
+          <li *ngFor="let item of menuItems">
+            <a 
+              [routerLink]="item.routerLink" 
+              routerLinkActive="active"
+              class="nav-item"
+              [class.active]="router.url === item.routerLink">
+              <i [class]="item.icon"></i>
+              <span>{{ item.label }}</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <!-- Bottom Navigation Mobile -->
+  <nav class="bottom-nav" *ngIf="menuItems.length > 0">
+    <a 
+      *ngFor="let item of menuItems" 
+      [routerLink]="item.routerLink" 
+      routerLinkActive="active"
+      class="bottom-nav-item"
+      [class.active]="router.url === item.routerLink">
+      <i [class]="item.icon"></i>
+      <span>{{ item.label }}</span>
+    </a>
+  </nav>
+
+
+

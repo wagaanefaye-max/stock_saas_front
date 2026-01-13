@@ -1,0 +1,122 @@
+<div class="products-page">
+  <div class="page-header">
+    <div>
+      <h1>Produits</h1>
+      <p class="text-muted">Gérez votre catalogue de produits</p>
+    </div>
+    <button pButton label="Nouveau produit" icon="pi pi-plus" (click)="openNew()"></button>
+  </div>
+
+  <p-card>
+    <p-toolbar>
+      <div class="p-toolbar-group-start">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="globalFilter" 
+            placeholder="Rechercher...">
+        </span>
+      </div>
+      <div class="p-toolbar-group-end">
+        <button 
+          pButton 
+          icon="pi pi-file-export" 
+          label="Exporter" 
+          class="p-button-secondary">
+        </button>
+      </div>
+    </p-toolbar>
+
+    <p-table 
+      [value]="products" 
+      [paginator]="true" 
+      [rows]="10"
+      [globalFilterFields]="['name','sku','category']"
+      [tableStyle]="{'min-width': '50rem'}"
+      selectionMode="multiple"
+      [(selection)]="selectedProducts"
+      [rowHover]="true">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 3rem">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
+          <th pSortableColumn="sku">SKU <p-sortIcon field="sku"></p-sortIcon></th>
+          <th>Catégorie</th>
+          <th pSortableColumn="stock">Stock <p-sortIcon field="stock"></p-sortIcon></th>
+          <th pSortableColumn="price">Prix <p-sortIcon field="price"></p-sortIcon></th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-product>
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="product"></p-tableCheckbox>
+          </td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.sku }}</td>
+          <td>{{ product.category }}</td>
+          <td>{{ product.stock }}</td>
+          <td>{{ product.price | number:'1.2-2' }} €</td>
+          <td>
+            <p-tag [value]="product.status" [severity]="getSeverity(product.status)"></p-tag>
+          </td>
+          <td>
+            <button 
+              pButton 
+              icon="pi pi-pencil" 
+              class="p-button-text p-button-sm"
+              (click)="editProduct(product)">
+            </button>
+            <button 
+              pButton 
+              icon="pi pi-trash" 
+              class="p-button-text p-button-sm p-button-danger"
+              (click)="editProduct(product)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-dialog 
+    [(visible)]="displayDialog" 
+    [style]="{width: '500px'}"
+    header="Produit"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false">
+    <div class="form-group">
+      <label>Nom</label>
+      <input type="text" pInputText [(ngModel)]="product.name" class="w-full">
+    </div>
+    <div class="form-group">
+      <label>SKU</label>
+      <input type="text" pInputText [(ngModel)]="product.sku" class="w-full">
+    </div>
+    <div class="form-group">
+      <label>Catégorie</label>
+      <input type="text" pInputText [(ngModel)]="product.category" class="w-full">
+    </div>
+    <div class="form-group">
+      <label>Stock</label>
+      <input type="number" pInputText [(ngModel)]="product.stock" class="w-full">
+    </div>
+    <div class="form-group">
+      <label>Prix</label>
+      <input type="number" pInputText [(ngModel)]="product.price" class="w-full">
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
+      <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveProduct()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+

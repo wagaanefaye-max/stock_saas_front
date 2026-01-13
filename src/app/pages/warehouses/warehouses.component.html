@@ -1,0 +1,53 @@
+<div class="warehouses-page">
+  <div class="page-header">
+    <div>
+      <h1>Entrepôts</h1>
+      <p class="text-muted">Gérez vos entrepôts et leurs capacités</p>
+    </div>
+    <button pButton label="Nouvel entrepôt" icon="pi pi-plus"></button>
+  </div>
+
+  <div class="warehouses-grid">
+    <p-card *ngFor="let warehouse of warehouses" class="warehouse-card">
+      <div class="warehouse-header">
+        <div>
+          <h3>{{ warehouse.name }}</h3>
+          <p class="text-muted">{{ warehouse.location }}</p>
+        </div>
+        <p-tag [value]="warehouse.status" [severity]="getSeverity(warehouse.status)"></p-tag>
+      </div>
+
+      <div class="warehouse-stats">
+        <div class="stat-item">
+          <span class="stat-label">Capacité</span>
+          <span class="stat-value">{{ warehouse.capacity | number }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Utilisé</span>
+          <span class="stat-value">{{ warehouse.used | number }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Disponible</span>
+          <span class="stat-value">{{ warehouse.capacity - warehouse.used | number }}</span>
+        </div>
+      </div>
+
+      <div class="warehouse-progress">
+        <div class="progress-bar">
+          <div 
+            class="progress-fill" 
+            [style.width.%]="getUsagePercentage(warehouse.used, warehouse.capacity)"
+            [style.background-color]="getUsagePercentage(warehouse.used, warehouse.capacity) > 80 ? 'var(--danger)' : 'var(--primary)'">
+          </div>
+        </div>
+        <span class="progress-text">{{ getUsagePercentage(warehouse.used, warehouse.capacity) }}% utilisé</span>
+      </div>
+
+      <div class="warehouse-actions">
+        <button pButton label="Voir détails" icon="pi pi-eye" class="p-button-text"></button>
+        <button pButton label="Modifier" icon="pi pi-pencil" class="p-button-text"></button>
+      </div>
+    </p-card>
+  </div>
+</div>
+

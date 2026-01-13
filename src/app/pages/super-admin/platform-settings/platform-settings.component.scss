@@ -1,0 +1,117 @@
+.platform-settings-page {
+  .page-header {
+    margin-bottom: 2rem;
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .settings-content {
+    display: grid;
+    gap: 1.5rem;
+
+    .settings-card {
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-main);
+      }
+
+      .form-section {
+        margin-top: 1.5rem;
+
+        .form-group {
+          margin-bottom: 1.5rem;
+
+          label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-main);
+          }
+
+          .w-full {
+            width: 100%;
+          }
+        }
+
+        .setting-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem 0;
+          border-bottom: 1px solid var(--border);
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+          }
+
+          p {
+            font-size: 0.875rem;
+            margin: 0;
+          }
+        }
+      }
+
+      .plans-list {
+        .plan-item {
+          padding: 1.5rem;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          margin-bottom: 1rem;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+
+            h4 {
+              font-size: 1.25rem;
+              font-weight: 600;
+              color: var(--text-main);
+              margin: 0;
+            }
+
+            .plan-price {
+              font-size: 1.5rem;
+              font-weight: 700;
+              color: var(--primary);
+            }
+          }
+
+          .plan-details {
+            margin-bottom: 1rem;
+
+            p {
+              color: var(--text-muted);
+              margin-bottom: 0.5rem;
+
+              i {
+                margin-right: 0.5rem;
+                color: var(--primary);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

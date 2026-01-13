@@ -1,0 +1,251 @@
+<div class="companies-page">
+  <div class="page-header">
+    <div>
+      <h1>Gestion des entreprises</h1>
+      <p class="text-muted">Gérez les entreprises de la plateforme</p>
+    </div>
+    <button pButton label="Nouvelle entreprise" icon="pi pi-plus" (click)="openNew()"></button>
+  </div>
+
+  <p-card>
+    <p-toolbar>
+      <div class="p-toolbar-group-start">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="globalFilter" 
+            placeholder="Rechercher...">
+        </span>
+      </div>
+      <div class="p-toolbar-group-end">
+        <button 
+          pButton 
+          icon="pi pi-file-export" 
+          label="Exporter" 
+          class="p-button-secondary">
+        </button>
+      </div>
+    </p-toolbar>
+
+    <p-table 
+      [value]="companies" 
+      [paginator]="true" 
+      [rows]="10"
+      [globalFilterFields]="['name','email','plan']"
+      [tableStyle]="{'min-width': '50rem'}"
+      selectionMode="multiple"
+      [(selection)]="selectedCompanies"
+      [rowHover]="true">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 3rem">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
+          <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+          <th pSortableColumn="plan">Plan <p-sortIcon field="plan"></p-sortIcon></th>
+          <th>Utilisateurs</th>
+          <th pSortableColumn="status">Statut <p-sortIcon field="status"></p-sortIcon></th>
+          <th pSortableColumn="createdAt">Date création <p-sortIcon field="createdAt"></p-sortIcon></th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-company>
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="company"></p-tableCheckbox>
+          </td>
+          <td>{{ company.name }}</td>
+          <td>{{ company.email }}</td>
+          <td>
+            <p-tag [value]="company.plan" [severity]="getPlanSeverity(company.plan)"></p-tag>
+          </td>
+          <td>{{ company.users }}</td>
+          <td>
+            <p-tag [value]="company.status" [severity]="getSeverity(company.status)"></p-tag>
+          </td>
+          <td>{{ company.createdAt }}</td>
+          <td>
+            <button 
+              pButton 
+              icon="pi pi-pencil" 
+              class="p-button-text p-button-sm"
+              (click)="editCompany(company)"
+              pTooltip="Modifier">
+            </button>
+            <button 
+              pButton 
+              icon="pi pi-trash" 
+              class="p-button-text p-button-sm p-button-danger"
+              (click)="deleteCompany(company)"
+              pTooltip="Supprimer">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-dialog 
+    [(visible)]="displayDialog" 
+    [style]="{width: '800px', maxHeight: '90vh'}"
+    [header]="company.id ? 'Modifier l\'entreprise' : 'Nouvelle entreprise'"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [styleClass]="'company-dialog'">
+    <div class="dialog-content">
+      <!-- Informations entreprise -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="pi pi-building"></i>
+          Informations de l'entreprise
+        </h3>
+        
+        <div class="form-group">
+          <label>Nom de l'entreprise *</label>
+          <input type="text" pInputText [(ngModel)]="company.name" class="w-full" placeholder="Ex: Mon Entreprise SARL" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email de contact *</label>
+            <input type="email" pInputText [(ngModel)]="company.email" class="w-full" placeholder="contact@entreprise.com" required>
+          </div>
+          <div class="form-group">
+            <label>Téléphone *</label>
+            <input type="tel" pInputText [(ngModel)]="company.phone" class="w-full" placeholder="77 888 66 55" appPhoneFormat maxlength="12" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Adresse *</label>
+          <input type="text" pInputText [(ngModel)]="company.address" class="w-full" placeholder="123 Rue Example" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Région *</label>
+            <p-dropdown 
+              [(ngModel)]="company.region" 
+              [options]="regions" 
+              placeholder="Sélectionner une région"
+              class="w-full"
+              required>
+            </p-dropdown>
+          </div>
+          <div class="form-group">
+            <label>Pays *</label>
+            <input type="text" pInputText [(ngModel)]="company.country" class="w-full" [readonly]="true" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            Logo de l'entreprise
+            <span class="optional-badge">(Optionnel)</span>
+          </label>
+          <div class="logo-upload-container">
+            <div *ngIf="!companyLogoPreview" class="logo-upload-area">
+              <input 
+                type="file" 
+                id="companyLogo"
+                name="companyLogo"
+                accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                (change)="onLogoSelected($event)"
+                class="logo-file-input">
+              <label for="companyLogo" class="logo-upload-label">
+                <i class="pi pi-upload"></i>
+                <span>Cliquez pour télécharger ou glissez une image</span>
+                <small>PNG, JPG, GIF ou WEBP (max 5MB)</small>
+              </label>
+            </div>
+            <div *ngIf="companyLogoPreview" class="logo-preview-container">
+              <img [src]="companyLogoPreview" alt="Logo prévisualisation" class="logo-preview">
+              <button 
+                type="button"
+                pButton 
+                icon="pi pi-times" 
+                class="p-button-rounded p-button-danger p-button-text logo-remove-btn"
+                (click)="removeLogo()"
+                title="Supprimer le logo">
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p-divider></p-divider>
+
+      <!-- Informations administrateur -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="pi pi-user"></i>
+          Administrateur principal
+        </h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prénom *</label>
+            <input type="text" pInputText [(ngModel)]="company.adminFirstName" class="w-full" placeholder="Jean" required>
+          </div>
+          <div class="form-group">
+            <label>Nom *</label>
+            <input type="text" pInputText [(ngModel)]="company.adminLastName" class="w-full" placeholder="Dupont" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Email administrateur *</label>
+          <input type="email" pInputText [(ngModel)]="company.adminEmail" class="w-full" placeholder="admin@entreprise.com" required>
+          <small class="text-muted">
+            Un email de bienvenue avec les instructions de connexion sera envoyé à cette adresse.
+          </small>
+        </div>
+      </div>
+
+      <p-divider></p-divider>
+
+      <!-- Plan et statut -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="pi pi-credit-card"></i>
+          Abonnement et statut
+        </h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Plan d'abonnement *</label>
+            <p-dropdown 
+              [(ngModel)]="company.plan" 
+              [options]="plans" 
+              placeholder="Sélectionner un plan"
+              class="w-full"
+              required>
+            </p-dropdown>
+          </div>
+          <div class="form-group">
+            <label>Statut *</label>
+            <p-dropdown 
+              [(ngModel)]="company.status" 
+              [options]="statuses" 
+              placeholder="Sélectionner un statut"
+              class="w-full"
+              required>
+            </p-dropdown>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <ng-template pTemplate="footer">
+      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
+      <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveCompany()" [disabled]="!isFormValid()"></button>
+    </ng-template>
+  </p-dialog>
+</div>
+
