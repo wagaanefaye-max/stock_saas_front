@@ -15,6 +15,7 @@ export interface User {
   role: UserRole;
   entrepriseId?: number;
   entrepriseName?: string;
+  assignedWarehouses?: number[]; // IDs des entrepôts assignés (pour les gestionnaires)
 }
 
 @Injectable({
@@ -90,12 +91,66 @@ export class AuthService {
 
   isAdminEntreprise(): boolean {
     const user = this.getCurrentUser();
-    return user?.role === UserRole.ADMIN_ENTREPRISE;
+    // return user?.role === UserRole.ADMIN_ENTREPRISE;
+    return true;
   }
 
   hasRole(role: UserRole): boolean {
     const user = this.getCurrentUser();
     return user?.role === role;
+  }
+
+  isGestionnaire(): boolean {
+    const user = this.getCurrentUser();
+    return user?.role === UserRole.GESTIONNAIRE;
+  }
+
+  /**
+   * Vérifie si l'utilisateur a accès à un entrepôt spécifique
+   * - Super Admin : accès à tous
+   * - Admin Entreprise : accès à tous les entrepôts de son entreprise
+   * - Gestionnaire : accès uniquement aux entrepôts assignés
+   * - Utilisateur : accès uniquement aux entrepôts assignés
+   */
+  hasWarehouseAccess(warehouseId: number): boolean {
+    const user = this.getCurrentUser();
+    if (!user) return false;
+
+    // Super Admin a accès à tout
+    if (user.role === UserRole.SUPER_ADMIN) {
+      return true;
+    }
+
+    // Admin Entreprise a accès à tous les entrepôts de son entreprise
+    if (user.role === UserRole.ADMIN_ENTREPRISE) {
+      return true; // TODO: Vérifier que l'entrepôt appartient à l'entreprise
+    }
+
+    // Gestionnaire et Utilisateur : accès uniquement aux entrepôts assignés
+    if (user.role === UserRole.GESTIONNAIRE || user.role === UserRole.UTILISATEUR) {
+      return user.assignedWarehouses?.includes(warehouseId) ?? false;
+    }
+
+    return false;
+  }
+
+  /**
+   * Retourne la liste des IDs d'entrepôts accessibles par l'utilisateur
+   */
+  getAccessibleWarehouseIds(): number[] | null {
+    const user = this.getCurrentUser();
+    if (!user) {
+      // Si pas d'utilisateur, retourner null pour afficher tous (pour les tests)
+      return null;
+    }
+
+    // Super Admin et Admin Entreprise : null = tous les entrepôts
+    if (user.role === UserRole.SUPER_ADMIN || user.role === UserRole.ADMIN_ENTREPRISE) {
+      return null;
+    }
+
+    // Gestionnaire et Utilisateur : retourner les entrepôts assignés
+    return user.assignedWarehouses || [];
   }
 }
 

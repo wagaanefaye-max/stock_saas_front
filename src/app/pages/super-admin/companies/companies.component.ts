@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -12,6 +12,8 @@ import { DropdownModule } from 'primeng/dropdown';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { TooltipModule } from 'primeng/tooltip';
 import { DividerModule } from 'primeng/divider';
+import { MenuModule } from 'primeng/menu';
+import { Menu } from 'primeng/menu';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
 
 @Component({
@@ -31,6 +33,7 @@ import { PhoneFormatDirective } from '../../../directives/phone-format.directive
     ToggleButtonModule,
     TooltipModule,
     DividerModule,
+    MenuModule,
     PhoneFormatDirective
   ],
   templateUrl: './companies.component.html',
@@ -38,11 +41,11 @@ import { PhoneFormatDirective } from '../../../directives/phone-format.directive
 })
 export class CompaniesComponent {
   companies = [
-    { id: 1, name: 'Entreprise A', email: 'contact@entreprisea.com', plan: 'Premium', status: 'Actif', users: 25, createdAt: '2024-01-15' },
-    { id: 2, name: 'Entreprise B', email: 'contact@entrepriseb.com', plan: 'Standard', status: 'Actif', users: 12, createdAt: '2024-01-10' },
-    { id: 3, name: 'Entreprise C', email: 'contact@entreprisec.com', plan: 'Basique', status: 'Inactif', users: 5, createdAt: '2024-01-05' },
-    { id: 4, name: 'Entreprise D', email: 'contact@entreprised.com', plan: 'Premium', status: 'Actif', users: 45, createdAt: '2024-01-20' },
-    { id: 5, name: 'Entreprise E', email: 'contact@entreprisee.com', plan: 'Standard', status: 'Actif', users: 18, createdAt: '2024-01-12' }
+    { id: 1, name: 'Entreprise A', email: 'contact@entreprisea.com', plan: 'Premium', status: 'Actif', users: 25, createdAt: '2024-01-15', logoUrl: null },
+    { id: 2, name: 'Entreprise B', email: 'contact@entrepriseb.com', plan: 'Standard', status: 'Actif', users: 12, createdAt: '2024-01-10', logoUrl: null },
+    { id: 3, name: 'Entreprise C', email: 'contact@entreprisec.com', plan: 'Basique', status: 'Inactif', users: 5, createdAt: '2024-01-05', logoUrl: null },
+    { id: 4, name: 'Entreprise D', email: 'contact@entreprised.com', plan: 'Premium', status: 'Actif', users: 45, createdAt: '2024-01-20', logoUrl: null },
+    { id: 5, name: 'Entreprise E', email: 'contact@entreprisee.com', plan: 'Standard', status: 'Actif', users: 18, createdAt: '2024-01-12', logoUrl: null }
   ];
 
   selectedCompanies: any[] = [];
@@ -71,6 +74,9 @@ export class CompaniesComponent {
   
   companyLogo: File | null = null;
   companyLogoPreview: string | null = null;
+  menuItems: any[] = [];
+  selectedCompany: any = null;
+  @ViewChild('actionMenu') actionMenu!: Menu;
 
   getSeverity(status: string): 'success' | 'danger' | 'warn' | undefined {
     switch (status) {
@@ -225,10 +231,52 @@ export class CompaniesComponent {
 
   deleteCompany(company: any) {
     // TODO: Implémenter la suppression
+    if (confirm(`Êtes-vous sûr de vouloir supprimer l'entreprise "${company.name}" ?`)) {
+      const index = this.companies.findIndex(c => c.id === company.id);
+      if (index !== -1) {
+        this.companies.splice(index, 1);
+      }
+    }
+  }
+
+  toggleCompanyStatus(company: any) {
+    const newStatus = company.status === 'Actif' ? 'Inactif' : 'Actif';
     const index = this.companies.findIndex(c => c.id === company.id);
     if (index !== -1) {
-      this.companies.splice(index, 1);
+      this.companies[index].status = newStatus;
     }
+  }
+
+  showMenu(event: Event, company: any) {
+    this.selectedCompany = company;
+    this.menuItems = [
+      {
+        label: 'Modifier',
+        icon: 'pi pi-pencil',
+        command: () => {
+          this.editCompany(company);
+        }
+      },
+      {
+        label: company.status === 'Actif' ? 'Désactiver' : 'Activer',
+        icon: company.status === 'Actif' ? 'pi pi-ban' : 'pi pi-check-circle',
+        command: () => {
+          this.toggleCompanyStatus(company);
+        }
+      },
+      {
+        separator: true
+      },
+      {
+        label: 'Supprimer',
+        icon: 'pi pi-trash',
+        styleClass: 'text-red-500',
+        command: () => {
+          this.deleteCompany(company);
+        }
+      }
+    ];
+    this.actionMenu.toggle(event);
   }
 }
 

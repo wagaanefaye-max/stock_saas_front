@@ -45,6 +45,8 @@ export class SuperAdminDashboardComponent implements OnInit {
 
   chartData: any;
   chartOptions: any;
+  planChartData: any;
+  planChartOptions: any;
 
   constructor(public authService: AuthService) {}
 
@@ -53,6 +55,16 @@ export class SuperAdminDashboardComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Palette de couleurs pour différencier les entités
+    const colors = {
+      primary: '#2563EB',      // Bleu
+      secondary: '#16A34A',     // Vert
+      warning: '#F59E0B',       // Orange
+      danger: '#DC2626',        // Rouge
+      info: '#06B6D4',          // Cyan
+      purple: '#9333EA'         // Violet
+    };
+
     this.chartData = {
       labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
       datasets: [
@@ -60,9 +72,15 @@ export class SuperAdminDashboardComponent implements OnInit {
           label: 'Nouvelles entreprises',
           data: [2, 3, 4, 3, 5, 4],
           fill: true,
-          backgroundColor: 'rgba(37, 99, 235, 0.2)',
-          borderColor: 'var(--primary)',
-          tension: 0.4
+          backgroundColor: 'rgba(37, 99, 235, 0.15)',
+          borderColor: colors.primary,
+          borderWidth: 3,
+          tension: 0.4,
+          pointBackgroundColor: colors.primary,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7
         }
       ]
     };
@@ -76,6 +94,38 @@ export class SuperAdminDashboardComponent implements OnInit {
       scales: {
         y: {
           beginAtZero: true
+        }
+      }
+    };
+
+    // Graphique en doughnut pour les plans
+    this.planChartData = {
+      labels: ['Free', 'Premium', 'Standard', 'Basique'],
+      datasets: [{
+        data: [5, 8, 12, 4],
+        backgroundColor: [
+          '#16A34A',  // Vert - Free
+          '#2563EB',  // Bleu - Premium
+          '#9333EA',  // Violet - Standard
+          '#F59E0B'   // Orange - Basique
+        ],
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverOffset: 4
+      }]
+    };
+
+    this.planChartOptions = {
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 15,
+            font: {
+              size: 12,
+              weight: '500'
+            }
+          }
         }
       }
     };

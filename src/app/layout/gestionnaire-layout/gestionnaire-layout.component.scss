@@ -1,4 +1,4 @@
-.layout-container {
+.gestionnaire-layout-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -39,36 +39,8 @@
       margin: 0;
     }
 
-    .badge-super-admin {
-      background: var(--danger);
-      color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-left: 0.5rem;
-
-      @media (max-width: 768px) {
-        display: none;
-      }
-    }
-
     .badge-gestionnaire {
       background: var(--primary);
-      color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-left: 0.5rem;
-
-      @media (max-width: 768px) {
-        display: none;
-      }
-    }
-
-    .badge-utilisateur {
-      background: var(--secondary);
       color: white;
       padding: 0.25rem 0.75rem;
       border-radius: 12px;
@@ -121,7 +93,6 @@
   }
 }
 
-
 .sidebar {
   width: 280px;
   background: var(--bg-card);
@@ -136,6 +107,22 @@
 
   .sidebar-nav {
     padding: 1rem;
+
+    .sidebar-header {
+      margin-bottom: 1rem;
+
+      h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 0.25rem;
+      }
+
+      .text-muted {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+      }
+    }
 
     .nav-list {
       list-style: none;
@@ -310,61 +297,6 @@
 
       .nav-label {
         font-size: 0.6rem;
-      }
-    }
-  }
-}
-
-.mobile-sidebar {
-  padding: 1rem;
-
-  .sidebar-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--text-main);
-  }
-
-  .nav-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.875rem 1rem;
-      color: var(--text-main);
-      text-decoration: none;
-      border-radius: 8px;
-      transition: all 0.2s;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-
-      i {
-        font-size: 1.25rem;
-        color: var(--text-muted);
-        width: 24px;
-        text-align: center;
-      }
-
-      &:hover {
-        background: rgba(37, 99, 235, 0.1);
-        color: var(--primary);
-
-        i {
-          color: var(--primary);
-        }
-      }
-
-      &.active {
-        background: var(--primary);
-        color: white;
-
-        i {
-          color: white;
-        }
       }
     }
   }

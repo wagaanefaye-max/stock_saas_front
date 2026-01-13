@@ -4,12 +4,47 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+      margin-bottom: 1rem;
+    }
 
     h1 {
       font-size: 2rem;
       font-weight: 700;
       color: var(--text-main);
       margin-bottom: 0.5rem;
+
+      @media (max-width: 768px) {
+        font-size: 1.75rem;
+        margin-bottom: 0.25rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+      }
+    }
+
+    ::ng-deep .p-button {
+      @media (max-width: 480px) {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.8125rem;
+
+        .p-button-label {
+          display: none;
+        }
+
+        .p-button-icon {
+          margin: 0;
+        }
+      }
     }
   }
 
@@ -178,5 +213,73 @@
   background: transparent;
   border: none;
   padding: 0 0 1rem 0;
+}
+
+.company-logo-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+
+  .company-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  .company-logo-placeholder {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+
+    i {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+.action-menu-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+::ng-deep .p-menu {
+  min-width: 180px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem;
+
+  .p-menuitem-link {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+
+    &:hover {
+      background: rgba(37, 99, 235, 0.1);
+    }
+
+    .p-menuitem-icon {
+      margin-right: 0.75rem;
+    }
+  }
+
+  .p-menu-separator {
+    margin: 0.5rem 0;
+    border-top: 1px solid var(--border);
+  }
 }
 

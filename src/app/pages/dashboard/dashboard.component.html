@@ -31,25 +31,8 @@
       <h3>Produits par catégorie</h3>
       <p-chart 
         type="doughnut" 
-        [data]="{
-          labels: ['Électronique', 'Vêtements', 'Alimentaire', 'Autres'],
-          datasets: [{
-            data: [300, 450, 280, 204],
-            backgroundColor: [
-              'var(--primary)',
-              'var(--secondary)',
-              'var(--warning)',
-              'var(--text-muted)'
-            ]
-          }]
-        }"
-        [options]="{
-          plugins: {
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }">
+        [data]="categoryChartData"
+        [options]="categoryChartOptions">
       </p-chart>
     </p-card>
   </div>

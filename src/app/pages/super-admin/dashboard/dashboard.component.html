@@ -29,25 +29,8 @@
       <h3>Répartition par plan</h3>
       <p-chart 
         type="doughnut" 
-        [data]="{
-          labels: ['Free', 'Premium', 'Standard', 'Basique'],
-          datasets: [{
-            data: [5, 8, 12, 4],
-            backgroundColor: [
-              'var(--secondary)',
-              'var(--primary)',
-              '#16A34A',
-              'var(--warning)'
-            ]
-          }]
-        }"
-        [options]="{
-          plugins: {
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }">
+        [data]="planChartData"
+        [options]="planChartOptions">
       </p-chart>
     </p-card>
   </div>

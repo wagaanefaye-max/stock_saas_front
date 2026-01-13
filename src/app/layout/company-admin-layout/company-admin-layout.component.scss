@@ -1,18 +1,19 @@
-.layout-container {
+.company-admin-layout-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  background: var(--bg-main);
 }
 
 .header {
   background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--primary);
   padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
   z-index: 1000;
   position: sticky;
   top: 0;
@@ -39,44 +40,22 @@
       margin: 0;
     }
 
-    .badge-super-admin {
-      background: var(--danger);
-      color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-left: 0.5rem;
-
-      @media (max-width: 768px) {
-        display: none;
-      }
-    }
-
-    .badge-gestionnaire {
-      background: var(--primary);
-      color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-left: 0.5rem;
-
-      @media (max-width: 768px) {
-        display: none;
-      }
-    }
-
-    .badge-utilisateur {
+    .badge-company-admin {
       background: var(--secondary);
       color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
+      padding: 0.375rem 0.875rem;
+      border-radius: 16px;
       font-size: 0.75rem;
       font-weight: 600;
-      margin-left: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
 
       @media (max-width: 768px) {
+        font-size: 0.625rem;
+        padding: 0.25rem 0.5rem;
+      }
+
+      @media (max-width: 480px) {
         display: none;
       }
     }
@@ -121,7 +100,6 @@
   }
 }
 
-
 .sidebar {
   width: 280px;
   background: var(--bg-card);
@@ -135,35 +113,47 @@
   }
 
   .sidebar-nav {
-    padding: 1rem;
+    padding: 1.5rem 1rem;
+
+    .sidebar-header {
+      margin-bottom: 1rem;
+
+      h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 0.25rem;
+      }
+
+      p {
+        font-size: 0.875rem;
+        margin: 0;
+      }
+    }
 
     .nav-list {
       list-style: none;
       margin: 0;
       padding: 0;
+      margin-top: 1rem;
 
       .nav-item {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        padding: 0.75rem 1rem;
+        padding: 0.875rem 1rem;
         color: var(--text-main);
         text-decoration: none;
-        border-radius: 6px;
+        border-radius: 8px;
         transition: all 0.2s;
-        margin-bottom: 0.25rem;
-        width: 100%;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
 
         i {
           font-size: 1.25rem;
           color: var(--text-muted);
           width: 24px;
           text-align: center;
-          flex-shrink: 0;
-        }
-
-        span {
-          flex: 1;
         }
 
         &:hover {
@@ -178,6 +168,7 @@
         &.active {
           background: var(--primary);
           color: white;
+          box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
 
           i {
             color: white;
@@ -310,61 +301,6 @@
 
       .nav-label {
         font-size: 0.6rem;
-      }
-    }
-  }
-}
-
-.mobile-sidebar {
-  padding: 1rem;
-
-  .sidebar-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--text-main);
-  }
-
-  .nav-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.875rem 1rem;
-      color: var(--text-main);
-      text-decoration: none;
-      border-radius: 8px;
-      transition: all 0.2s;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-
-      i {
-        font-size: 1.25rem;
-        color: var(--text-muted);
-        width: 24px;
-        text-align: center;
-      }
-
-      &:hover {
-        background: rgba(37, 99, 235, 0.1);
-        color: var(--primary);
-
-        i {
-          color: var(--primary);
-        }
-      }
-
-      &.active {
-        background: var(--primary);
-        color: white;
-
-        i {
-          color: white;
-        }
       }
     }
   }

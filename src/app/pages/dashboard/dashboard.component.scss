@@ -2,11 +2,29 @@
   .page-header {
     margin-bottom: 2rem;
 
+    @media (max-width: 768px) {
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+      margin-bottom: 1rem;
+    }
+
     h1 {
       font-size: 2rem;
       font-weight: 700;
       color: var(--text-main);
       margin-bottom: 0.5rem;
+
+      @media (max-width: 768px) {
+        font-size: 1.75rem;
+        margin-bottom: 0.25rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+      }
     }
   }
 
@@ -52,6 +70,10 @@
           font-size: 0.875rem;
           color: var(--text-muted);
           margin-bottom: 0.25rem;
+
+          @media (max-width: 480px) {
+            font-size: 0.8125rem;
+          }
         }
 
         .stat-value {
@@ -59,11 +81,23 @@
           font-weight: 700;
           color: var(--text-main);
           margin-bottom: 0.25rem;
+
+          @media (max-width: 768px) {
+            font-size: 1.5rem;
+          }
+
+          @media (max-width: 480px) {
+            font-size: 1.375rem;
+          }
         }
 
         .stat-change {
           font-size: 0.875rem;
           font-weight: 500;
+
+          @media (max-width: 480px) {
+            font-size: 0.8125rem;
+          }
 
           &.positive {
             color: var(--secondary);
@@ -82,6 +116,17 @@
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+      gap: 0.875rem;
+      margin-bottom: 1rem;
+    }
 
     .chart-card {
       h3 {

@@ -1,0 +1,169 @@
+<div class="company-users-page">
+  <div class="page-header">
+    <div>
+      <h1>Gestion des utilisateurs</h1>
+      <p class="text-muted">Gérez les utilisateurs de votre entreprise</p>
+    </div>
+    <button pButton label="Nouvel utilisateur" icon="pi pi-plus" (click)="openNew()"></button>
+  </div>
+
+  <p-card>
+    <p-toolbar>
+      <div class="p-toolbar-group-start">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="globalFilter" 
+            placeholder="Rechercher...">
+        </span>
+      </div>
+      <div class="p-toolbar-group-end">
+        <button 
+          pButton 
+          icon="pi pi-file-export" 
+          label="Exporter" 
+          class="p-button-secondary">
+        </button>
+      </div>
+    </p-toolbar>
+
+    <p-table 
+      [value]="users" 
+      [paginator]="true" 
+      [rows]="10"
+      [globalFilterFields]="['name','email']"
+      [tableStyle]="{'min-width': '50rem'}"
+      selectionMode="multiple"
+      [(selection)]="selectedUsers"
+      [rowHover]="true">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 3rem">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
+          <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+          <th>Rôle</th>
+          <th>Entrepôts assignés</th>
+          <th pSortableColumn="status">Statut <p-sortIcon field="status"></p-sortIcon></th>
+          <th>Dernière connexion</th>
+          <th style="width: 3rem">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="user"></p-tableCheckbox>
+          </td>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <p-tag [value]="getRoleLabel(user.role)" [severity]="getRoleSeverity(user.role)"></p-tag>
+          </td>
+          <td>
+            <div *ngIf="user.assignedWarehouses && user.assignedWarehouses.length > 0" class="warehouses-tags">
+              <p-tag 
+                *ngFor="let warehouseId of user.assignedWarehouses" 
+                [value]="getWarehouseName(warehouseId)" 
+                severity="info"
+                styleClass="mr-1">
+              </p-tag>
+            </div>
+            <span *ngIf="!user.assignedWarehouses || user.assignedWarehouses.length === 0" class="text-muted">
+              Aucun
+            </span>
+          </td>
+          <td>
+            <p-tag [value]="user.status" [severity]="getSeverity(user.status)"></p-tag>
+          </td>
+          <td>{{ user.lastLogin }}</td>
+          <td>
+            <button 
+              pButton 
+              icon="pi pi-ellipsis-v" 
+              class="p-button-text p-button-sm p-button-rounded action-menu-btn"
+              (click)="showMenu($event, user)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
+
+  <p-dialog 
+    [(visible)]="displayDialog" 
+    [style]="{width: '600px'}"
+    [header]="user.id ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [dismissableMask]="false">
+    <div class="form-group">
+      <label>Nom complet *</label>
+      <input type="text" pInputText [(ngModel)]="user.name" class="w-full" required>
+    </div>
+    <div class="form-group">
+      <label>Email *</label>
+      <input type="email" pInputText [(ngModel)]="user.email" class="w-full" required>
+    </div>
+
+    <div class="form-group">
+      <label>Rôle *</label>
+      <p-dropdown 
+        [(ngModel)]="user.role" 
+        [options]="roles" 
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Sélectionner un rôle"
+        class="w-full"
+        required>
+      </p-dropdown>
+    </div>
+    <div class="form-group">
+      <label>Statut *</label>
+      <p-dropdown 
+        [(ngModel)]="user.status" 
+        [options]="statuses" 
+        placeholder="Sélectionner un statut"
+        class="w-full"
+        required>
+      </p-dropdown>
+    </div>
+    <div class="form-group">
+      <label>
+        Entrepôts assignés
+        <span class="optional-badge">(Optionnel)</span>
+      </label>
+      <p-multiSelect 
+        [(ngModel)]="user.assignedWarehouses" 
+        [options]="warehouses" 
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Sélectionner les entrepôts"
+        [showClear]="true"
+        [appendTo]="'body'"
+        [panelStyleClass]="'warehouse-multiselect-panel'"
+        class="w-full"
+        [disabled]="user.role === 'ADMIN_ENTREPRISE'">
+      </p-multiSelect>
+      <small class="text-muted">
+        <span *ngIf="user.role === 'GESTIONNAIRE' || user.role === 'UTILISATEUR'">
+          L'utilisateur n'aura accès qu'aux entrepôts sélectionnés.
+        </span>
+        <span *ngIf="user.role === 'ADMIN_ENTREPRISE'">
+          L'administrateur a accès à tous les entrepôts de l'entreprise.
+        </span>
+      </small>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
+      <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveUser()" [disabled]="!isFormValid()"></button>
+    </ng-template>
+  </p-dialog>
+</div>

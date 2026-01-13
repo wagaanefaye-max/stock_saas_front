@@ -11,7 +11,7 @@ import { DividerModule } from 'primeng/divider';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-super-admin-layout',
+  selector: 'app-gestionnaire-layout',
   standalone: true,
   imports: [
     CommonModule,
@@ -23,10 +23,10 @@ import { AuthService } from '../../services/auth.service';
     BadgeModule,
     DividerModule
   ],
-  templateUrl: './super-admin-layout.component.html',
-  styleUrl: './super-admin-layout.component.scss'
+  templateUrl: './gestionnaire-layout.component.html',
+  styleUrl: './gestionnaire-layout.component.scss'
 })
-export class SuperAdminLayoutComponent implements OnInit {
+export class GestionnaireLayoutComponent implements OnInit {
   sidebarVisible = false;
   menuItems: MenuItem[] = [];
 
@@ -38,28 +38,42 @@ export class SuperAdminLayoutComponent implements OnInit {
         label: 'Tableau de bord',
         icon: 'pi pi-th-large',
         mobileIcon: 'pi pi-th-large',
-        routerLink: '/super-admin/dashboard',
+        routerLink: '/gestionnaire/dashboard',
         command: () => this.sidebarVisible = false
       },
       {
-        label: 'Entreprises',
-        icon: 'pi pi-briefcase',
-        mobileIcon: 'pi pi-briefcase',
-        routerLink: '/super-admin/companies',
+        label: 'Produits',
+        icon: 'pi pi-shopping-bag',
+        mobileIcon: 'pi pi-shopping-bag',
+        routerLink: '/gestionnaire/products',
         command: () => this.sidebarVisible = false
       },
       {
-        label: 'Utilisateurs',
-        icon: 'pi pi-user',
-        mobileIcon: 'pi pi-user',
-        routerLink: '/super-admin/platform-users',
+        label: 'Entrepôts',
+        icon: 'pi pi-warehouse',
+        mobileIcon: 'pi pi-warehouse',
+        routerLink: '/gestionnaire/warehouses',
+        command: () => this.sidebarVisible = false
+      },
+      {
+        label: 'Mouvements',
+        icon: 'pi pi-sync',
+        mobileIcon: 'pi pi-sync',
+        routerLink: '/gestionnaire/movements',
+        command: () => this.sidebarVisible = false
+      },
+      {
+        label: 'Rapports',
+        icon: 'pi pi-file-pdf',
+        mobileIcon: 'pi pi-file-pdf',
+        routerLink: '/gestionnaire/reports',
         command: () => this.sidebarVisible = false
       },
       {
         label: 'Paramètres',
         icon: 'pi pi-sliders-h',
         mobileIcon: 'pi pi-sliders-h',
-        routerLink: '/super-admin/platform-settings',
+        routerLink: '/gestionnaire/settings',
         command: () => this.sidebarVisible = false
       }
     ];

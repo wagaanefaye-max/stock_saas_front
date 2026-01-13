@@ -2,48 +2,119 @@
   <div class="page-header">
     <div>
       <h1>Rapports</h1>
-      <p class="text-muted">Analysez vos données et générez des rapports</p>
+      <p class="text-muted">
+        <span *ngIf="isAdminEntreprise()">Analysez les données de votre entreprise</span>
+        <span *ngIf="!isAdminEntreprise()">Analysez les données de vos entrepôts assignés</span>
+      </p>
     </div>
-    <button pButton label="Exporter PDF" icon="pi pi-file-pdf"></button>
+    <div class="header-actions">
+      <p-dropdown 
+        *ngIf="accessibleWarehouses.length > 1"
+        [options]="warehouseFilterOptions" 
+        [(ngModel)]="selectedWarehouse"
+        placeholder="Filtrer par entrepôt"
+        optionLabel="label"
+        [showClear]="true"
+        styleClass="warehouse-filter"
+        (onChange)="onWarehouseFilterChange()">
+      </p-dropdown>
+      <p-dropdown 
+        [options]="periods" 
+        [(ngModel)]="selectedPeriod"
+        placeholder="Période"
+        optionLabel="label"
+        styleClass="period-dropdown">
+      </p-dropdown>
+      <button pButton label="Exporter PDF" icon="pi pi-file-pdf" (click)="exportPDF()"></button>
+    </div>
   </div>
 
+  <!-- Statistiques mensuelles -->
+  <div class="stats-grid">
+    <div *ngFor="let stat of monthlyStats" class="stat-card">
+      <div class="stat-icon" [style.background-color]="stat.color + '20'">
+        <i [class]="stat.icon" [style.color]="stat.color"></i>
+      </div>
+      <div class="stat-content">
+        <p class="stat-title">{{ stat.label }}</p>
+        <h2 class="stat-value">{{ stat.value }}</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graphiques principaux -->
   <div class="reports-grid">
-    <p-card class="report-card">
-      <h3>Valeur du stock (12 mois)</h3>
-      <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+    <p-card class="report-card large-card">
+      <h3>Valeur du stock (12 derniers mois)</h3>
+      <p-chart type="line" [data]="stockValueChartData" [options]="stockValueChartOptions"></p-chart>
+    </p-card>
+
+    <p-card class="report-card large-card">
+      <h3>Mouvements par type</h3>
+      <p-chart type="line" [data]="movementsChartData" [options]="movementsChartOptions"></p-chart>
+    </p-card>
+
+    <p-card class="report-card" *ngIf="accessibleWarehouses.length > 1 && warehouseDistributionChartData && !selectedWarehouse">
+      <h3>Répartition de la valeur par entrepôt</h3>
+      <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.875rem;">
+        Comparaison de la valeur du stock entre vos entrepôts
+      </p>
+      <p-chart type="doughnut" [data]="warehouseDistributionChartData" [options]="warehouseDistributionChartOptions"></p-chart>
     </p-card>
 
     <p-card class="report-card">
       <h3>Top 5 produits</h3>
       <div class="top-products">
-        <div *ngFor="let i of [1,2,3,4,5]" class="product-item">
+        <div *ngFor="let product of topProducts" class="product-item">
           <div class="product-info">
-            <span class="product-rank">#{{ i }}</span>
-            <span class="product-name">Produit {{ i }}</span>
+            <span class="product-rank">#{{ product.rank }}</span>
+            <div class="product-details">
+              <span class="product-name">{{ product.name }}</span>
+              <small class="product-warehouse">{{ product.warehouse }}</small>
+            </div>
           </div>
-          <span class="product-value">1,234 €</span>
+          <div class="product-values">
+            <span class="product-value">{{ product.value | number }} €</span>
+            <small class="product-quantity">{{ product.quantity }} unités</small>
+          </div>
         </div>
       </div>
     </p-card>
 
     <p-card class="report-card">
-      <h3>Statistiques mensuelles</h3>
-      <div class="stats-list">
-        <div class="stat-row">
-          <span>Mouvements totaux</span>
-          <strong>456</strong>
-        </div>
-        <div class="stat-row">
-          <span>Valeur moyenne</span>
-          <strong>75,000 €</strong>
-        </div>
-        <div class="stat-row">
-          <span>Produits actifs</span>
-          <strong>1,234</strong>
-        </div>
-        <div class="stat-row">
-          <span>Taux de rotation</span>
-          <strong>2.5x</strong>
+      <h3>
+        <span *ngIf="selectedWarehouse">Statistiques - {{ selectedWarehouse.name }}</span>
+        <span *ngIf="!selectedWarehouse">Statistiques par entrepôt</span>
+      </h3>
+      <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.875rem;" *ngIf="!selectedWarehouse">
+        Vue détaillée de tous vos entrepôts assignés
+      </p>
+      <div class="warehouse-stats-list">
+        <div *ngFor="let warehouse of warehouseStats" class="warehouse-stat-item">
+          <div class="warehouse-header">
+            <div>
+              <h4>{{ warehouse.name }}</h4>
+              <p class="text-muted">{{ warehouse.location }}</p>
+            </div>
+            <p-tag 
+              [value]="warehouse.usage + '%'" 
+              [severity]="warehouse.usage > 80 ? 'danger' : warehouse.usage > 60 ? 'warn' : 'info'">
+            </p-tag>
+          </div>
+          <div class="warehouse-metrics">
+            <div class="metric">
+              <span class="metric-label">Valeur stock</span>
+              <span class="metric-value">{{ warehouse.stockValue | number }} €</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Mouvements</span>
+              <span class="metric-value">{{ warehouse.movements }}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Produits</span>
+              <span class="metric-value">{{ warehouse.products }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </p-card>

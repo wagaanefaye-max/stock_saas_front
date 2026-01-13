@@ -46,8 +46,14 @@ export class LoginComponent {
         // Rediriger selon le rôle
         if (this.authService.isSuperAdmin()) {
           this.router.navigate(['/super-admin/dashboard']);
+        } else if (this.authService.isAdminEntreprise()) {
+          this.router.navigate(['/company-admin/dashboard']);
+        } else if (this.authService.isGestionnaire()) {
+          // Gestionnaire
+          this.router.navigate(['/gestionnaire/dashboard']);
         } else {
-    this.router.navigate(['/dashboard']);
+          // Utilisateur
+          this.router.navigate(['/gestion/dashboard']);
         }
       },
       error: (error) => {

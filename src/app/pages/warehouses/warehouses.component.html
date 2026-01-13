@@ -4,15 +4,130 @@
       <h1>Entrepôts</h1>
       <p class="text-muted">Gérez vos entrepôts et leurs capacités</p>
     </div>
-    <button pButton label="Nouvel entrepôt" icon="pi pi-plus"></button>
+    <button 
+      pButton 
+      label="Nouvel entrepôt" 
+      icon="pi pi-plus" 
+      (click)="openNew()"
+      *ngIf="authService.isAdminEntreprise()">
+    </button>
   </div>
 
-  <div class="warehouses-grid">
+  <!-- Vue tableau pour Admin Entreprise -->
+  <p-card *ngIf="authService.isAdminEntreprise()">
+    <p-toolbar>
+      <div class="p-toolbar-group-start">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="globalFilter" 
+            placeholder="Rechercher...">
+        </span>
+      </div>
+      <div class="p-toolbar-group-end">
+        <button 
+          pButton 
+          icon="pi pi-file-export" 
+          label="Exporter" 
+          class="p-button-secondary">
+        </button>
+      </div>
+    </p-toolbar>
+
+    <p-table 
+      [value]="warehouses" 
+      [paginator]="true" 
+      [rows]="10"
+      [globalFilterFields]="['name','location','region','status']"
+      [tableStyle]="{'min-width': '50rem'}"
+      selectionMode="multiple"
+      [(selection)]="selectedWarehouses"
+      [rowHover]="true">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 3rem">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
+          <th pSortableColumn="location">Localisation <p-sortIcon field="location"></p-sortIcon></th>
+          <th pSortableColumn="region">Région <p-sortIcon field="region"></p-sortIcon></th>
+          <th>Adresse</th>
+          <th pSortableColumn="capacity">Capacité <p-sortIcon field="capacity"></p-sortIcon></th>
+          <th>Utilisé</th>
+          <th>Disponible</th>
+          <th>Utilisation</th>
+          <th pSortableColumn="status">Statut <p-sortIcon field="status"></p-sortIcon></th>
+          <th style="width: 3rem">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-warehouse>
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="warehouse"></p-tableCheckbox>
+          </td>
+          <td>
+            <strong>{{ warehouse.name }}</strong>
+          </td>
+          <td>{{ warehouse.location }}</td>
+          <td>{{ warehouse.region }}</td>
+          <td>
+            <span *ngIf="warehouse.address">{{ warehouse.address }}</span>
+            <span *ngIf="!warehouse.address" class="text-muted">-</span>
+          </td>
+          <td>{{ warehouse.capacity | number }}</td>
+          <td>{{ warehouse.used | number }}</td>
+          <td>{{ warehouse.capacity - warehouse.used | number }}</td>
+          <td>
+            <div class="usage-indicator">
+              <div class="usage-bar">
+                <div 
+                  class="usage-fill" 
+                  [style.width.%]="getUsagePercentage(warehouse.used, warehouse.capacity)"
+                  [style.background-color]="getUsagePercentage(warehouse.used, warehouse.capacity) > 80 ? 'var(--danger)' : getUsagePercentage(warehouse.used, warehouse.capacity) > 60 ? 'var(--warning)' : 'var(--primary)'">
+                </div>
+              </div>
+              <span class="usage-text">{{ getUsagePercentage(warehouse.used, warehouse.capacity) }}%</span>
+            </div>
+          </td>
+          <td>
+            <p-tag [value]="warehouse.status" [severity]="getSeverity(warehouse.status)"></p-tag>
+          </td>
+          <td>
+            <button 
+              *ngIf="authService.isAdminEntreprise()"
+              pButton 
+              icon="pi pi-ellipsis-v" 
+              class="p-button-text p-button-sm p-button-rounded action-menu-btn"
+              (click)="showMenu($event, warehouse)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [attr.colspan]="11" class="text-center">
+            <div class="empty-state">
+              <i class="pi pi-inbox" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+              <p>Aucun entrepôt trouvé</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <!-- Vue cartes pour Gestionnaires/Utilisateurs -->
+  <div class="warehouses-grid" *ngIf="!authService.isAdminEntreprise()">
     <p-card *ngFor="let warehouse of warehouses" class="warehouse-card">
       <div class="warehouse-header">
         <div>
           <h3>{{ warehouse.name }}</h3>
-          <p class="text-muted">{{ warehouse.location }}</p>
+          <p class="text-muted">{{ warehouse.location }}, {{ warehouse.region }}</p>
         </div>
         <p-tag [value]="warehouse.status" [severity]="getSeverity(warehouse.status)"></p-tag>
       </div>
@@ -42,12 +157,93 @@
         </div>
         <span class="progress-text">{{ getUsagePercentage(warehouse.used, warehouse.capacity) }}% utilisé</span>
       </div>
-
-      <div class="warehouse-actions">
-        <button pButton label="Voir détails" icon="pi pi-eye" class="p-button-text"></button>
-        <button pButton label="Modifier" icon="pi pi-pencil" class="p-button-text"></button>
-      </div>
     </p-card>
+    
+    <div *ngIf="warehouses.length === 0" class="empty-state">
+      <i class="pi pi-inbox" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+      <p>Aucun entrepôt disponible</p>
+    </div>
   </div>
-</div>
 
+  <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
+
+  <!-- Dialog pour créer/modifier un entrepôt (uniquement pour Admin Entreprise) -->
+  <p-dialog 
+    *ngIf="authService.isAdminEntreprise()"
+    [(visible)]="displayDialog" 
+    [style]="{width: '700px'}"
+    [header]="warehouse.id ? 'Modifier l\'entrepôt' : 'Nouvel entrepôt'"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [dismissableMask]="false">
+    
+    <div class="form-group">
+      <label>Nom de l'entrepôt *</label>
+      <input type="text" pInputText [(ngModel)]="warehouse.name" class="w-full" required>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Localisation *</label>
+        <input type="text" pInputText [(ngModel)]="warehouse.location" class="w-full" required>
+      </div>
+      <div class="form-group">
+        <label>Région *</label>
+        <p-dropdown 
+          [(ngModel)]="warehouse.region" 
+          [options]="regions" 
+          placeholder="Sélectionner une région"
+          class="w-full"
+          [appendTo]="'body'"
+          required>
+        </p-dropdown>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Adresse</label>
+      <input type="text" pInputText [(ngModel)]="warehouse.address" class="w-full" placeholder="Adresse complète (optionnel)">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Capacité totale *</label>
+        <p-inputNumber 
+          [(ngModel)]="warehouse.capacity" 
+          [min]="0" 
+          [showButtons]="true"
+          class="w-full"
+          required>
+        </p-inputNumber>
+      </div>
+      <div class="form-group">
+        <label>Stock actuel</label>
+        <p-inputNumber 
+          [(ngModel)]="warehouse.used" 
+          [min]="0" 
+          [max]="warehouse.capacity"
+          [showButtons]="true"
+          class="w-full">
+        </p-inputNumber>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Statut *</label>
+      <p-dropdown 
+        [(ngModel)]="warehouse.status" 
+        [options]="statuses" 
+        placeholder="Sélectionner un statut"
+        class="w-full"
+        [appendTo]="'body'"
+        required>
+      </p-dropdown>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
+      <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveWarehouse()" [disabled]="!isFormValid()"></button>
+    </ng-template>
+  </p-dialog>
+</div>

@@ -4,7 +4,13 @@
       <h1>Produits</h1>
       <p class="text-muted">Gérez votre catalogue de produits</p>
     </div>
-    <button pButton label="Nouveau produit" icon="pi pi-plus" (click)="openNew()"></button>
+    <button 
+      pButton 
+      label="Nouveau produit" 
+      icon="pi pi-plus" 
+      (click)="openNew()"
+      *ngIf="authService.isAdminEntreprise()">
+    </button>
   </div>
 
   <p-card>
@@ -47,6 +53,7 @@
           <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
           <th pSortableColumn="sku">SKU <p-sortIcon field="sku"></p-sortIcon></th>
           <th>Catégorie</th>
+          <th *ngIf="authService.isAdminEntreprise()">Entrepôt</th>
           <th pSortableColumn="stock">Stock <p-sortIcon field="stock"></p-sortIcon></th>
           <th pSortableColumn="price">Prix <p-sortIcon field="price"></p-sortIcon></th>
           <th>Statut</th>
@@ -62,6 +69,10 @@
           <td>{{ product.name }}</td>
           <td>{{ product.sku }}</td>
           <td>{{ product.category }}</td>
+          <td *ngIf="authService.isAdminEntreprise()">
+            <span *ngIf="product.warehouseName">{{ product.warehouseName }}</span>
+            <span *ngIf="!product.warehouseName" class="text-muted">-</span>
+          </td>
           <td>{{ product.stock }}</td>
           <td>{{ product.price | number:'1.2-2' }} €</td>
           <td>
@@ -72,14 +83,17 @@
               pButton 
               icon="pi pi-pencil" 
               class="p-button-text p-button-sm"
-              (click)="editProduct(product)">
+              (click)="editProduct(product)"
+              *ngIf="authService.isAdminEntreprise()">
             </button>
             <button 
               pButton 
               icon="pi pi-trash" 
               class="p-button-text p-button-sm p-button-danger"
-              (click)="editProduct(product)">
+              (click)="editProduct(product)"
+              *ngIf="authService.isAdminEntreprise()">
             </button>
+            <span *ngIf="!authService.isAdminEntreprise()" class="text-muted" style="font-size: 0.875rem;">Lecture seule</span>
           </td>
         </tr>
       </ng-template>
@@ -88,34 +102,65 @@
 
   <p-dialog 
     [(visible)]="displayDialog" 
-    [style]="{width: '500px'}"
-    header="Produit"
+    [style]="{width: '600px'}"
+    [header]="product.id ? 'Modifier le produit' : 'Nouveau produit'"
     [modal]="true"
     [draggable]="false"
-    [resizable]="false">
+    [resizable]="false"
+    [dismissableMask]="false">
     <div class="form-group">
-      <label>Nom</label>
-      <input type="text" pInputText [(ngModel)]="product.name" class="w-full">
+      <label>Nom *</label>
+      <input type="text" pInputText [(ngModel)]="product.name" class="w-full" required>
     </div>
     <div class="form-group">
-      <label>SKU</label>
-      <input type="text" pInputText [(ngModel)]="product.sku" class="w-full">
+      <label>SKU *</label>
+      <input type="text" pInputText [(ngModel)]="product.sku" class="w-full" required>
     </div>
     <div class="form-group">
       <label>Catégorie</label>
       <input type="text" pInputText [(ngModel)]="product.category" class="w-full">
     </div>
     <div class="form-group">
-      <label>Stock</label>
-      <input type="number" pInputText [(ngModel)]="product.stock" class="w-full">
+      <label>Stock initial</label>
+      <p-inputNumber 
+        [(ngModel)]="product.stock" 
+        [min]="0" 
+        [showButtons]="true"
+        class="w-full">
+      </p-inputNumber>
     </div>
     <div class="form-group">
       <label>Prix</label>
-      <input type="number" pInputText [(ngModel)]="product.price" class="w-full">
+      <p-inputNumber 
+        [(ngModel)]="product.price" 
+        [min]="0" 
+        [maxFractionDigits]="2"
+        mode="decimal"
+        class="w-full">
+      </p-inputNumber>
+    </div>
+    <div class="form-group" *ngIf="authService.isAdminEntreprise()">
+      <label>
+        Entrepôt *
+        <span class="text-muted" style="font-size: 0.75rem; font-weight: normal;">(Obligatoire pour l'admin entreprise)</span>
+      </label>
+      <p-dropdown 
+        [(ngModel)]="product.warehouseId" 
+        [options]="warehouses" 
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Sélectionner un entrepôt"
+        class="w-full"
+        [appendTo]="'body'"
+        required>
+      </p-dropdown>
+      <small class="text-muted">
+        Le produit sera ajouté dans l'entrepôt sélectionné.
+      </small>
     </div>
     <ng-template pTemplate="footer">
       <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
-      <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveProduct()"></button>
+      <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveProduct()" [disabled]="!isFormValid()"></button>
     </ng-template>
   </p-dialog>
 </div>

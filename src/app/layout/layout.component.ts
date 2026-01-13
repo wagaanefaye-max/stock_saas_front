@@ -9,7 +9,7 @@ import { MenuItem } from 'primeng/api';
 import { MenubarModule } from 'primeng/menubar';
 import { BadgeModule } from 'primeng/badge';
 import { DividerModule } from 'primeng/divider';
-import { AuthService } from '../services/auth.service';
+import { AuthService, UserRole } from '../services/auth.service';
 
 @Component({
   selector: 'app-layout',
@@ -31,76 +31,56 @@ import { AuthService } from '../services/auth.service';
 export class LayoutComponent implements OnInit {
   sidebarVisible = false;
   menuItems: MenuItem[] = [];
+  UserRole = UserRole;
 
   constructor(public router: Router, public authService: AuthService) {}
 
   ngOnInit() {
-    const user = this.authService.getCurrentUser();
-    const isSuperAdmin = this.authService.isSuperAdmin();
-
-    if (isSuperAdmin) {
-      // Menu pour Super Admin
-      this.menuItems = [
-        {
-          label: 'Tableau de bord',
-          icon: 'pi pi-home',
-          routerLink: '/super-admin/dashboard',
-          command: () => this.sidebarVisible = false
-        },
-        {
-          label: 'Entreprises',
-          icon: 'pi pi-building',
-          routerLink: '/super-admin/companies',
-          command: () => this.sidebarVisible = false
-        },
-        {
-          label: 'Utilisateurs système',
-          icon: 'pi pi-users',
-          routerLink: '/super-admin/system-users',
-          command: () => this.sidebarVisible = false
-        }
-      ];
-    } else {
-      // Menu pour utilisateurs normaux
+    // Menu pour utilisateurs normaux (Gestionnaire et Utilisateur)
     this.menuItems = [
       {
         label: 'Tableau de bord',
-        icon: 'pi pi-home',
-        routerLink: '/dashboard',
+        icon: 'pi pi-th-large',
+        mobileIcon: 'pi pi-th-large',
+        routerLink: '/gestion/dashboard',
         command: () => this.sidebarVisible = false
       },
       {
         label: 'Produits',
-        icon: 'pi pi-box',
-        routerLink: '/products',
+        icon: 'pi pi-shopping-bag',
+        mobileIcon: 'pi pi-shopping-bag',
+        routerLink: '/gestion/products',
         command: () => this.sidebarVisible = false
       },
       {
         label: 'Entrepôts',
-        icon: 'pi pi-building',
-        routerLink: '/warehouses',
+        icon: 'pi pi-warehouse',
+        mobileIcon: 'pi pi-warehouse',
+        routerLink: '/gestion/warehouses',
         command: () => this.sidebarVisible = false
       },
       {
         label: 'Mouvements',
-        icon: 'pi pi-arrows-h',
-        routerLink: '/movements',
+        icon: 'pi pi-sync',
+        mobileIcon: 'pi pi-sync',
+        routerLink: '/gestion/movements',
         command: () => this.sidebarVisible = false
       },
       {
         label: 'Rapports',
-        icon: 'pi pi-chart-bar',
-        routerLink: '/reports',
+        icon: 'pi pi-file-pdf',
+        mobileIcon: 'pi pi-file-pdf',
+        routerLink: '/gestion/reports',
         command: () => this.sidebarVisible = false
       },
       {
         label: 'Paramètres',
-        icon: 'pi pi-cog',
-        routerLink: '/settings',
+        icon: 'pi pi-sliders-h',
+        mobileIcon: 'pi pi-sliders-h',
+        routerLink: '/gestion/settings',
         command: () => this.sidebarVisible = false
       }
     ];
-    }
   }
 
   toggleSidebar() {

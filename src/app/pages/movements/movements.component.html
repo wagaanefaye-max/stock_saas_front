@@ -2,40 +2,99 @@
   <div class="page-header">
     <div>
       <h1>Mouvements de stock</h1>
-      <p class="text-muted">Suivez tous les mouvements d'entrée et de sortie</p>
+      <p class="text-muted">Suivez tous les mouvements d'entrée, sortie, transfert et ajustement</p>
     </div>
     <button pButton label="Nouveau mouvement" icon="pi pi-plus" (click)="openNew()"></button>
   </div>
 
   <p-card>
+    <p-toolbar>
+      <div class="p-toolbar-group-start">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="globalFilter" 
+            placeholder="Rechercher...">
+        </span>
+      </div>
+      <div class="p-toolbar-group-end">
+        <button 
+          pButton 
+          icon="pi pi-file-export" 
+          label="Exporter" 
+          class="p-button-secondary">
+        </button>
+      </div>
+    </p-toolbar>
+
     <p-table 
-      [value]="movements" 
+      [value]="allMovements"
       [paginator]="true" 
       [rows]="10"
+      [globalFilterFields]="['product','type','warehouse','user','justification']"
       [tableStyle]="{'min-width': '50rem'}"
+      selectionMode="multiple"
+      [(selection)]="selectedMovements"
       [rowHover]="true">
       
       <ng-template pTemplate="header">
         <tr>
+          <th style="width: 3rem">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
           <th pSortableColumn="date">Date <p-sortIcon field="date"></p-sortIcon></th>
-          <th>Produit</th>
+          <th pSortableColumn="product">Produit <p-sortIcon field="product"></p-sortIcon></th>
           <th>Type</th>
           <th pSortableColumn="quantity">Quantité <p-sortIcon field="quantity"></p-sortIcon></th>
           <th>Entrepôt</th>
+          <th *ngIf="authService.isAdminEntreprise()">Destination</th>
           <th>Utilisateur</th>
+          <th *ngIf="authService.isAdminEntreprise()">Justification</th>
         </tr>
       </ng-template>
 
       <ng-template pTemplate="body" let-movement>
         <tr>
+          <td>
+            <p-tableCheckbox [value]="movement"></p-tableCheckbox>
+          </td>
           <td>{{ movement.date }}</td>
-          <td>{{ movement.product }}</td>
+          <td>
+            <strong>{{ movement.product }}</strong>
+          </td>
           <td>
             <p-tag [value]="movement.type" [severity]="getSeverity(movement.type)"></p-tag>
           </td>
-          <td>{{ movement.quantity }}</td>
+          <td>
+            <span [class.text-danger]="movement.quantity < 0" [class.text-success]="movement.quantity > 0">
+              {{ movement.quantity > 0 ? '+' : '' }}{{ movement.quantity }}
+            </span>
+          </td>
           <td>{{ movement.warehouse }}</td>
+          <td *ngIf="authService.isAdminEntreprise()">
+            <span *ngIf="movement.warehouseDestination">{{ movement.warehouseDestination }}</span>
+            <span *ngIf="!movement.warehouseDestination" class="text-muted">-</span>
+          </td>
           <td>{{ movement.user }}</td>
+          <td *ngIf="authService.isAdminEntreprise()">
+            <span *ngIf="movement.justification" [title]="movement.justification" class="justification-text">
+              {{ movement.justification.length > 50 ? (movement.justification | slice:0:50) + '...' : movement.justification }}
+            </span>
+            <span *ngIf="!movement.justification" class="text-muted">-</span>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [attr.colspan]="authService.isAdminEntreprise() ? 9 : 7" class="text-center">
+            <div class="empty-state">
+              <i class="pi pi-inbox" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+              <p>Aucun mouvement trouvé</p>
+            </div>
+          </td>
         </tr>
       </ng-template>
     </p-table>
@@ -43,36 +102,110 @@
 
   <p-dialog 
     [(visible)]="displayDialog" 
-    [style]="{width: '500px'}"
-    header="Nouveau mouvement"
+    [style]="{width: '700px'}"
+    [header]="movement.id ? 'Modifier le mouvement' : 'Nouveau mouvement'"
     [modal]="true"
     [draggable]="false"
-    [resizable]="false">
+    [resizable]="false"
+    [dismissableMask]="false">
+    
     <div class="form-group">
-      <label>Type</label>
+      <label>Type de mouvement *</label>
       <p-dropdown 
         [(ngModel)]="movement.type" 
         [options]="types" 
         placeholder="Sélectionner un type"
-        class="w-full">
+        class="w-full"
+        [appendTo]="'body'"
+        required>
       </p-dropdown>
     </div>
-    <div class="form-group">
-      <label>Produit</label>
-      <input type="text" pInputText [(ngModel)]="movement.product" class="w-full">
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date *</label>
+        <p-calendar 
+          [(ngModel)]="movement.date" 
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          [appendTo]="'body'"
+          class="w-full"
+          required>
+        </p-calendar>
+      </div>
+      <div class="form-group">
+        <label>Produit *</label>
+        <p-dropdown 
+          [(ngModel)]="movement.productId" 
+          [options]="products" 
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Sélectionner un produit"
+          class="w-full"
+          [appendTo]="'body'"
+          required>
+        </p-dropdown>
+      </div>
     </div>
-    <div class="form-group">
-      <label>Quantité</label>
-      <p-inputNumber [(ngModel)]="movement.quantity" [showButtons]="true" class="w-full"></p-inputNumber>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Quantité *</label>
+        <p-inputNumber 
+          [(ngModel)]="movement.quantity" 
+          [min]="movement.type === 'Ajustement' ? -999999 : 1"
+          [showButtons]="true"
+          class="w-full"
+          required>
+        </p-inputNumber>
+        <small class="text-muted" *ngIf="movement.type === 'Ajustement'">
+          Quantité positive pour ajout, négative pour retrait
+        </small>
+      </div>
+      <div class="form-group">
+        <label>Entrepôt *</label>
+        <p-dropdown 
+          [(ngModel)]="movement.warehouseId" 
+          [options]="accessibleWarehouses" 
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Sélectionner un entrepôt"
+          class="w-full"
+          [appendTo]="'body'"
+          required>
+        </p-dropdown>
+      </div>
     </div>
-    <div class="form-group">
-      <label>Entrepôt</label>
-      <input type="text" pInputText [(ngModel)]="movement.warehouse" class="w-full">
+
+    <div class="form-group" *ngIf="movement.type === 'Transfert'">
+      <label>Entrepôt de destination *</label>
+      <p-dropdown 
+        [(ngModel)]="movement.warehouseDestinationId" 
+        [options]="accessibleWarehouses" 
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Sélectionner l'entrepôt de destination"
+        class="w-full"
+        [appendTo]="'body'"
+        [filterBy]="'name'"
+        required>
+      </p-dropdown>
     </div>
+
+    <div class="form-group">
+      <label>Justification / Notes</label>
+      <textarea
+        pTextarea 
+        [(ngModel)]="movement.justification" 
+        [rows]="3"
+        placeholder="Raison du mouvement (optionnel)"
+        class="w-full">
+      </textarea>
+    </div>
+
     <ng-template pTemplate="footer">
       <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
-      <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveMovement()"></button>
+      <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveMovement()" [disabled]="!isFormValid()"></button>
     </ng-template>
   </p-dialog>
 </div>
-

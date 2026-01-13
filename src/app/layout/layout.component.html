@@ -10,7 +10,8 @@
         aria-label="Menu">
       </button>
       <h1 class="logo">Stock SaaS</h1>
-      <span *ngIf="authService.isSuperAdmin()" class="badge-super-admin">Super Admin</span>
+      <span *ngIf="authService.isGestionnaire()" class="badge-gestionnaire">Gestionnaire</span>
+      <span *ngIf="authService.hasRole(UserRole.UTILISATEUR)" class="badge-utilisateur">Utilisateur</span>
     </div>
     
     <div class="header-right">
@@ -60,9 +61,10 @@
       [routerLink]="item.routerLink" 
       routerLinkActive="active"
       class="bottom-nav-item"
-      [class.active]="router.url === item.routerLink">
-      <i [class]="item.icon"></i>
-      <span>{{ item.label }}</span>
+      [class.active]="router.url === item.routerLink"
+      [title]="item.label">
+      <i [class]="item['mobileIcon'] || item.icon"></i>
+      <span class="nav-label">{{ item.label }}</span>
     </a>
   </nav>
 </div>

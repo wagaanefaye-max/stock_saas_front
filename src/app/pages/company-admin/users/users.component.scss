@@ -1,4 +1,4 @@
-.products-page {
+.company-users-page {
   .page-header {
     display: flex;
     justify-content: space-between;
@@ -64,12 +64,32 @@
     }
   }
 
+  .action-menu-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .warehouses-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .optional-badge {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: normal;
+    margin-left: 0.5rem;
+  }
+
   .text-muted {
     color: var(--text-muted);
     font-size: 0.75rem;
     font-style: italic;
-    display: block;
-    margin-top: 0.25rem;
   }
 }
 
@@ -77,5 +97,40 @@
   background: transparent;
   border: none;
   padding: 0 0 1rem 0;
+}
+
+::ng-deep .p-menu {
+  min-width: 180px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem;
+
+  .p-menuitem-link {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+
+    &:hover {
+      background: rgba(37, 99, 235, 0.1);
+    }
+
+    .p-menuitem-icon {
+      margin-right: 0.75rem;
+    }
+  }
+
+  .p-menu-separator {
+    margin: 0.5rem 0;
+    border-top: 1px solid var(--border);
+  }
+}
+
+::ng-deep .warehouse-multiselect-panel {
+  z-index: 10000 !important;
+  
+  .p-multiselect-items-wrapper {
+    max-height: 200px;
+  }
 }
 

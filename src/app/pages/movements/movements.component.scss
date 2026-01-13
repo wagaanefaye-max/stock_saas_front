@@ -4,12 +4,47 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+      margin-bottom: 1rem;
+    }
 
     h1 {
       font-size: 2rem;
       font-weight: 700;
       color: var(--text-main);
       margin-bottom: 0.5rem;
+
+      @media (max-width: 768px) {
+        font-size: 1.75rem;
+        margin-bottom: 0.25rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+      }
+    }
+
+    ::ng-deep .p-button {
+      @media (max-width: 480px) {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.8125rem;
+
+        .p-button-label {
+          display: none;
+        }
+
+        .p-button-icon {
+          margin: 0;
+        }
+      }
     }
   }
 
@@ -21,11 +56,72 @@
       margin-bottom: 0.5rem;
       font-weight: 500;
       color: var(--text-main);
+      font-size: 0.875rem;
     }
 
     .w-full {
       width: 100%;
     }
   }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+      gap: 0.625rem;
+    }
+  }
+
+  .justification-text {
+    max-width: 200px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .text-muted {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .text-success {
+    color: var(--secondary);
+    font-weight: 600;
+  }
+
+  .text-danger {
+    color: var(--danger);
+    font-weight: 600;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+
+    p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
+}
+
+::ng-deep .p-toolbar {
+  background: transparent;
+  border: none;
+  padding: 0 0 1rem 0;
 }
 

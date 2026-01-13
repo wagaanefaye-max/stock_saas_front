@@ -4,12 +4,127 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+      margin-bottom: 1rem;
+    }
 
     h1 {
       font-size: 2rem;
       font-weight: 700;
       color: var(--text-main);
       margin-bottom: 0.5rem;
+
+      @media (max-width: 768px) {
+        font-size: 1.75rem;
+        margin-bottom: 0.25rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+      }
+    }
+
+    ::ng-deep .p-button {
+      @media (max-width: 480px) {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.8125rem;
+
+        .p-button-label {
+          display: none;
+        }
+
+        .p-button-icon {
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-main);
+      font-size: 0.875rem;
+    }
+
+    .w-full {
+      width: 100%;
+    }
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .action-menu-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .usage-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 100px;
+
+    .usage-bar {
+      flex: 1;
+      height: 8px;
+      background: var(--bg-main);
+      border-radius: 4px;
+      overflow: hidden;
+
+      .usage-fill {
+        height: 100%;
+        transition: width 0.3s;
+        border-radius: 4px;
+      }
+    }
+
+    .usage-text {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      min-width: 35px;
+      text-align: right;
+    }
+  }
+
+  .text-muted {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+
+    p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin: 0;
     }
   }
 
@@ -91,6 +206,39 @@
         justify-content: flex-end;
       }
     }
+  }
+}
+
+::ng-deep .p-toolbar {
+  background: transparent;
+  border: none;
+  padding: 0 0 1rem 0;
+}
+
+::ng-deep .p-menu {
+  min-width: 180px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem;
+
+  .p-menuitem-link {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+
+    &:hover {
+      background: rgba(37, 99, 235, 0.1);
+    }
+
+    .p-menuitem-icon {
+      margin-right: 0.75rem;
+    }
+  }
+
+  .p-menu-separator {
+    margin: 0.5rem 0;
+    border-top: 1px solid var(--border);
   }
 }
 
