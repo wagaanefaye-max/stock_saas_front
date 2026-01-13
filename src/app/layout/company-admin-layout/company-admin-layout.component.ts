@@ -89,4 +89,9 @@ export class CompanyAdminLayoutComponent implements OnInit {
   toggleSidebar() {
     this.sidebarVisible = !this.sidebarVisible;
   }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
 }

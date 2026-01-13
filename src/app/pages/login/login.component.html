@@ -33,6 +33,14 @@
     <!-- Right side - Login Form -->
     <div class="login-form-container">
       <div class="login-form-card">
+        <!-- Mobile Logo -->
+        <div class="mobile-logo">
+          <div class="mobile-logo-icon">
+            <i class="pi pi-box"></i>
+          </div>
+          <h1>Stock SaaS</h1>
+        </div>
+
         <div class="form-header">
           <h2>Connexion</h2>
           <p>Connectez-vous à votre compte</p>
@@ -86,10 +94,10 @@
         <button 
           pButton 
           type="submit" 
-            [label]="loading ? 'Connexion...' : 'Se connecter'"
-            class="p-button-primary w-full login-button"
-            [disabled]="!email || !password || loading"
-            [loading]="loading">
+          [label]="loading ? 'Connexion...' : 'Se connecter'"
+          class="p-button-primary w-full login-button"
+          [disabled]="!email || !password || loading"
+          [loading]="loading">
         </button>
       </form>
 

@@ -21,10 +21,10 @@
         <button 
           pButton 
           type="button" 
-        icon="pi pi-sign-out" 
-        label="Déconnexion"
+          icon="pi pi-sign-out" 
+          label="Déconnexion"
           class="p-button-text"
-        (click)="authService.logout(); router.navigate(['/login'])">
+          (click)="logout()">
         </button>
     </div>
   </header>
@@ -66,6 +66,13 @@
       <i [class]="item['mobileIcon'] || item.icon"></i>
       <span class="nav-label">{{ item.label }}</span>
     </a>
+    <button 
+      class="bottom-nav-item logout-item"
+      (click)="logout()"
+      title="Déconnexion">
+      <i class="pi pi-sign-out"></i>
+      <span class="nav-label">Déconnexion</span>
+    </button>
   </nav>
 </div>
 

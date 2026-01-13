@@ -31,8 +31,8 @@ export const routes: Routes = [
     path: 'gestionnaire',
     component: GestionnaireLayoutComponent,
     children: [
-      {
-        path: '',
+  {
+    path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'
       },

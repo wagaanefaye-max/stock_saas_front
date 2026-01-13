@@ -1,3 +1,31 @@
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button 
+        pButton 
+        icon="pi pi-bars" 
+        class="p-button-text p-button-lg menu-toggle"
+        (click)="toggleSidebar()"
+        aria-label="Menu">
+      </button>
+      <h1 class="logo">Stock SaaS</h1>
+      <span class="badge-super-admin">Super Admin</span>
+    </div>
+    
+    <div class="header-right">
+      <span *ngIf="authService.getCurrentUser()" class="user-name">
+        {{ authService.getCurrentUser()?.name }}
+      </span>
+      <button 
+        pButton 
+        type="button" 
+        icon="pi pi-sign-out" 
+        label="Déconnexion"
+        class="p-button-text"
+        (click)="logout()">
+      </button>
+    </div>
+  </header>
 
   <div class="layout-content">
     <!-- Sidebar -->
@@ -41,6 +69,13 @@
       <i [class]="item['mobileIcon'] || item.icon"></i>
       <span class="nav-label">{{ item.label }}</span>
     </a>
+    <button 
+      class="bottom-nav-item logout-item"
+      (click)="logout()"
+      title="Déconnexion">
+      <i class="pi pi-sign-out"></i>
+      <span class="nav-label">Déconnexion</span>
+    </button>
   </nav>
 
 

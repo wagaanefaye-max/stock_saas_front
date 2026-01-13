@@ -83,6 +83,84 @@
   }
 }
 
+.header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  position: sticky;
+  top: 0;
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 1rem;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .menu-toggle {
+      @media (max-width: 768px) {
+        display: none;
+      }
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0;
+    }
+
+    .badge-gestionnaire {
+      background: var(--primary);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+
+      @media (max-width: 768px) {
+        display: none;
+      }
+    }
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      gap: 0.5rem;
+    }
+
+    .user-name {
+      color: var(--text-main);
+      font-weight: 500;
+      font-size: 0.875rem;
+
+      @media (max-width: 480px) {
+        display: none;
+      }
+    }
+
+    ::ng-deep .p-button {
+      @media (max-width: 480px) {
+        .p-button-label {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
 .layout-content {
   display: flex;
   flex: 1;
@@ -278,6 +356,31 @@
 
         i {
           color: var(--primary);
+        }
+      }
+    }
+
+    .logout-item {
+      color: var(--danger);
+      
+      i {
+        color: var(--danger);
+      }
+
+      .nav-label {
+        color: var(--danger);
+      }
+
+      &:hover, &:active {
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--danger);
+
+        i {
+          color: var(--danger);
+        }
+
+        .nav-label {
+          color: var(--danger);
         }
       }
     }

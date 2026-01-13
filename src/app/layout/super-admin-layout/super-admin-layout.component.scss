@@ -286,6 +286,31 @@
         }
       }
     }
+
+    .logout-item {
+      color: var(--danger);
+      
+      i {
+        color: var(--danger);
+      }
+
+      .nav-label {
+        color: var(--danger);
+      }
+
+      &:hover, &:active {
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--danger);
+
+        i {
+          color: var(--danger);
+        }
+
+        .nav-label {
+          color: var(--danger);
+        }
+      }
+    }
   }
 
   @media (max-width: 480px) {
