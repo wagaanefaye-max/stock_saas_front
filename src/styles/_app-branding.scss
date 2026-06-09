@@ -1,0 +1,56 @@
+/* Logo application — sidebar + pages auth */
+
+.app-sidebar__brand-mark {
+  width: auto;
+  height: auto;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+
+  i {
+    display: none;
+  }
+}
+
+.app-sidebar__logo-img {
+  display: block;
+  height: 2.75rem;
+  width: auto;
+  max-width: 5.5rem;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.app-logo {
+  display: block;
+  object-fit: contain;
+
+  &--auth-desktop {
+    height: 7rem;
+    width: auto;
+    max-width: 11rem;
+    margin: 0 auto;
+  }
+
+  &--auth-mobile {
+    height: 4.25rem;
+    width: auto;
+    max-width: 8.5rem;
+    margin: 0 auto;
+  }
+}
+
+.auth-branding .logo-container,
+.login-branding .logo-container,
+.register-branding .logo-container,
+.verify-branding .logo-container {
+  margin-bottom: 1.5rem;
+}
+
+.mobile-logo {
+  .app-logo--auth-mobile {
+    margin-bottom: 0;
+  }
+}

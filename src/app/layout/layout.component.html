@@ -3,10 +3,9 @@
     <aside class="app-sidebar-desktop">
       <div class="app-sidebar__brand">
         <div class="app-sidebar__brand-mark" aria-hidden="true">
-          <i class="pi pi-box"></i>
+          <img src="/assets/logo.jpg" alt="Stock SaaS" class="app-sidebar__logo-img" />
         </div>
         <div class="app-sidebar__brand-text">
-          <span class="app-sidebar__app-name">Stock</span>
           <span *ngIf="authService.isGestionnaire()" class="app-sidebar__role-badge">Gestionnaire</span>
         </div>
       </div>

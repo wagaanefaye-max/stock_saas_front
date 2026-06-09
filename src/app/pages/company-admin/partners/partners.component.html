@@ -71,7 +71,6 @@
       [paginator]="true"
       [rows]="rows"
       [totalRecords]="totalPartners"
-      [loading]="loading"
       (onLazyLoad)="onPartnersLazyLoad($event)"
       [rowTrackBy]="trackByPartnerId"
       [tableStyle]="{'min-width': '50rem'}"
@@ -113,17 +112,13 @@
   </p-card>
 
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="loading" class="mobile-list__loading">
-      <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
-    </div>
-
-    <div *ngIf="!loading && partners.length === 0" class="mobile-list__empty">
+    <div *ngIf="partners.length === 0" class="mobile-list__empty">
       <i class="pi pi-users"></i>
       <p>Aucun partenaire (client ou fournisseur)</p>
       <button pButton label="Nouveau partenaire" icon="pi pi-plus" class="p-button-sm" (click)="openNew()"></button>
     </div>
 
-    <ul *ngIf="!loading && partners.length > 0" class="mobile-list__items">
+    <ul *ngIf="partners.length > 0" class="mobile-list__items">
       <li *ngFor="let p of partners; trackBy: trackByPartnerId" class="mobile-card">
         <div class="mobile-card__top">
           <div class="mobile-card__main">

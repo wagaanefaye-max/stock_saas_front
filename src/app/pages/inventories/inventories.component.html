@@ -46,17 +46,13 @@
 
   <!-- Vue mobile -->
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="loading" class="mobile-list__loading">
-      <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
-    </div>
-
-    <div *ngIf="!loading && filteredInventories.length === 0" class="mobile-list__empty">
+    <div *ngIf="filteredInventories.length === 0" class="mobile-list__empty">
       <i class="pi pi-clipboard"></i>
       <p>Aucun inventaire</p>
       <p class="text-muted small">Créez un inventaire pour un entrepôt pour lancer un comptage.</p>
     </div>
 
-    <ul *ngIf="!loading && filteredInventories.length > 0" class="mobile-list__items">
+    <ul *ngIf="filteredInventories.length > 0" class="mobile-list__items">
       <li *ngFor="let inv of filteredInventories" class="mobile-card">
         <div class="mobile-card__top">
           <div class="mobile-card__main">
@@ -122,7 +118,6 @@
       [value]="filteredInventories"
       [paginator]="true"
       [rows]="10"
-      [loading]="loading"
       [tableStyle]="{'min-width': '50rem'}">
       <ng-template pTemplate="header">
         <tr>

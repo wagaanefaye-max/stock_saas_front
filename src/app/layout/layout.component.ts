@@ -45,8 +45,6 @@ export class LayoutComponent implements OnInit {
   }
 
   logout() {
-    this.closeMobileMenu();
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.authService.confirmLogout(() => this.closeMobileMenu());
   }
 }

@@ -22,16 +22,12 @@
   </div>
 
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="loading" class="mobile-list__loading">
-      <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
-    </div>
-
-    <div *ngIf="!loading && users.length === 0" class="mobile-list__empty">
+    <div *ngIf="users.length === 0" class="mobile-list__empty">
       <i class="pi pi-users"></i>
       <p>Aucun utilisateur trouvé</p>
     </div>
 
-    <ul *ngIf="!loading && users.length > 0" class="mobile-list__items">
+    <ul *ngIf="users.length > 0" class="mobile-list__items">
       <li *ngFor="let user of users" class="mobile-card">
         <div class="mobile-card__top">
           <div class="mobile-card__main">
@@ -61,7 +57,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="!loading && totalRecords > size"
+      *ngIf="totalRecords > size"
       class="mobile-list__paginator"
       [rows]="size"
       [totalRecords]="totalRecords"
@@ -114,7 +110,6 @@
       [rows]="size"
       [totalRecords]="totalRecords"
       [lazy]="true"
-      [loading]="loading"
       (onLazyLoad)="onPageChange($event)"
       [first]="page * size"
       [tableStyle]="{'min-width': '50rem'}"

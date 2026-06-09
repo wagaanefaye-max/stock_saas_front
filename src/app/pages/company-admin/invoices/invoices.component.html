@@ -125,17 +125,13 @@
     </div>
 
     <div class="mobile-list">
-      <div *ngIf="invoicesLoading" class="mobile-list__loading">
-        <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
-      </div>
-
-      <div *ngIf="!invoicesLoading && filteredInvoices.length === 0" class="mobile-list__empty">
+      <div *ngIf="filteredInvoices.length === 0" class="mobile-list__empty">
         <i class="pi pi-file"></i>
         <p>Aucune facture</p>
         <button pButton label="Créer une facture" icon="pi pi-plus" class="p-button-sm" (click)="openCreateDialog()"></button>
       </div>
 
-      <ul *ngIf="!invoicesLoading && filteredInvoices.length > 0" class="mobile-list__items">
+      <ul *ngIf="filteredInvoices.length > 0" class="mobile-list__items">
         <li *ngFor="let inv of paginatedInvoices" class="mobile-card">
           <div class="mobile-card__top">
             <div class="mobile-card__main">
@@ -171,7 +167,7 @@
       </ul>
 
       <p-paginator
-        *ngIf="!invoicesLoading && filteredInvoices.length > mobileRows"
+        *ngIf="filteredInvoices.length > mobileRows"
         class="mobile-list__paginator"
         [rows]="mobileRows"
         [totalRecords]="filteredInvoices.length"

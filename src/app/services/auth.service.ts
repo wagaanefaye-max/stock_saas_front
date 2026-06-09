@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, map, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { ConfirmationService } from 'primeng/api';
 import { ApiService } from './api.service';
 import { User, UserRole } from '../models/user.model';
 import { LoginRequest, RegisterRequest, AuthResponse } from '../models/auth.model';
@@ -15,7 +16,8 @@ export class AuthService {
 
   constructor(
     private apiService: ApiService,
-    private router: Router
+    private router: Router,
+    private confirmationService: ConfirmationService
   ) {
     this.loadUserFromStorage();
   }
@@ -114,6 +116,24 @@ export class AuthService {
         return throwError(() => error);
       })
     );
+  }
+
+  /**
+   * Demande de confirmation avant déconnexion.
+   */
+  confirmLogout(beforeLogout?: () => void): void {
+    this.confirmationService.confirm({
+      message: 'Voulez-vous vraiment vous déconnecter ?',
+      header: 'Déconnexion',
+      icon: 'pi pi-sign-out',
+      acceptLabel: 'Oui, me déconnecter',
+      rejectLabel: 'Annuler',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        beforeLogout?.();
+        this.logout();
+      }
+    });
   }
 
   /**

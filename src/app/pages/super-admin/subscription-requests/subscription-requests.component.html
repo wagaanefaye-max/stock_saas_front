@@ -19,16 +19,12 @@
   </div>
 
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="loading" class="mobile-list__loading">
-      <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
-    </div>
-
-    <div *ngIf="!loading && filteredRequests.length === 0" class="mobile-list__empty">
+    <div *ngIf="filteredRequests.length === 0" class="mobile-list__empty">
       <i class="pi pi-inbox"></i>
       <p>Aucune souscription pour ce filtre.</p>
     </div>
 
-    <ul *ngIf="!loading && filteredRequests.length > 0" class="mobile-list__items">
+    <ul *ngIf="filteredRequests.length > 0" class="mobile-list__items">
       <li
         *ngFor="let row of filteredRequests"
         class="mobile-card"
@@ -120,12 +116,7 @@
       </div>
     </div>
 
-    <div *ngIf="loading" class="loading-state">
-      <i class="pi pi-spin pi-spinner"></i> Chargement...
-    </div>
-
     <p-table
-      *ngIf="!loading"
       [value]="filteredRequests"
       [rowHover]="true"
       styleClass="p-datatable-sm"

@@ -52,8 +52,6 @@ export class CompanyAdminLayoutComponent implements OnInit {
   }
 
   logout() {
-    this.closeMobileMenu();
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.authService.confirmLogout(() => this.closeMobileMenu());
   }
 }

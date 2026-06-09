@@ -43,16 +43,12 @@
 
   <!-- Vue mobile -->
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="loading" class="mobile-list__loading">
-      <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
-    </div>
-
-    <div *ngIf="!loading && companies.length === 0" class="mobile-list__empty">
+    <div *ngIf="companies.length === 0" class="mobile-list__empty">
       <i class="pi pi-building"></i>
       <p>Aucune entreprise trouvée</p>
     </div>
 
-    <ul *ngIf="!loading && companies.length > 0" class="mobile-list__items">
+    <ul *ngIf="companies.length > 0" class="mobile-list__items">
       <li *ngFor="let company of companies" class="mobile-card">
         <div class="mobile-card__top">
           <div class="company-logo-cell company-logo-cell--mobile">
@@ -98,7 +94,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="!loading && totalRecords > size"
+      *ngIf="totalRecords > size"
       class="mobile-list__paginator"
       [rows]="size"
       [totalRecords]="totalRecords"
@@ -122,8 +118,7 @@
       [tableStyle]="{'min-width': '50rem'}"
       selectionMode="multiple"
       [(selection)]="selectedCompanies"
-      [rowHover]="true"
-      [loading]="loading">
+      [rowHover]="true">
 
       <ng-template pTemplate="header">
         <tr>

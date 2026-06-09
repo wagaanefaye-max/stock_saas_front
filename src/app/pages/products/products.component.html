@@ -110,11 +110,7 @@
 
   <!-- Vue mobile : cartes -->
   <div class="products-mobile show-mobile-only">
-    <div *ngIf="loading" class="products-mobile__loading">
-      <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
-    </div>
-
-    <div *ngIf="!loading && products.length === 0" class="products-mobile__empty">
+    <div *ngIf="products.length === 0" class="products-mobile__empty">
       <i class="pi pi-box"></i>
       <p>Aucun produit</p>
       <button
@@ -127,7 +123,7 @@
       </button>
     </div>
 
-    <ul *ngIf="!loading && products.length > 0" class="products-mobile__list">
+    <ul *ngIf="products.length > 0" class="products-mobile__list">
       <li *ngFor="let product of products; trackBy: trackByProductId" class="product-card">
         <div class="product-card__top">
           <div class="product-card__identity">
@@ -191,7 +187,6 @@
       [paginator]="true"
       [rows]="rows"
       [totalRecords]="totalProducts"
-      [loading]="loading"
       (onLazyLoad)="onProductsLazyLoad($event)"
       [rowTrackBy]="trackByProductId"
       [tableStyle]="{'min-width': '50rem'}"
