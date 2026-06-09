@@ -33,6 +33,7 @@ export class LoginComponent {
   rememberMe = false;
 
   errorMessage = '';
+  loading = false;
 
   constructor(
     private router: Router,
@@ -97,30 +98,19 @@ export class LoginComponent {
     }
 
     this.errorMessage = '';
-    
+    this.loading = true;
+
     this.authService.login(this.email, this.password).subscribe({
-      next: (user) => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Connexion réussie',
-          detail: `Bienvenue ${user.name} !`,
-          life: 3000
-        });
-        
-        // Récupérer l'URL de retour ou rediriger selon le rôle
+      next: () => {
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || null;
-        
-        setTimeout(() => {
-          if (returnUrl) {
-            // Rediriger vers l'URL demandée initialement
-            this.router.navigateByUrl(returnUrl);
-          } else {
-            // Rediriger selon le rôle
-            this.redirectToDashboard();
-          }
-        }, 500);
+        if (returnUrl) {
+          this.router.navigateByUrl(returnUrl);
+        } else {
+          this.redirectToDashboard();
+        }
       },
       error: (error) => {
+        this.loading = false;
         console.error('Erreur de connexion:', error);
         
         let errorDetail = 'Une erreur est survenue lors de la connexion';
