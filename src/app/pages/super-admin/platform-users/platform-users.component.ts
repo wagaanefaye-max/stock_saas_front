@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -10,10 +10,7 @@ import { TagModule } from 'primeng/tag';
 import { ToolbarModule } from 'primeng/toolbar';
 import { SelectModule } from 'primeng/select';
 import { PasswordModule } from 'primeng/password';
-import { MenuModule } from 'primeng/menu';
-import { Menu } from 'primeng/menu';
 import { PaginatorModule } from 'primeng/paginator';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { UserRole } from '../../../models/user.model';
@@ -59,9 +56,7 @@ interface PageResponse {
     ToolbarModule,
     SelectModule,
     PasswordModule,
-    MenuModule,
     PaginatorModule,
-    ProgressSpinnerModule,
     ToastModule,
   ],
   providers: [MessageService],
@@ -86,11 +81,6 @@ export class PlatformUsersComponent implements OnInit {
   totalRecords = 0;
   page = 0;
   size = 10;
-
-  // Menu contextuel
-  menuItems: any[] = [];
-  selectedUser: User | null = null;
-  @ViewChild('actionMenu') actionMenu!: Menu;
 
   // Liste des entreprises pour le dropdown
   companies: any[] = [];
@@ -305,39 +295,6 @@ export class PlatformUsersComponent implements OnInit {
           });
       }
     });
-  }
-
-  showMenu(event: Event, user: User) {
-    this.selectedUser = user;
-    const isActive = user.status === 'Actif';
-    this.menuItems = [
-      {
-        label: 'Modifier',
-        icon: 'pi pi-pencil',
-        command: () => {
-          this.editUser(user);
-        }
-      },
-      {
-        label: isActive ? 'Désactiver' : 'Activer',
-        icon: isActive ? 'pi pi-ban' : 'pi pi-check-circle',
-        command: () => {
-          this.toggleUserStatus(user);
-        }
-      },
-      {
-        separator: true
-      },
-      {
-        label: 'Supprimer',
-        icon: 'pi pi-trash',
-        styleClass: 'text-red-500',
-        command: () => {
-          this.deleteUser(user);
-        }
-      }
-    ];
-    this.actionMenu.toggle(event);
   }
 
   toggleUserStatus(user: User) {

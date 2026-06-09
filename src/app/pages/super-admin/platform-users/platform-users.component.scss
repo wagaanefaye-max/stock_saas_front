@@ -1,4 +1,10 @@
 .platform-users-page {
+  .mobile-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
   .page-header {
     display: flex;
     justify-content: space-between;
@@ -35,14 +41,3 @@
   padding: 0 0 1rem 0;
 }
 
-.action-menu-btn {
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  &:hover {
-    background-color: var(--surface-hover);
-  }
-}

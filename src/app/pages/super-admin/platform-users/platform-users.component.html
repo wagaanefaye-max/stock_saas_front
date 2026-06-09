@@ -34,13 +34,6 @@
             <span class="mobile-card__title">{{ user.name }}</span>
             <span class="mobile-card__subtitle">{{ user.email }}</span>
           </div>
-          <button
-            pButton
-            icon="pi pi-ellipsis-v"
-            class="p-button-text p-button-rounded mobile-card__menu"
-            (click)="showMenu($event, user)"
-            aria-label="Actions">
-          </button>
         </div>
         <div class="mobile-card__row">
           <span class="text-muted">{{ user.companyName || '—' }}</span>
@@ -52,6 +45,32 @@
         <div class="mobile-card__footer">
           <span>Dernière connexion</span>
           <span>{{ formatDate(user.lastLogin) }}</span>
+        </div>
+        <div class="card-actions-bar">
+          <button
+            pButton
+            icon="pi pi-pencil"
+            class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+            title="Modifier"
+            aria-label="Modifier"
+            (click)="editUser(user)">
+          </button>
+          <button
+            pButton
+            [icon]="user.status === 'Actif' ? 'pi pi-ban' : 'pi pi-check-circle'"
+            class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+            [title]="user.status === 'Actif' ? 'Désactiver' : 'Activer'"
+            [attr.aria-label]="user.status === 'Actif' ? 'Désactiver' : 'Activer'"
+            (click)="toggleUserStatus(user)">
+          </button>
+          <button
+            pButton
+            icon="pi pi-trash"
+            class="p-button-sm p-button-rounded p-button-icon-only card-actions-bar__danger"
+            title="Supprimer"
+            aria-label="Supprimer"
+            (click)="deleteUser(user)">
+          </button>
         </div>
       </li>
     </ul>
@@ -74,8 +93,6 @@
     aria-label="Nouvel utilisateur">
     <i class="pi pi-plus"></i>
   </button>
-
-  <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
 
   <p-dialog
     styleClass="app-mobile-dialog"

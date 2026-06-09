@@ -1,16 +1,16 @@
 import { Component, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { APP_CONFIRM_BREAKPOINTS, APP_CONFIRM_STYLE } from './utils/dialog-mobile.util';
 import { LoadingService } from './services/loading.service';
+import { GlobalLoadingComponent } from './components/shared/global-loading.component';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, ProgressSpinnerModule, ConfirmDialogModule],
+  imports: [RouterOutlet, CommonModule, ConfirmDialogModule, GlobalLoadingComponent],
   template: `
     <div class="app-container">
       <router-outlet></router-outlet>
@@ -28,40 +28,13 @@ import { Subscription } from 'rxjs';
         [closeOnEscape]="true">
       </p-confirmDialog>
 
-      <!-- Indicateur de chargement global -->
-      <div *ngIf="isLoading" class="loading-overlay">
-        <p-progressSpinner 
-          [style]="{width: '50px', height: '50px'}" 
-          strokeWidth="4"
-          animationDuration=".5s">
-        </p-progressSpinner>
-      </div>
+      <app-global-loading *ngIf="isLoading"></app-global-loading>
     </div>
   `,
   styles: [`
     .app-container {
       position: relative;
       min-height: 100vh;
-    }
-
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.3);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      pointer-events: none;
-    }
-
-    .loading-overlay ::ng-deep .p-progressspinner {
-      background-color: rgba(255, 255, 255, 0.9);
-      border-radius: 50%;
-      padding: 10px;
     }
   `]
 })
