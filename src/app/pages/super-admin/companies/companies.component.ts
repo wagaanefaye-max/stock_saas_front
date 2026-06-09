@@ -88,9 +88,9 @@ export class CompaniesComponent implements OnInit, OnDestroy {
     { label: 'Basique', value: 'BASIQUE' }
   ];
   statuses = [
-    { label: 'Actif', value: 'ACTIF' },
-    { label: 'Inactif', value: 'INACTIF' },
-    { label: 'Suspendu', value: 'SUSPENDU' }
+    { label: 'Actif', value: 'Actif' },
+    { label: 'Inactif', value: 'Inactif' },
+    { label: 'Suspendu', value: 'Suspendu' }
   ];
   
   // Pagination
@@ -240,7 +240,7 @@ export class CompaniesComponent implements OnInit, OnDestroy {
 
   openNew() {
     this.company = {
-      statusCode: 'ACTIF',
+      statusCode: 'Actif',
       planCode: 'STANDARD',
       country: 'Sénégal',
       phone: '',
@@ -406,9 +406,24 @@ export class CompaniesComponent implements OnInit, OnDestroy {
     });
   }
 
+  private resolveCompanyStatusCode(company: Company): 'ACTIF' | 'INACTIF' | 'SUSPENDU' {
+    const raw = String(company.statusCode ?? company.statusLabel ?? '').trim().toUpperCase();
+    if (raw === 'INACTIF' || raw.includes('INACTIF')) {
+      return 'INACTIF';
+    }
+    if (raw === 'SUSPENDU' || raw.includes('SUSPENDU')) {
+      return 'SUSPENDU';
+    }
+    return 'ACTIF';
+  }
+
+  isCompanyActive(company: Company): boolean {
+    return this.resolveCompanyStatusCode(company) === 'ACTIF';
+  }
+
   toggleCompanyStatus(company: Company) {
-    const isActive = company.statusCode === 'ACTIF';
-    const newStatus = isActive ? 'INACTIF' : 'ACTIF';
+    const isActive = this.isCompanyActive(company);
+    const newStatus = isActive ? 'Inactif' : 'Actif';
     const action = isActive ? 'désactiver' : 'activer';
     
     this.confirmationService.confirm({

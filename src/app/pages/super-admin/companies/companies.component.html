@@ -94,10 +94,10 @@
           </button>
           <button
             pButton
-            [icon]="company.statusCode === 'ACTIF' ? 'pi pi-ban' : 'pi pi-check-circle'"
+            [icon]="isCompanyActive(company) ? 'pi pi-ban' : 'pi pi-check-circle'"
             class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
-            [title]="company.statusCode === 'ACTIF' ? 'Désactiver' : 'Activer'"
-            [attr.aria-label]="company.statusCode === 'ACTIF' ? 'Désactiver' : 'Activer'"
+            [title]="isCompanyActive(company) ? 'Désactiver' : 'Activer'"
+            [attr.aria-label]="isCompanyActive(company) ? 'Désactiver' : 'Activer'"
             (click)="toggleCompanyStatus(company)">
           </button>
           <button
