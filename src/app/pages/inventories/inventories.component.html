@@ -1,0 +1,191 @@
+<div class="inventories-page">
+  <p-toast></p-toast>
+  <div class="page-header">
+    <div>
+      <h1>Inventaires</h1>
+      <p class="text-muted">Comptage physique et ajustement des stocks par entrepôt</p>
+    </div>
+    <button pButton label="Nouvel inventaire" icon="pi pi-plus" (click)="openCreate()"></button>
+  </div>
+
+  <p-card>
+    <div class="list-toolbar">
+      <div class="list-toolbar__filters">
+        <div class="list-toolbar__filter-field">
+          <label for="inventory-warehouse-filter">Entrepôt</label>
+          <p-select
+            inputId="inventory-warehouse-filter"
+            [options]="warehouseFilterOptions"
+            [(ngModel)]="warehouseFilter"
+            (onChange)="loadInventories()"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Tous les entrepôts"
+            [showClear]="false"
+            styleClass="inventory-filter-dropdown w-full">
+          </p-select>
+        </div>
+        <div class="list-filter-chips">
+          <p-selectButton
+            [options]="statusFilterOptions"
+            [(ngModel)]="statusFilter"
+            optionLabel="label"
+            optionValue="value"
+            (ngModelChange)="loadInventories()">
+          </p-selectButton>
+        </div>
+      </div>
+    </div>
+
+    <p-table
+      [value]="filteredInventories"
+      [paginator]="true"
+      [rows]="10"
+      [tableStyle]="{'min-width': '50rem'}">
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="inventoryDate">Date <p-sortIcon field="inventoryDate"></p-sortIcon></th>
+          <th pSortableColumn="warehouseName">Entrepôt <p-sortIcon field="warehouseName"></p-sortIcon></th>
+          <th>Statut</th>
+          <th>Créé par</th>
+          <th>Clôturé le</th>
+          <th style="width: 12rem">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-inv>
+        <tr>
+          <td>{{ inv.inventoryDate }}</td>
+          <td><strong>{{ inv.warehouseName }}</strong></td>
+          <td>
+            <p-tag [value]="inv.statusLabel" [severity]="getStatusSeverity(inv.status)"></p-tag>
+          </td>
+          <td>{{ inv.createdByName || '–' }}</td>
+          <td>{{ inv.closedAt ? (inv.closedAt | date:'short') : '–' }}</td>
+          <td>
+            <button pButton icon="pi pi-eye" title="Voir / Saisir les quantités" class="p-button-rounded p-button-text" (click)="openDetail(inv)"></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center">
+            <div class="empty-state">
+              <i class="pi pi-clipboard" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+              <p>Aucun inventaire</p>
+              <p class="text-muted small">Créez un inventaire pour un entrepôt pour lancer un comptage.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <!-- Dialog création -->
+  <p-dialog
+    [(visible)]="displayCreateDialog"
+    header="Nouvel inventaire"
+    [style]="{width: '480px'}"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    (onHide)="displayCreateDialog = false">
+    <div class="form-group">
+      <label>Entrepôt *</label>
+      <p-select
+        [(ngModel)]="createForm.warehouseId"
+        [options]="warehouses"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Choisir l'entrepôt"
+        class="w-full"
+        [appendTo]="'body'">
+      </p-select>
+    </div>
+    <div class="form-group">
+      <label>Date d'inventaire *</label>
+      <p-calendar
+        [(ngModel)]="createForm.inventoryDate"
+        dateFormat="dd/mm/yy"
+        [showIcon]="true"
+        class="w-full"
+        [appendTo]="'body'">
+      </p-calendar>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea pTextarea [(ngModel)]="createForm.notes" [rows]="2" placeholder="Optionnel" class="w-full"></textarea>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayCreateDialog = false"></button>
+      <button pButton label="Créer l'inventaire" icon="pi pi-check" (click)="createInventory()" [disabled]="!createForm.warehouseId || !createForm.inventoryDate"></button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog détail + lignes -->
+  <p-dialog
+    [(visible)]="displayDetailDialog"
+    [header]="selectedInventory ? 'Inventaire – ' + selectedInventory.warehouseName + ' (' + selectedInventory.inventoryDate + ')' : 'Détail inventaire'"
+    [style]="{width: '90vw', maxWidth: '960px'}"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [contentStyle]="{ overflow: 'auto' }"
+    (onHide)="selectedInventory = null">
+    <ng-container *ngIf="selectedInventory">
+      <div class="detail-meta">
+        <p-tag [value]="selectedInventory.statusLabel" [severity]="getStatusSeverity(selectedInventory.status)"></p-tag>
+        <span class="text-muted" *ngIf="selectedInventory.createdByName">Créé par {{ selectedInventory.createdByName }}</span>
+        <span class="text-muted" *ngIf="selectedInventory.closedAt">Clôturé le {{ selectedInventory.closedAt | date:'short' }}</span>
+      </div>
+      <!-- Boutons d'action visibles au-dessus du tableau -->
+      <div class="detail-actions" *ngIf="canEdit(selectedInventory)">
+        <button pButton label="Enregistrer les quantités" icon="pi pi-save" class="p-button-outlined" (click)="saveLines()" [loading]="savingLines"></button>
+        <button pButton label="Clôturer l'inventaire" icon="pi pi-lock" (click)="confirmCloseInventory()" [loading]="closing" severity="success"></button>
+      </div>
+      <p-table [value]="selectedInventory.lines || []" [tableStyle]="{'min-width': '40rem'}" styleClass="p-datatable-sm p-datatable-gridlines">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Produit</th>
+            <th>Réf. / SKU</th>
+            <th>Quantité théorique</th>
+            <th>Quantité comptée</th>
+            <th>Écart</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-line>
+          <tr>
+            <td>{{ line.productName }}</td>
+            <td>{{ line.productSku || '–' }}</td>
+            <td>{{ line.theoreticalQuantity }}</td>
+            <td>
+              <p-inputNumber
+                *ngIf="canEdit(selectedInventory)"
+                [ngModel]="line.countedQuantityEdit"
+                (ngModelChange)="updateLineCountedQuantity(line.productId, $event)"
+                [min]="0"
+                [minFractionDigits]="0"
+                [maxFractionDigits]="2"
+                [showButtons]="true"
+                inputStyleClass="w-8rem">
+              </p-inputNumber>
+              <span *ngIf="!canEdit(selectedInventory)">{{ line.countedQuantity ?? line.theoreticalQuantity }}</span>
+            </td>
+            <td>
+              <span [class.text-success]="getLineDifference(line) > 0" [class.text-danger]="getLineDifference(line) < 0">
+                {{ getLineDifference(line) > 0 ? '+' : '' }}{{ getLineDifference(line) }}
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center text-muted">Aucune ligne (aucun stock dans cet entrepôt au moment de la création).</td>
+          </tr>
+        </ng-template>
+      </p-table>
+      <ng-template pTemplate="footer">
+        <button pButton label="Fermer" icon="pi pi-times" class="p-button-text" (click)="displayDetailDialog = false"></button>
+      </ng-template>
+    </ng-container>
+  </p-dialog>
+</div>

@@ -1,0 +1,38 @@
+import { inject } from '@angular/core';
+import { Router, CanActivateFn } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+
+/**
+ * Guard pour vérifier si l'utilisateur est authentifié ET admin entreprise
+ * Redirige vers la page de connexion si l'utilisateur n'est pas connecté
+ * Redirige vers le dashboard approprié si l'utilisateur n'a pas le bon rôle
+ */
+export const adminEntrepriseGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  // D'abord vérifier si l'utilisateur est authentifié
+  if (!authService.isAuthenticated()) {
+    // Rediriger vers la page de connexion avec l'URL de retour
+    router.navigate(['/login'], { 
+      queryParams: { returnUrl: state.url } 
+    });
+    return false;
+  }
+
+  // Ensuite vérifier si l'utilisateur est admin entreprise ou super admin
+  if (authService.isAdminEntreprise() || authService.isSuperAdmin()) {
+    return true;
+  }
+
+  // Rediriger vers le dashboard approprié selon le rôle de l'utilisateur
+  const user = authService.getCurrentUser();
+  if (user?.role === 'GESTIONNAIRE') {
+    router.navigate(['/gestionnaire/dashboard']);
+  } else if (user?.role === 'SUPER_ADMIN') {
+    router.navigate(['/super-admin/dashboard']);
+  } else {
+    router.navigate(['/login']);
+  }
+  return false;
+};

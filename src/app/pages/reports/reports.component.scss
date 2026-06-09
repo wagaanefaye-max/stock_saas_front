@@ -130,6 +130,12 @@
     }
 
     .report-card {
+      .chart-caption {
+        margin: 0 0 0.75rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
       h3 {
         font-size: 1.25rem;
         font-weight: 600;

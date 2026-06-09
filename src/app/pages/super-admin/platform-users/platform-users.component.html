@@ -1,4 +1,6 @@
 <div class="platform-users-page">
+  <p-toast></p-toast>
+  
   <div class="page-header">
     <div>
       <h1>Utilisateurs de la plateforme</h1>
@@ -8,32 +10,42 @@
   </div>
 
   <p-card>
-    <p-toolbar>
-      <div class="p-toolbar-group-start">
-        <span class="p-input-icon-left">
+    <div class="list-toolbar">
+      <div class="list-toolbar__primary">
+        <span class="p-input-icon-left list-toolbar__search">
           <i class="pi pi-search"></i>
-          <input 
-            type="text" 
-            pInputText 
-            [(ngModel)]="globalFilter" 
-            placeholder="Rechercher...">
+          <input
+            type="text"
+            pInputText
+            [(ngModel)]="globalFilter"
+            (input)="onGlobalFilter()"
+            placeholder="Nom ou email…">
         </span>
       </div>
-      <div class="p-toolbar-group-end">
-        <button 
-          pButton 
-          icon="pi pi-file-export" 
-          label="Exporter" 
-          class="p-button-secondary">
+      <div class="list-toolbar__actions">
+        <button
+          pButton
+          icon="pi pi-search"
+          class="p-button-secondary list-toolbar__btn-icon"
+          title="Rechercher">
+        </button>
+        <button
+          pButton
+          icon="pi pi-file-export"
+          label="Exporter"
+          class="p-button-secondary list-toolbar__btn-icon">
         </button>
       </div>
-    </p-toolbar>
+    </div>
 
     <p-table 
       [value]="users" 
       [paginator]="true" 
-      [rows]="10"
-      [globalFilterFields]="['name','email','entreprise']"
+      [rows]="size"
+      [totalRecords]="totalRecords"
+      [lazy]="true"
+      (onLazyLoad)="onPageChange($event)"
+      [first]="page * size"
       [tableStyle]="{'min-width': '50rem'}"
       selectionMode="multiple"
       [(selection)]="selectedUsers"
@@ -44,13 +56,13 @@
           <th style="width: 3rem">
             <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
           </th>
-          <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
-          <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
-          <th pSortableColumn="entreprise">Entreprise <p-sortIcon field="entreprise"></p-sortIcon></th>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Entreprise</th>
           <th>Rôle</th>
-          <th pSortableColumn="status">Statut <p-sortIcon field="status"></p-sortIcon></th>
+          <th>Statut</th>
           <th>Dernière connexion</th>
-          <th>Actions</th>
+          <th style="width: 3rem">Actions</th>
         </tr>
       </ng-template>
 
@@ -61,31 +73,36 @@
           </td>
           <td>{{ user.name }}</td>
           <td>{{ user.email }}</td>
-          <td>{{ user.entreprise }}</td>
+          <td>{{ user.companyName || '-' }}</td>
           <td>
-            <p-tag [value]="getRoleLabel(user.role)" severity="info"></p-tag>
+            <p-tag [value]="getRoleLabel(user.roleCode)" severity="info"></p-tag>
           </td>
           <td>
             <p-tag [value]="user.status" [severity]="getSeverity(user.status)"></p-tag>
           </td>
-          <td>{{ user.lastLogin }}</td>
+          <td>{{ formatDate(user.lastLogin) }}</td>
           <td>
             <button 
               pButton 
-              icon="pi pi-pencil" 
-              class="p-button-text p-button-sm"
-              (click)="editUser(user)">
-            </button>
-            <button 
-              pButton 
-              icon="pi pi-trash" 
-              class="p-button-text p-button-sm p-button-danger"
-              (click)="deleteUser(user)">
+              icon="pi pi-ellipsis-v" 
+              class="p-button-text p-button-sm p-button-rounded action-menu-btn"
+              (click)="showMenu($event, user)"
+              [title]="'Actions'">
             </button>
           </td>
         </tr>
       </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="text-center">
+            <p>Aucun utilisateur trouvé</p>
+          </td>
+        </tr>
+      </ng-template>
     </p-table>
+    
+    <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
   </p-card>
 
   <p-dialog 
@@ -116,32 +133,35 @@
     </div>
     <div class="form-group">
       <label>Entreprise *</label>
-      <p-dropdown 
+      <p-select 
         [(ngModel)]="user.entreprise" 
-        [options]="entreprises" 
+        [options]="companies" 
+        optionLabel="name"
+        optionValue="name"
         placeholder="Sélectionner une entreprise"
-        class="w-full">
-      </p-dropdown>
+        class="w-full"
+        required>
+      </p-select>
     </div>
     <div class="form-group">
       <label>Rôle *</label>
-      <p-dropdown 
+      <p-select 
         [(ngModel)]="user.role" 
         [options]="roles" 
         optionLabel="label"
         optionValue="value"
         placeholder="Sélectionner un rôle"
         class="w-full">
-      </p-dropdown>
+      </p-select>
     </div>
     <div class="form-group">
       <label>Statut</label>
-      <p-dropdown 
+      <p-select 
         [(ngModel)]="user.status" 
         [options]="statuses" 
         placeholder="Sélectionner un statut"
         class="w-full">
-      </p-dropdown>
+      </p-select>
     </div>
     <ng-template pTemplate="footer">
       <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>

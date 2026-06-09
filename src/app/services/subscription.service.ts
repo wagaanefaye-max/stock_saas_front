@@ -1,0 +1,148 @@
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ApiService } from './api.service';
+
+export interface SubscriptionStatus {
+  companyId: number;
+  planCode: string;
+  planLabel: string;
+  planMonthlyPrice: number;
+  subscriptionStatus: string;
+  subscriptionStatusLabel: string;
+  trialEndsAt: string | null;
+  subscriptionEndsAt: string | null;
+  durationCode: string | null;
+  durationLabel: string | null;
+  readOnly: boolean;
+  canUpgrade: boolean;
+  hasPendingRequest: boolean;
+  daysRemaining: number;
+  nextCumulativeStartAt?: string | null;
+  willStackSubscription?: boolean;
+}
+
+export interface SubscriptionPlan {
+  code: string;
+  label: string;
+  monthlyPrice: number;
+  maxUsers: number;
+  maxWarehouses: number;
+}
+
+export interface SubscriptionDuration {
+  code: string;
+  label: string;
+  months: number;
+  discountPercent?: number;
+  totalPrice?: number;
+}
+
+export interface SubscriptionRecord {
+  id: number;
+  companyId?: number;
+  companyName?: string;
+  planCode: string;
+  planLabel: string;
+  durationCode: string;
+  durationLabel: string;
+  months: number;
+  amountPaid: number;
+  periodStart: string | null;
+  periodEnd: string | null;
+  subscribedByEmail: string;
+  createdAt: string;
+  requestStatus: string;
+  requestStatusLabel: string;
+  paymentProvider?: string;
+  paymentProviderLabel?: string;
+  proofUrl?: string | null;
+  validatedByEmail?: string | null;
+  validatedAt?: string | null;
+  rejectionReason?: string | null;
+}
+
+export interface SubscriptionQuote {
+  planCode: string;
+  durationCode: string;
+  months: number;
+  monthlyPrice: number;
+  discountPercent?: number;
+  grossTotal?: number;
+  totalPrice: number;
+  currency: string;
+  periodStart?: string;
+  periodEnd?: string;
+  willStack?: boolean;
+}
+
+export interface PaymentProviderOption {
+  code: string;
+  label: string;
+  /** false = affiché mais pas encore disponible à la soumission */
+  enabled?: boolean;
+}
+
+export const PAYMENT_PROVIDERS: PaymentProviderOption[] = [
+  { code: 'WAVE', label: 'Wave', enabled: true },
+  { code: 'ORANGE_MONEY', label: 'Orange Money', enabled: true },
+  { code: 'CASH', label: 'Espèce', enabled: false }
+];
+
+@Injectable({ providedIn: 'root' })
+export class SubscriptionService {
+  constructor(private api: ApiService) {}
+
+  getStatus(): Observable<SubscriptionStatus> {
+    return this.api.get<SubscriptionStatus>('/subscriptions/status');
+  }
+
+  getPlans(): Observable<SubscriptionPlan[]> {
+    return this.api.get<SubscriptionPlan[]>('/subscriptions/plans');
+  }
+
+  getDurations(): Observable<SubscriptionDuration[]> {
+    return this.api.get<SubscriptionDuration[]>('/subscriptions/durations');
+  }
+
+  getHistory(): Observable<SubscriptionRecord[]> {
+    return this.api.get<SubscriptionRecord[]>('/subscriptions/history');
+  }
+
+  getPendingRequests(): Observable<SubscriptionRecord[]> {
+    return this.api.get<SubscriptionRecord[]>('/subscriptions/requests/pending');
+  }
+
+  getAllRequests(status?: string): Observable<SubscriptionRecord[]> {
+    return this.api.get<SubscriptionRecord[]>('/subscriptions/requests', status ? { status } : undefined);
+  }
+
+  getQuote(planCode: string, durationCode: string): Observable<SubscriptionQuote> {
+    return this.api.get<SubscriptionQuote>('/subscriptions/quote', { planCode, durationCode });
+  }
+
+  submitRequest(
+    planCode: string,
+    durationCode: string,
+    paymentProvider: string,
+    proofFile: File
+  ): Observable<SubscriptionRecord> {
+    const form = new FormData();
+    form.append('planCode', planCode);
+    form.append('durationCode', durationCode);
+    form.append('paymentProvider', paymentProvider);
+    form.append('proof', proofFile);
+    return this.api.postFormData<SubscriptionRecord>('/subscriptions/request', form);
+  }
+
+  approveRequest(id: number): Observable<SubscriptionRecord> {
+    return this.api.post<SubscriptionRecord>(`/subscriptions/requests/${id}/approve`, {});
+  }
+
+  rejectRequest(id: number, reason?: string): Observable<SubscriptionRecord> {
+    return this.api.post<SubscriptionRecord>(`/subscriptions/requests/${id}/reject`, { reason });
+  }
+
+  getProofBlob(recordId: number): Observable<Blob> {
+    return this.api.getBlob(`/subscriptions/requests/${recordId}/proof`);
+  }
+}

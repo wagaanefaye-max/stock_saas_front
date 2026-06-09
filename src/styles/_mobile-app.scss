@@ -1,0 +1,109 @@
+/* Expérience application mobile — téléphones et petits écrans */
+
+:root {
+  --app-bottom-nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
+  --app-touch-min: 44px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Conteneur layout type app */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg-main);
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.25rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(var(--app-bottom-nav-height) + 0.75rem);
+  }
+}
+
+/* Pages : en-têtes et tableaux sur mobile */
+@media (max-width: 768px) {
+  .page-header {
+    margin-bottom: 1rem !important;
+
+    h1 {
+      font-size: 1.25rem !important;
+    }
+
+    .text-muted,
+    p.text-muted {
+      font-size: 0.8rem !important;
+    }
+
+    .header-actions {
+      width: 100%;
+      margin-top: 0.5rem;
+
+      .p-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
+  .p-datatable-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .p-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .p-card .p-card-body {
+    padding: 0.85rem !important;
+  }
+}
+
+/* FAB optionnel */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .show-mobile {
+    display: block !important;
+  }
+
+  .full-width-mobile {
+    width: 100% !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .show-mobile-only {
+    display: none !important;
+  }
+}

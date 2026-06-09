@@ -4,11 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DividerModule } from 'primeng/divider';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { PhoneFormatDirective } from '../../directives/phone-format.directive';
+import { AuthService } from '../../services/auth.service';
+import { RegisterRequest } from '../../models/auth.model';
 
 @Component({
   selector: 'app-register',
@@ -19,12 +23,14 @@ import { PhoneFormatDirective } from '../../directives/phone-format.directive';
     RouterModule,
     InputTextModule,
     ButtonModule,
-    DropdownModule,
+    SelectModule,
     InputNumberModule,
     CheckboxModule,
     DividerModule,
+    ToastModule,
     PhoneFormatDirective
   ],
+  providers: [MessageService],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss'
 })
@@ -65,18 +71,22 @@ export class RegisterComponent {
   selectedPlan = 'Free';
   plans = [
     { label: 'Gratuit - 14 jours d\'essai', value: 'Free' },
-    { label: 'Basique - 29,99€/mois', value: 'Basique' },
-    { label: 'Standard - 79,99€/mois', value: 'Standard' },
-    { label: 'Premium - 149,99€/mois', value: 'Premium' }
+    { label: 'Basique - 19 650 FCFA/mois', value: 'Basique' },
+    { label: 'Standard - 52 650 FCFA/mois', value: 'Standard' },
+    { label: 'Premium - 99 000 FCFA/mois', value: 'Premium' }
   ];
   
   // Autres
   acceptTerms = false;
-  loading = false;
   currentStep = 1;
   totalSteps = 3;
+  errorMessage = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private messageService: MessageService
+  ) {}
 
   nextStep() {
     if (this.currentStep < this.totalSteps) {
@@ -106,19 +116,70 @@ export class RegisterComponent {
 
   register() {
     if (!this.isStepValid(3)) {
+      this.errorMessage = 'Veuillez remplir tous les champs obligatoires et accepter les conditions';
       return;
     }
 
-    this.loading = true;
+    this.errorMessage = '';
     
-    // TODO: Implémenter l'appel API d'inscription
-    setTimeout(() => {
-      this.loading = false;
-      // Rediriger vers la page de login avec un message de succès
-      this.router.navigate(['/login'], { 
-        queryParams: { registered: 'true' } 
-      });
-    }, 2000);
+    const registerRequest: RegisterRequest = {
+      name: `${this.adminFirstName} ${this.adminLastName}`.trim(),
+      email: this.adminEmail,
+      companyName: this.companyName,
+      companyEmail: this.companyEmail,
+      companyPhone: this.companyPhone,
+      companyAddress: this.companyAddress,
+      companyRegion: this.companyRegion,
+      planCode: this.selectedPlan
+    };
+    
+    this.authService.register(registerRequest).subscribe({
+      next: (response: any) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Inscription réussie',
+          detail: response.message || 'Un email de validation a été envoyé à votre adresse. Veuillez cliquer sur le lien pour activer votre compte.',
+          life: 8000
+        });
+        
+        // Rediriger vers la page de login avec un message
+        setTimeout(() => {
+          this.router.navigate(['/login'], { 
+            queryParams: { registered: 'true', message: 'Veuillez vérifier votre email pour activer votre compte.' } 
+          });
+        }, 2000);
+      },
+      error: (error) => {
+        console.error('Erreur d\'inscription:', error);
+        
+        let errorDetail = 'Une erreur est survenue lors de l\'inscription';
+        if (error.status === 0) {
+          errorDetail = 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
+        } else if (error.error?.message) {
+          errorDetail = error.error.message;
+          // Ajouter le détail des champs en erreur si présent (validation backend)
+          const errors = error.error?.errors;
+          if (errors && typeof errors === 'object') {
+            const messages = Object.values(errors) as string[];
+            if (messages.length) {
+              errorDetail += ' : ' + messages.join('. ');
+            }
+          }
+        } else if (error.status === 400) {
+          errorDetail = 'Les données fournies sont invalides';
+        } else if (error.status === 409) {
+          errorDetail = 'Un compte existe déjà avec cet email';
+        }
+        
+        this.errorMessage = errorDetail;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur d\'inscription',
+          detail: errorDetail,
+          life: 5000
+        });
+      }
+    });
   }
 
   getStepProgress(): number {

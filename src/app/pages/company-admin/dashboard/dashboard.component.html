@@ -1,28 +1,93 @@
-<div class="company-admin-dashboard">
-  <div class="page-header">
-    <h1>Tableau de bord - Administrateur</h1>
-    <p class="text-muted">Vue d'ensemble de votre entreprise</p>
-  </div>
+<div class="company-admin-dashboard simple-ux">
+  <p-toast></p-toast>
 
-  <!-- Statistiques -->
-  <div class="stats-grid">
-    <div *ngFor="let stat of stats" class="stat-card">
-      <div class="stat-icon" [style.background-color]="stat.color + '20'">
-        <i [class]="stat.icon" [style.color]="stat.color"></i>
+  <header class="dashboard-header">
+    <h1>Accueil</h1>
+    <p class="dashboard-header__subtitle">Créez une facture, consultez le stock ou gérez vos clients</p>
+  </header>
+
+  <section class="main-actions" aria-label="Actions principales">
+    <a
+      routerLink="/company-admin/invoices"
+      [queryParams]="{ new: '1' }"
+      class="main-action-card main-action-sale dashboard-cta-primary">
+      <div class="main-action-icon">
+        <i class="pi pi-file-edit"></i>
       </div>
-      <div class="stat-content">
-        <p class="stat-title">{{ stat.title }}</p>
-        <h2 class="stat-value">{{ stat.value }}</h2>
-        <span class="stat-change">{{ stat.change }}</span>
+      <div class="main-action-text">
+        <span class="main-action-label">Nouvelle facture</span>
+        <span class="main-action-hint">Créer une facture client</span>
       </div>
+      <i class="pi pi-chevron-right dashboard-cta-arrow" aria-hidden="true"></i>
+    </a>
+
+    <div class="main-actions-row">
+      <a routerLink="/company-admin/invoices" class="main-action-card main-action-invoices">
+        <div class="main-action-icon">
+          <i class="pi pi-list"></i>
+        </div>
+        <span class="main-action-label">Factures</span>
+      </a>
+
+      <a routerLink="/company-admin/products" class="main-action-card main-action-stock">
+        <div class="main-action-icon">
+          <i class="pi pi-box"></i>
+        </div>
+        <span class="main-action-label">Stock</span>
+      </a>
     </div>
-  </div>
+  </section>
 
-  <!-- Graphiques -->
-  <div class="charts-grid">
-    <p-card class="chart-card">
-      <h3>Évolution des mouvements</h3>
-      <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+  <nav class="secondary-actions" aria-label="Raccourcis">
+    <a routerLink="/company-admin/partners" class="secondary-link">
+      <i class="pi pi-users"></i>
+      <span>Clients</span>
+    </a>
+    <a routerLink="/company-admin/inventories" class="secondary-link">
+      <i class="pi pi-clipboard"></i>
+      <span>Inventaires</span>
+    </a>
+    <a routerLink="/company-admin/movements" class="secondary-link">
+      <i class="pi pi-sync"></i>
+      <span>Mouvements</span>
+    </a>
+    <a routerLink="/company-admin/subscriptions" class="secondary-link">
+      <i class="pi pi-credit-card"></i>
+      <span>Abonnement</span>
+    </a>
+  </nav>
+
+  <section class="kpi-grid" aria-label="Indicateurs">
+    <p-card class="kpi-card kpi-card--revenue">
+      <div class="kpi-title">Ventes encaissées</div>
+      <div class="kpi-value">{{ formatMoney(paidRevenue) }} <span class="kpi-unit">FCFA</span></div>
     </p-card>
-  </div>
+    <p-card class="kpi-card">
+      <div class="kpi-title">Factures payées</div>
+      <div class="kpi-value">{{ paidInvoices }}</div>
+    </p-card>
+    <p-card class="kpi-card kpi-card--warn">
+      <div class="kpi-title">Factures impayées</div>
+      <div class="kpi-value">{{ unpaidInvoices }}</div>
+    </p-card>
+    <p-card class="kpi-card kpi-card--alert">
+      <div class="kpi-title">Stock bas (≤ 5)</div>
+      <div class="kpi-value">{{ lowStockProducts }}</div>
+    </p-card>
+  </section>
+
+  <section class="charts-grid" aria-label="Graphiques">
+    <p-card class="chart-card">
+      <h3>Ventes — 6 derniers mois</h3>
+      <div class="chart-wrap chart-wrap--tall">
+        <p-chart type="line" [data]="salesByMonthData" [options]="chartOptions"></p-chart>
+      </div>
+    </p-card>
+    <p-card class="chart-card">
+      <h3>Répartition des factures</h3>
+      <div class="chart-wrap chart-wrap--donut">
+        <p-chart type="doughnut" [data]="statusChartData" [options]="doughnutChartOptions"></p-chart>
+      </div>
+    </p-card>
+  </section>
 </div>

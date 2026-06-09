@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -8,13 +8,46 @@ import { DialogModule } from 'primeng/dialog';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { ToolbarModule } from 'primeng/toolbar';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { TooltipModule } from 'primeng/tooltip';
 import { DividerModule } from 'primeng/divider';
 import { MenuModule } from 'primeng/menu';
 import { Menu } from 'primeng/menu';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
+import { ApiService } from '../../../services/api.service';
+import { Subject, catchError, debounceTime, of, takeUntil, throwError } from 'rxjs';
+
+interface Company {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  region: string | null;
+  country: string | null;
+  planCode: string | null;
+  planLabel: string | null;
+  statusCode: string | null;
+  statusLabel: string | null;
+  logoUrl: string | null;
+  userCount: number;
+  createdAt: string;
+  adminName?: string | null;
+  adminEmail?: string | null;
+}
+
+interface PageResponse {
+  content: Company[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
 
 @Component({
   selector: 'app-companies',
@@ -29,31 +62,42 @@ import { PhoneFormatDirective } from '../../../directives/phone-format.directive
     CardModule,
     TagModule,
     ToolbarModule,
-    DropdownModule,
+    SelectModule,
     ToggleButtonModule,
     TooltipModule,
     DividerModule,
     MenuModule,
+    ToastModule,
     PhoneFormatDirective
   ],
+  providers: [MessageService],
   templateUrl: './companies.component.html',
   styleUrl: './companies.component.scss'
 })
-export class CompaniesComponent {
-  companies = [
-    { id: 1, name: 'Entreprise A', email: 'contact@entreprisea.com', plan: 'Premium', status: 'Actif', users: 25, createdAt: '2024-01-15', logoUrl: null },
-    { id: 2, name: 'Entreprise B', email: 'contact@entrepriseb.com', plan: 'Standard', status: 'Actif', users: 12, createdAt: '2024-01-10', logoUrl: null },
-    { id: 3, name: 'Entreprise C', email: 'contact@entreprisec.com', plan: 'Basique', status: 'Inactif', users: 5, createdAt: '2024-01-05', logoUrl: null },
-    { id: 4, name: 'Entreprise D', email: 'contact@entreprised.com', plan: 'Premium', status: 'Actif', users: 45, createdAt: '2024-01-20', logoUrl: null },
-    { id: 5, name: 'Entreprise E', email: 'contact@entreprisee.com', plan: 'Standard', status: 'Actif', users: 18, createdAt: '2024-01-12', logoUrl: null }
-  ];
-
-  selectedCompanies: any[] = [];
+export class CompaniesComponent implements OnInit, OnDestroy {
+  companies: Company[] = [];
+  selectedCompanies: Company[] = [];
   displayDialog = false;
   company: any = {};
   globalFilter = '';
-  plans = ['Free', 'Premium', 'Standard', 'Basique'];
-  statuses = ['Actif', 'Inactif', 'Suspendu'];
+  private search$ = new Subject<void>();
+  private destroy$ = new Subject<void>();
+  plans = [
+    { label: 'Gratuit', value: 'FREE' },
+    { label: 'Premium', value: 'PREMIUM' },
+    { label: 'Standard', value: 'STANDARD' },
+    { label: 'Basique', value: 'BASIQUE' }
+  ];
+  statuses = [
+    { label: 'Actif', value: 'ACTIF' },
+    { label: 'Inactif', value: 'INACTIF' },
+    { label: 'Suspendu', value: 'SUSPENDU' }
+  ];
+  
+  // Pagination
+  totalRecords = 0;
+  page = 0;
+  size = 10;
   
   regions = [
     'Dakar',
@@ -75,31 +119,123 @@ export class CompaniesComponent {
   companyLogo: File | null = null;
   companyLogoPreview: string | null = null;
   menuItems: any[] = [];
-  selectedCompany: any = null;
+  selectedCompany: Company | null = null;
   @ViewChild('actionMenu') actionMenu!: Menu;
+  displayDetailDialog = false;
+  companyDetail: Company | null = null;
 
-  getSeverity(status: string): 'success' | 'danger' | 'warn' | undefined {
-    switch (status) {
-      case 'Actif':
+  constructor(
+    private apiService: ApiService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService
+  ) {}
+
+  ngOnInit() {
+    this.loadCompanies();
+    this.search$.pipe(debounceTime(400), takeUntil(this.destroy$)).subscribe(() => this.loadCompanies());
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadCompanies() {
+    const search = this.globalFilter && this.globalFilter.trim() ? this.globalFilter.trim() : undefined;
+    
+    this.apiService.get<PageResponse>(`/companies?page=${this.page}&size=${this.size}${search ? `&search=${encodeURIComponent(search)}` : ''}`)
+      .pipe(
+        catchError(error => {
+          console.error('Erreur lors du chargement des entreprises:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de charger les entreprises'
+          });
+          return of({
+            content: [],
+            page: 0,
+            size: this.size,
+            totalElements: 0,
+            totalPages: 0,
+            first: true,
+            last: true
+          } as PageResponse);
+        })
+      )
+      .subscribe(response => {
+        this.companies = response.content;
+        this.totalRecords = response.totalElements;
+      });
+  }
+
+  onPageChange(event: any) {
+    if (event.first !== undefined) {
+      // Événement de pagination PrimeNG
+      this.page = Math.floor(event.first / event.rows);
+      this.size = event.rows;
+    } else {
+      // Événement personnalisé
+      this.page = event.page || 0;
+      this.size = event.rows || event.size || 10;
+    }
+    this.loadCompanies();
+  }
+
+  onGlobalFilter() {
+    this.page = 0;
+    this.search$.next();
+  }
+
+  formatDate(date: string | null): string {
+    if (!date) return '-';
+    try {
+      return new Date(date).toLocaleDateString('fr-FR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+    } catch {
+      return date;
+    }
+  }
+
+  getSeverity(statusCode: string | null): 'success' | 'danger' | 'warn' | undefined {
+    if (!statusCode) return undefined;
+    switch (statusCode.toUpperCase()) {
+      case 'ACTIF':
         return 'success';
-      case 'Inactif':
+      case 'INACTIF':
         return 'danger';
-      case 'Suspendu':
+      case 'SUSPENDU':
         return 'warn';
       default:
         return undefined;
     }
   }
 
-  getPlanSeverity(plan: string): 'success' | 'info' | 'warn' | 'secondary' | undefined {
-    switch (plan) {
-      case 'Premium':
+  getStatusLabel(statusCode: string | null): string {
+    if (!statusCode) return '-';
+    const company = this.companies.find(c => c.statusCode === statusCode);
+    return company?.statusLabel || statusCode;
+  }
+
+  getPlanLabel(planCode: string | null): string {
+    if (!planCode) return '-';
+    const company = this.companies.find(c => c.planCode === planCode);
+    return company?.planLabel || planCode;
+  }
+
+  getPlanSeverity(planCode: string | null): 'success' | 'info' | 'warn' | 'secondary' | undefined {
+    if (!planCode) return undefined;
+    switch (planCode.toUpperCase()) {
+      case 'PREMIUM':
         return 'success';
-      case 'Standard':
+      case 'STANDARD':
         return 'info';
-      case 'Basique':
+      case 'BASIQUE':
         return 'warn';
-      case 'Free':
+      case 'FREE':
         return 'secondary';
       default:
         return undefined;
@@ -108,8 +244,8 @@ export class CompaniesComponent {
 
   openNew() {
     this.company = {
-      status: 'Actif',
-      plan: 'Standard',
+      statusCode: 'ACTIF',
+      planCode: 'STANDARD',
       country: 'Sénégal',
       phone: '',
       address: '',
@@ -123,31 +259,27 @@ export class CompaniesComponent {
     this.displayDialog = true;
   }
 
-  editCompany(company: any) {
-    this.company = { ...company };
-    // Initialiser les champs manquants
-    if (!this.company.country) {
-      this.company.country = 'Sénégal';
-    }
-    if (!this.company.phone) {
-      this.company.phone = '';
-    }
-    if (!this.company.address) {
-      this.company.address = '';
-    }
-    if (!this.company.region) {
-      this.company.region = '';
-    }
-    // Si l'entreprise a déjà un logo, on peut charger la prévisualisation
-    if (company.logoUrl) {
-      this.companyLogoPreview = company.logoUrl;
-    } else {
-      this.companyLogoPreview = null;
-    }
-    this.companyLogo = null;
-    this.displayDialog = true;
+  showDetail(company: Company) {
+    this.apiService.get<Company>(`/companies/${company.id}`)
+      .pipe(
+        catchError(error => {
+          console.error('Erreur lors du chargement de l\'entreprise:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de charger les détails de l\'entreprise'
+          });
+          return of(null);
+        })
+      )
+      .subscribe(fetchedCompany => {
+        if (fetchedCompany) {
+          this.companyDetail = fetchedCompany;
+          this.displayDetailDialog = true;
+        }
+      });
   }
-  
+
   onLogoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
@@ -190,7 +322,7 @@ export class CompaniesComponent {
              this.company.phone && 
              this.company.address && 
              this.company.region && 
-             this.company.plan &&
+             this.company.planCode &&
              this.company.adminFirstName &&
              this.company.adminLastName &&
              this.company.adminEmail);
@@ -198,68 +330,136 @@ export class CompaniesComponent {
 
   saveCompany() {
     if (!this.isFormValid()) {
-      alert('Veuillez remplir tous les champs obligatoires');
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation',
+        detail: 'Veuillez remplir tous les champs obligatoires'
+      });
       return;
     }
     
-    // TODO: Implémenter la sauvegarde avec upload du logo si présent
-    if (this.company.id) {
-      // Mise à jour
-      const index = this.companies.findIndex(c => c.id === this.company.id);
-      if (index !== -1) {
-        // Si un nouveau logo a été sélectionné, mettre à jour l'URL
-        if (this.companyLogoPreview && !this.company.logoUrl) {
-          this.company.logoUrl = this.companyLogoPreview;
-        }
-        this.companies[index] = { ...this.company };
-      }
-    } else {
-      // Création
-      this.company.id = this.companies.length + 1;
-      this.company.createdAt = new Date().toISOString().split('T')[0];
-      this.company.users = 0;
-      // Si un logo a été sélectionné, l'ajouter
-      if (this.companyLogoPreview) {
-        this.company.logoUrl = this.companyLogoPreview;
-      }
-      this.companies.push({ ...this.company });
-    }
-    this.displayDialog = false;
-    this.companyLogo = null;
-    this.companyLogoPreview = null;
-  }
-
-  deleteCompany(company: any) {
-    // TODO: Implémenter la suppression
-    if (confirm(`Êtes-vous sûr de vouloir supprimer l'entreprise "${company.name}" ?`)) {
-      const index = this.companies.findIndex(c => c.id === company.id);
-      if (index !== -1) {
-        this.companies.splice(index, 1);
-      }
-    }
-  }
-
-  toggleCompanyStatus(company: any) {
-    const newStatus = company.status === 'Actif' ? 'Inactif' : 'Actif';
-    const index = this.companies.findIndex(c => c.id === company.id);
-    if (index !== -1) {
-      this.companies[index].status = newStatus;
+    if (!this.company.id) {
+      const createRequest = {
+        name: this.company.name,
+        email: this.company.email,
+        phone: this.company.phone || null,
+        address: this.company.address || null,
+        region: this.company.region || null,
+        country: this.company.country || 'Sénégal',
+        planCode: this.company.planCode || 'FREE',
+        adminFirstName: this.company.adminFirstName,
+        adminLastName: this.company.adminLastName,
+        adminEmail: this.company.adminEmail
+      };
+      this.apiService.post<Company>('/companies', createRequest)
+        .pipe(
+          catchError(error => {
+            console.error('Erreur lors de la création de l\'entreprise:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: error.error?.message || 'Impossible de créer l\'entreprise'
+            });
+            return throwError(() => error);
+          })
+        )
+        .subscribe(() => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Boutique créée. Un email d\'activation a été envoyé à l\'administrateur pour qu\'il active son compte et définisse son mot de passe.'
+          });
+          this.displayDialog = false;
+          this.companyLogo = null;
+          this.companyLogoPreview = null;
+          this.loadCompanies();
+        });
+      return;
     }
   }
 
-  showMenu(event: Event, company: any) {
+  deleteCompany(company: Company) {
+    this.confirmationService.confirm({
+      message: `Êtes-vous sûr de vouloir supprimer l'entreprise "${company.name}" ? Cette action est irréversible et supprimera toutes les données associées.`,
+      header: 'Confirmer la suppression',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Oui, supprimer',
+      rejectLabel: 'Non, annuler',
+      accept: () => {
+        this.apiService.delete(`/companies/${company.id}`)
+          .pipe(
+            catchError(error => {
+              console.error('Erreur lors de la suppression de l\'entreprise:', error);
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Erreur',
+                detail: error.error?.message || 'Impossible de supprimer l\'entreprise'
+              });
+              return throwError(() => error);
+            })
+          )
+          .subscribe(() => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Succès',
+              detail: `L'entreprise "${company.name}" a été supprimée.`
+            });
+            this.loadCompanies(); // Recharger la liste
+          });
+      }
+    });
+  }
+
+  toggleCompanyStatus(company: Company) {
+    const isActive = company.statusCode === 'ACTIF';
+    const newStatus = isActive ? 'INACTIF' : 'ACTIF';
+    const action = isActive ? 'désactiver' : 'activer';
+    
+    this.confirmationService.confirm({
+      message: `Êtes-vous sûr de vouloir ${action} l'entreprise "${company.name}" ?`,
+      header: `Confirmer ${isActive ? 'la désactivation' : 'l\'activation'}`,
+      icon: 'pi pi-question-circle',
+      acceptLabel: `Oui, ${action}`,
+      rejectLabel: 'Non, annuler',
+      accept: () => {
+        this.apiService.patch<Company>(`/companies/${company.id}/status`, { status: newStatus })
+          .pipe(
+            catchError(error => {
+              console.error('Erreur lors du changement de statut:', error);
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Erreur',
+                detail: error.error?.message || 'Impossible de changer le statut de l\'entreprise'
+              });
+              return throwError(() => error);
+            })
+          )
+          .subscribe(updatedCompany => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Succès',
+              detail: `Le statut de l'entreprise "${company.name}" a été changé en "${isActive ? 'Inactif' : 'Actif'}".`
+            });
+            this.loadCompanies(); // Recharger la liste
+          });
+      }
+    });
+  }
+
+  showMenu(event: Event, company: Company) {
     this.selectedCompany = company;
+    const isActive = company.statusCode === 'ACTIF';
     this.menuItems = [
       {
-        label: 'Modifier',
-        icon: 'pi pi-pencil',
+        label: 'Voir le détail',
+        icon: 'pi pi-eye',
         command: () => {
-          this.editCompany(company);
+          this.showDetail(company);
         }
       },
       {
-        label: company.status === 'Actif' ? 'Désactiver' : 'Activer',
-        icon: company.status === 'Actif' ? 'pi pi-ban' : 'pi pi-check-circle',
+        label: isActive ? 'Désactiver' : 'Activer',
+        icon: isActive ? 'pi pi-ban' : 'pi pi-check-circle',
         command: () => {
           this.toggleCompanyStatus(company);
         }

@@ -1,7 +1,59 @@
 <div class="dashboard">
+  <p-toast></p-toast>
+  
   <div class="page-header">
     <h1>Tableau de bord</h1>
     <p class="text-muted">Vue d'ensemble de votre gestion de stock</p>
+  </div>
+
+  <!-- Actions rapides (pour gestionnaires) -->
+  <div class="quick-actions" *ngIf="authService.isGestionnaire()">
+    <h2 class="section-title">Actions rapides</h2>
+    <div class="actions-grid">
+      <a routerLink="/gestionnaire/movements" class="action-card" [queryParams]="{action: 'new'}">
+        <div class="action-icon" style="background-color: rgba(22, 163, 74, 0.1);">
+          <i class="pi pi-sync" style="color: #16A34A; font-size: 2rem;"></i>
+        </div>
+        <div class="action-content">
+          <h3>Enregistrer un mouvement</h3>
+          <p>Créer une entrée, sortie ou transfert de stock</p>
+        </div>
+        <i class="pi pi-arrow-right action-arrow"></i>
+      </a>
+
+      <a routerLink="/gestionnaire/products" class="action-card">
+        <div class="action-icon" style="background-color: rgba(37, 99, 235, 0.1);">
+          <i class="pi pi-shopping-bag" style="color: #2563EB; font-size: 2rem;"></i>
+        </div>
+        <div class="action-content">
+          <h3>Voir les produits</h3>
+          <p>Consulter le catalogue des produits</p>
+        </div>
+        <i class="pi pi-arrow-right action-arrow"></i>
+      </a>
+
+      <a routerLink="/gestionnaire/warehouses" class="action-card">
+        <div class="action-icon" style="background-color: rgba(245, 158, 11, 0.1);">
+          <i class="pi pi-warehouse" style="color: #F59E0B; font-size: 2rem;"></i>
+        </div>
+        <div class="action-content">
+          <h3>Mes entrepôts</h3>
+          <p>Consulter les entrepôts assignés</p>
+        </div>
+        <i class="pi pi-arrow-right action-arrow"></i>
+      </a>
+
+      <a routerLink="/gestionnaire/inventories" class="action-card">
+        <div class="action-icon" style="background-color: rgba(139, 92, 246, 0.1);">
+          <i class="pi pi-clipboard" style="color: #8B5CF6; font-size: 2rem;"></i>
+        </div>
+        <div class="action-content">
+          <h3>Inventaire</h3>
+          <p>Lancer un comptage et ajuster les stocks</p>
+        </div>
+        <i class="pi pi-arrow-right action-arrow"></i>
+      </a>
+    </div>
   </div>
 
   <!-- Statistiques -->
@@ -24,16 +76,16 @@
   <div class="charts-grid">
     <p-card class="chart-card">
       <h3>Mouvements de stock</h3>
-      <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+      <div class="chart-wrap chart-wrap--tall">
+        <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+      </div>
     </p-card>
 
     <p-card class="chart-card">
       <h3>Produits par catégorie</h3>
-      <p-chart 
-        type="doughnut" 
-        [data]="categoryChartData"
-        [options]="categoryChartOptions">
-      </p-chart>
+      <div class="chart-wrap chart-wrap--donut">
+        <p-chart type="doughnut" [data]="categoryChartData" [options]="categoryChartOptions"></p-chart>
+      </div>
     </p-card>
   </div>
 
@@ -52,12 +104,15 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let i of [1,2,3,4,5]">
-            <td>15/01/2024</td>
-            <td>Produit {{ i }}</td>
-            <td><span class="badge badge-success">Entrée</span></td>
-            <td>50</td>
-            <td>Entrepôt A</td>
+          <tr *ngFor="let movement of recentMovements">
+            <td>{{ movement.date }}</td>
+            <td>{{ movement.productName }}</td>
+            <td><span class="badge badge-success">{{ movement.movementType }}</span></td>
+            <td>{{ movement.quantity }}</td>
+            <td>{{ movement.warehouseName }}</td>
+          </tr>
+          <tr *ngIf="recentMovements.length === 0">
+            <td colspan="5" class="text-center text-muted">Aucun mouvement récent</td>
           </tr>
         </tbody>
       </table>

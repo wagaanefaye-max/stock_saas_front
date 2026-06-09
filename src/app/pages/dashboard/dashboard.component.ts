@@ -1,96 +1,254 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
+import { buildDoughnutChartOptions, buildLineChartOptions } from '../../utils/chart-options.util';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
+import { ButtonModule } from 'primeng/button';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, CardModule, ChartModule],
+  imports: [CommonModule, RouterModule, CardModule, ChartModule, ButtonModule, ToastModule],
+  providers: [MessageService],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
   stats: any[] = [];
+  recentMovements: any[] = [];
 
-  constructor(public authService: AuthService) {}
+  constructor(
+    public authService: AuthService,
+    private apiService: ApiService,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit() {
+    this.refreshChartOptions();
     this.loadStats();
-    this.initCharts();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.refreshChartOptions();
   }
 
   loadStats() {
-    const user = this.authService.getCurrentUser();
-    const accessibleIds = this.authService.getAccessibleWarehouseIds();
-    
-    // Calculer les statistiques selon les entrepôts accessibles
-    if (this.authService.isAdminEntreprise()) {
-      // Admin entreprise : toutes les statistiques
-      this.stats = [
-        {
-          title: 'Produits totaux',
-          value: '1,234',
-          icon: 'pi pi-box',
-          color: 'var(--primary)',
-          change: '+12%'
-        },
-        {
-          title: 'Entrepôts',
-          value: '13',
-          icon: 'pi pi-building',
-          color: 'var(--secondary)',
-          change: '+2'
-        },
-        {
-          title: 'Mouvements (mois)',
-          value: '456',
-          icon: 'pi pi-arrows-h',
-          color: 'var(--warning)',
-          change: '+8%'
-        },
-        {
-          title: 'Alertes',
-          value: '12',
-          icon: 'pi pi-exclamation-triangle',
-          color: 'var(--danger)',
-          change: '-3'
+    this.apiService.get<any>('/dashboard/stats')
+      .pipe(
+        catchError(error => {
+          console.error('Erreur lors du chargement des statistiques:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de charger les statistiques'
+          });
+          // Retourner des données par défaut en cas d'erreur
+          return of({
+            totalProducts: 0,
+            totalWarehouses: 0,
+            monthlyMovements: 0,
+            alerts: 0,
+            monthlyMovementsData: [],
+            productsByCategory: [],
+            recentMovements: [],
+            productsChange: '0%',
+            warehousesChange: '0',
+            movementsChange: '0%',
+            alertsChange: '0'
+          });
+        })
+      )
+      .subscribe(data => {
+        const user = this.authService.getCurrentUser();
+        const accessibleIds = this.authService.getAccessibleWarehouseIds();
+        
+        // Formater les valeurs avec des séparateurs de milliers
+        const formatNumber = (num: number) => num.toLocaleString('fr-FR');
+        
+        if (this.authService.isAdminEntreprise()) {
+          this.stats = [
+            {
+              title: 'Produits totaux',
+              value: formatNumber(data.totalProducts || 0),
+              icon: 'pi pi-box',
+              color: 'var(--primary)',
+              change: data.productsChange || '+0%'
+            },
+            {
+              title: 'Entrepôts',
+              value: formatNumber(data.totalWarehouses || 0),
+              icon: 'pi pi-building',
+              color: 'var(--secondary)',
+              change: data.warehousesChange || '+0'
+            },
+            {
+              title: 'Mouvements (mois)',
+              value: formatNumber(data.monthlyMovements || 0),
+              icon: 'pi pi-arrows-h',
+              color: 'var(--warning)',
+              change: data.movementsChange || '+0%'
+            },
+            {
+              title: 'Alertes',
+              value: formatNumber(data.alerts || 0),
+              icon: 'pi pi-exclamation-triangle',
+              color: 'var(--danger)',
+              change: data.alertsChange || '0'
+            }
+          ];
+        } else {
+          const warehouseCount = accessibleIds === null ? data.totalWarehouses : (accessibleIds.length || 0);
+          this.stats = [
+            {
+              title: 'Produits (mes entrepôts)',
+              value: formatNumber(data.totalProducts || 0),
+              icon: 'pi pi-box',
+              color: 'var(--primary)',
+              change: data.productsChange || '+0%'
+            },
+            {
+              title: 'Entrepôts assignés',
+              value: formatNumber(warehouseCount),
+              icon: 'pi pi-building',
+              color: 'var(--secondary)',
+              change: ''
+            },
+            {
+              title: 'Mouvements (mois)',
+              value: formatNumber(data.monthlyMovements || 0),
+              icon: 'pi pi-arrows-h',
+              color: 'var(--warning)',
+              change: data.movementsChange || '+0%'
+            },
+            {
+              title: 'Alertes',
+              value: formatNumber(data.alerts || 0),
+              icon: 'pi pi-exclamation-triangle',
+              color: 'var(--danger)',
+              change: data.alertsChange || '0'
+            }
+          ];
         }
-      ];
+        
+        // Mettre à jour les mouvements récents
+        this.recentMovements = data.recentMovements || [];
+        
+        // Mettre à jour les graphiques avec les données réelles
+        if (data.monthlyMovementsData && data.monthlyMovementsData.length > 0) {
+          this.updateChartData(data.monthlyMovementsData);
+        } else {
+          // Initialiser avec des données vides si aucune donnée
+          this.updateChartData([]);
+        }
+        
+        if (data.productsByCategory && data.productsByCategory.length > 0) {
+          this.updateCategoryChartData(data.productsByCategory);
+        } else {
+          // Initialiser avec des données vides si aucune donnée
+          this.updateCategoryChartData([]);
+        }
+      });
+  }
+  
+  updateChartData(monthlyData: any[]) {
+    if (monthlyData.length === 0) {
+      // Initialiser avec des données vides pour les 6 derniers mois
+      const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'];
+      this.chartData = {
+        labels: months,
+        datasets: [
+          {
+            label: 'Entrées',
+            data: new Array(6).fill(0),
+            fill: true,
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            borderColor: '#2563EB',
+            borderWidth: 2,
+            tension: 0.4,
+            pointBackgroundColor: '#2563EB',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+          },
+          {
+            label: 'Sorties',
+            data: new Array(6).fill(0),
+            fill: true,
+            backgroundColor: 'rgba(220, 38, 38, 0.1)',
+            borderColor: '#DC2626',
+            borderWidth: 2,
+            tension: 0.4,
+            pointBackgroundColor: '#DC2626',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+          }
+        ]
+      };
     } else {
-      // Gestionnaire/Utilisateur : statistiques filtrées selon les entrepôts assignés
-      const warehouseCount = accessibleIds === null ? 13 : (accessibleIds.length || 0);
-      this.stats = [
-        {
-          title: 'Produits (mes entrepôts)',
-          value: '456',
-          icon: 'pi pi-box',
-          color: 'var(--primary)',
-          change: '+8%'
-        },
-        {
-          title: 'Entrepôts assignés',
-          value: warehouseCount.toString(),
-          icon: 'pi pi-building',
-          color: 'var(--secondary)',
-          change: ''
-        },
-        {
-          title: 'Mouvements (mois)',
-          value: '128',
-          icon: 'pi pi-arrows-h',
-          color: 'var(--warning)',
-          change: '+5%'
-        },
-        {
-          title: 'Alertes',
-          value: '5',
-          icon: 'pi pi-exclamation-triangle',
-          color: 'var(--danger)',
-          change: '-2'
-        }
-      ];
+      this.chartData = {
+        labels: monthlyData.map(d => d.month),
+        datasets: [
+          {
+            label: 'Entrées',
+            data: monthlyData.map(d => d.entries || 0),
+            fill: true,
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            borderColor: '#2563EB',
+            borderWidth: 2,
+            tension: 0.4,
+            pointBackgroundColor: '#2563EB',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+          },
+          {
+            label: 'Sorties',
+            data: monthlyData.map(d => d.exits || 0),
+            fill: true,
+            backgroundColor: 'rgba(220, 38, 38, 0.1)',
+            borderColor: '#DC2626',
+            borderWidth: 2,
+            tension: 0.4,
+            pointBackgroundColor: '#DC2626',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+          }
+        ]
+      };
+    }
+  }
+  
+  updateCategoryChartData(categoryData: any[]) {
+    const colors = ['#2563EB', '#16A34A', '#F59E0B', '#6366F1', '#9333EA', '#EC4899'];
+    if (categoryData.length === 0) {
+      this.categoryChartData = {
+        labels: ['Aucune catégorie'],
+        datasets: [{
+          data: [1],
+          backgroundColor: ['#E5E7EB'],
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      };
+    } else {
+      this.categoryChartData = {
+        labels: categoryData.map(d => d.category),
+        datasets: [{
+          data: categoryData.map(d => d.count || 0),
+          backgroundColor: categoryData.map((_, i) => colors[i % colors.length]),
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      };
     }
   }
 
@@ -99,17 +257,25 @@ export class DashboardComponent implements OnInit {
   categoryChartData: any;
   categoryChartOptions: any;
 
+  refreshChartOptions(): void {
+    this.chartOptions = {
+      ...buildLineChartOptions({ legendPosition: 'bottom' })
+    };
+    this.categoryChartOptions = { ...buildDoughnutChartOptions() };
+  }
+
   initCharts() {
-    // Palette de couleurs pour différencier les entités
+    this.refreshChartOptions();
+
     const colors = {
-      primary: '#2563EB',      // Bleu - Entrées
-      secondary: '#16A34A',     // Vert - Sorties
-      warning: '#F59E0B',       // Orange - Transferts
-      danger: '#DC2626',        // Rouge - Ajustements
-      info: '#06B6D4',          // Cyan - Autres
-      purple: '#9333EA',        // Violet - Autres entités
-      pink: '#EC4899',          // Rose - Autres entités
-      indigo: '#6366F1'         // Indigo - Autres entités
+      primary: '#2563EB',
+      secondary: '#16A34A',
+      warning: '#F59E0B',
+      danger: '#DC2626',
+      info: '#06B6D4',
+      purple: '#9333EA',
+      pink: '#EC4899',
+      indigo: '#6366F1'
     };
 
     this.chartData = {
@@ -144,41 +310,6 @@ export class DashboardComponent implements OnInit {
       ]
     };
 
-    this.chartOptions = {
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-          labels: {
-            usePointStyle: true,
-            padding: 15,
-            font: {
-              size: 12,
-              weight: '500'
-            }
-          }
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'rgba(0, 0, 0, 0.05)'
-          }
-        },
-        x: {
-          grid: {
-            display: false
-          }
-        }
-      },
-      interaction: {
-        intersect: false,
-        mode: 'index'
-      }
-    };
-
-    // Graphique en doughnut pour les catégories
     this.categoryChartData = {
       labels: ['Électronique', 'Vêtements', 'Alimentaire', 'Autres'],
       datasets: [{
@@ -194,20 +325,6 @@ export class DashboardComponent implements OnInit {
       }]
     };
 
-    this.categoryChartOptions = {
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            padding: 15,
-            font: {
-              size: 12,
-              weight: '500'
-            }
-          }
-        }
-      }
-    };
   }
 }
 

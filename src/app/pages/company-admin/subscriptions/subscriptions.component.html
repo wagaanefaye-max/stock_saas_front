@@ -1,0 +1,240 @@
+<div class="subscriptions-page">
+  <p-toast></p-toast>
+
+  <div *ngIf="loading" class="loading-state">
+    <i class="pi pi-spin pi-spinner"></i>
+  </div>
+
+  <ng-container *ngIf="!loading && status">
+    <!-- Alerte courte uniquement si nécessaire -->
+    <div class="alert alert--pending" *ngIf="status.hasPendingRequest">
+      <i class="pi pi-clock"></i> Demande en cours de validation
+    </div>
+    <div class="alert alert--warn" *ngIf="status.readOnly && !status.hasPendingRequest && !status.canUpgrade">
+      <i class="pi pi-lock"></i> Abonnement expiré — souscrivez pour réactiver
+    </div>
+
+    <!-- Formulaire principal -->
+    <section class="subscribe-flow" *ngIf="status.canUpgrade">
+      <p class="status-line" *ngIf="!status.hasPendingRequest">
+        <span class="status-dot" [class]="status.subscriptionStatus"></span>
+        <ng-container [ngSwitch]="status.subscriptionStatus">
+          <span *ngSwitchCase="'TRIAL'">Essai · {{ status.daysRemaining }} j. restants</span>
+          <span *ngSwitchCase="'ACTIVE'">Actif jusqu'au {{ formatDate(status.subscriptionEndsAt) }}</span>
+          <span *ngSwitchDefault>{{ status.subscriptionStatusLabel }}</span>
+        </ng-container>
+      </p>
+
+      <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-body">
+          <span class="step-title">Durée</span>
+          <div class="chip-row">
+            <button
+              type="button"
+              class="chip"
+              *ngFor="let d of durations"
+              [class.chip--active]="selectedDuration?.code === d.code"
+              (click)="selectDuration(d)">
+              <span class="chip-label">{{ d.label }}</span>
+              <span class="chip-price">{{ formatAmount(d.totalPrice ?? 0) }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-body">
+          <span class="step-title">Paiement</span>
+          <div class="chip-row chip-row--pay">
+            <button
+              type="button"
+              class="chip chip--pay"
+              *ngFor="let p of paymentProviders"
+              [class.chip--active]="selectedPaymentProvider.code === p.code && isPaymentProviderEnabled(p)"
+              [class.chip--wave]="p.code === 'WAVE'"
+              [class.chip--orange]="p.code === 'ORANGE_MONEY'"
+              [class.chip--cash]="p.code === 'CASH'"
+              [class.chip--disabled]="!isPaymentProviderEnabled(p)"
+              [attr.aria-disabled]="!isPaymentProviderEnabled(p)"
+              (click)="selectPaymentProvider(p)">
+              <span class="chip-label">{{ p.label }}</span>
+              <span class="chip-soon" *ngIf="!isPaymentProviderEnabled(p)">Bientôt</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-body">
+          <span class="step-title">Capture du paiement</span>
+          <input
+            #proofInput
+            type="file"
+            class="proof-input-hidden"
+            accept="image/jpeg,image/png,image/webp"
+            (change)="onProofInputChange($event)" />
+
+          <div
+            *ngIf="!proofPreviewUrl"
+            class="proof-zone"
+            [class.proof-zone--drag]="isDragOver"
+            (click)="openProofPicker()"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)">
+            <i class="pi pi-camera"></i>
+            <span>Ajouter la capture</span>
+          </div>
+
+          <div *ngIf="proofPreviewUrl" class="proof-thumb" (click)="openProofPicker()">
+            <img [src]="proofPreviewUrl" alt="Capture" />
+            <button type="button" class="proof-remove" (click)="clearProof(); $event.stopPropagation()">
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p class="stack-hint" *ngIf="status.willStackSubscription && status.nextCumulativeStartAt">
+        + cumulé après le {{ formatDate(status.nextCumulativeStartAt) }}
+      </p>
+
+      <button
+        type="button"
+        class="submit-btn"
+        [disabled]="!canSubmitRequest()"
+        [class.submit-btn--loading]="subscribing"
+        (click)="submitRequest()">
+        <span class="submit-price" *ngIf="quoteTotal">{{ formatAmount(quoteTotal) }}</span>
+        <span class="submit-label">{{ subscribing ? 'Envoi...' : 'Envoyer' }}</span>
+      </button>
+      <p class="submit-note">Validation sous 24 h · 5 000 F/mois</p>
+    </section>
+
+    <!-- Historique replié -->
+    <button type="button" class="history-toggle" (click)="showHistory = !showHistory" *ngIf="history.length">
+      <i class="pi" [class.pi-chevron-down]="!showHistory" [class.pi-chevron-up]="showHistory"></i>
+      Mes souscriptions ({{ history.length }})
+    </button>
+
+    <div class="history-list" *ngIf="showHistory && history.length">
+      <button
+        type="button"
+        class="history-item"
+        *ngFor="let row of history"
+        (click)="openDetail(row)"
+        [attr.aria-label]="'Voir le détail de la souscription ' + row.durationLabel">
+        <div class="history-item__content">
+          <div class="history-item__main">
+            <strong>{{ row.durationLabel }}</strong>
+            <span>{{ formatAmount(row.amountPaid) }}</span>
+          </div>
+          <div class="history-item__sub">
+            <span>{{ formatDate(row.createdAt) }}</span>
+            <span class="badge" [class]="'badge--' + row.requestStatus">{{ row.requestStatusLabel }}</span>
+          </div>
+        </div>
+        <i class="pi pi-chevron-right history-item__chevron" aria-hidden="true"></i>
+      </button>
+    </div>
+  </ng-container>
+
+  <p-dialog
+    styleClass="app-mobile-dialog subscription-detail-dialog"
+    [(visible)]="detailDialogVisible"
+    [modal]="true"
+    [draggable]="false"
+    [breakpoints]="dialogBreakpoints"
+    [style]="dialogStyle"
+    (onHide)="closeDetail()">
+    <ng-template pTemplate="header">
+      <span class="detail-dialog-title">Détail de la souscription</span>
+    </ng-template>
+
+    <div class="subscription-detail" *ngIf="selectedRecord">
+      <div class="detail-status-row">
+        <span class="badge badge--lg" [class]="'badge--' + selectedRecord.requestStatus">
+          {{ selectedRecord.requestStatusLabel }}
+        </span>
+        <span class="detail-id">#{{ selectedRecord.id }}</span>
+      </div>
+
+      <dl class="detail-grid">
+        <div class="detail-row">
+          <dt>Plan</dt>
+          <dd>{{ selectedRecord.planLabel }}</dd>
+        </div>
+        <div class="detail-row">
+          <dt>Durée</dt>
+          <dd>{{ selectedRecord.durationLabel }} ({{ selectedRecord.months }} mois)</dd>
+        </div>
+        <div class="detail-row">
+          <dt>Montant payé</dt>
+          <dd>{{ formatAmount(selectedRecord.amountPaid) }}</dd>
+        </div>
+        <div class="detail-row">
+          <dt>Paiement</dt>
+          <dd>{{ selectedRecord.paymentProviderLabel || '—' }}</dd>
+        </div>
+        <div class="detail-row">
+          <dt>Date de demande</dt>
+          <dd>{{ formatDateTime(selectedRecord.createdAt) }}</dd>
+        </div>
+        <div class="detail-row" *ngIf="selectedRecord.subscribedByEmail">
+          <dt>Demandé par</dt>
+          <dd>{{ selectedRecord.subscribedByEmail }}</dd>
+        </div>
+        <div class="detail-row" *ngIf="selectedRecord.requestStatus === 'APPROVED' && selectedRecord.periodStart">
+          <dt>Période active</dt>
+          <dd>
+            {{ formatDateTime(selectedRecord.periodStart) }}
+            → {{ formatDateTime(selectedRecord.periodEnd) }}
+          </dd>
+        </div>
+        <div class="detail-row" *ngIf="selectedRecord.validatedAt">
+          <dt>Traité le</dt>
+          <dd>
+            {{ formatDateTime(selectedRecord.validatedAt) }}
+            <span *ngIf="selectedRecord.validatedByEmail" class="detail-muted">
+              · {{ selectedRecord.validatedByEmail }}
+            </span>
+          </dd>
+        </div>
+      </dl>
+
+      <div
+        class="detail-reject"
+        *ngIf="selectedRecord.requestStatus === 'REJECTED'">
+        <div class="detail-reject__head">
+          <i class="pi pi-times-circle" aria-hidden="true"></i>
+          <h4>Motif du refus</h4>
+        </div>
+        <p class="detail-reject__text">
+          {{ selectedRecord.rejectionReason || 'Aucun motif précisé par l\'administrateur.' }}
+        </p>
+      </div>
+
+      <div class="detail-proof" *ngIf="selectedRecord.proofUrl">
+        <span class="detail-proof__label">Justificatif de paiement</span>
+        <div *ngIf="detailProofLoading" class="detail-proof__loading">
+          <i class="pi pi-spin pi-spinner"></i> Chargement…
+        </div>
+        <img
+          *ngIf="detailProofUrl && !detailProofLoading"
+          [src]="detailProofUrl"
+          alt="Capture de paiement"
+          class="detail-proof__image" />
+        <p *ngIf="detailProofError && !detailProofLoading" class="detail-proof__error">
+          {{ detailProofError }}
+        </p>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button pButton label="Fermer" class="p-button-text dialog-footer-mobile" (click)="closeDetail()"></button>
+    </ng-template>
+  </p-dialog>
+</div>

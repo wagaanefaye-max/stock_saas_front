@@ -35,3 +35,14 @@
   padding: 0 0 1rem 0;
 }
 
+.action-menu-btn {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background-color: var(--surface-hover);
+  }
+}

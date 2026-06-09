@@ -1,9 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
+import {
+  buildDoughnutChartOptions,
+  buildLineChartOptions,
+  compactAxisTick,
+  isChartMobile,
+  mergeChartOptions
+} from '../../utils/chart-options.util';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
@@ -11,7 +18,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardModule, ChartModule, ButtonModule, DropdownModule, TagModule],
+  imports: [CommonModule, FormsModule, CardModule, ChartModule, ButtonModule, SelectModule, TagModule],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.scss'
 })
@@ -29,7 +36,7 @@ export class ReportsComponent implements OnInit {
   topProducts: any[] = [];
   monthlyStats: any[] = [
     { label: 'Mouvements totaux', value: '0', icon: 'pi pi-arrows-h', color: 'var(--primary)' },
-    { label: 'Valeur moyenne', value: '0 €', icon: 'pi pi-euro', color: 'var(--secondary)' },
+    { label: 'Valeur moyenne', value: '0 FCFA', icon: 'pi pi-money-bill', color: 'var(--secondary)' },
     { label: 'Produits actifs', value: '0', icon: 'pi pi-box', color: 'var(--warning)' },
     { label: 'Taux de rotation', value: '0x', icon: 'pi pi-refresh', color: 'var(--info)' }
   ];
@@ -53,6 +60,13 @@ export class ReportsComponent implements OnInit {
     this.loadAccessibleWarehouses();
     this.initCharts();
     this.loadData();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (this.stockValueChartData) {
+      this.applyChartOptions();
+    }
   }
 
   loadAccessibleWarehouses() {
@@ -182,45 +196,6 @@ export class ReportsComponent implements OnInit {
       };
     }
 
-    this.stockValueChartOptions = {
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-          labels: {
-            usePointStyle: true,
-            padding: 15,
-            font: {
-              size: 12,
-              weight: '500'
-            }
-          }
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: false,
-          grid: {
-            color: 'rgba(0, 0, 0, 0.05)'
-          },
-          ticks: {
-            callback: function(value: any) {
-              return value.toLocaleString('fr-FR') + ' €';
-            }
-          }
-        },
-        x: {
-          grid: {
-            display: false
-          }
-        }
-      },
-      interaction: {
-        intersect: false,
-        mode: 'index'
-      }
-    };
-
     // Graphique 2: Mouvements par type (agrégé ou par entrepôt)
     if (warehousesToShow.length === 1 || this.selectedWarehouse) {
       // Un seul entrepôt : mouvements par type
@@ -296,46 +271,15 @@ export class ReportsComponent implements OnInit {
       };
     }
 
-    this.movementsChartOptions = {
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-          labels: {
-            usePointStyle: true,
-            padding: 15,
-            font: {
-              size: 12,
-              weight: '500'
-            }
-          }
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'rgba(0, 0, 0, 0.05)'
-          }
-        },
-        x: {
-          grid: {
-            display: false
-          }
-        }
-      },
-      interaction: {
-        intersect: false,
-        mode: 'index'
-      }
-    };
+    let warehouseDataForTooltip: { name: string; value: number }[] | undefined;
 
     // Graphique 3: Répartition par entrepôt (si plusieurs entrepôts)
     if (this.accessibleWarehouses.length > 1 && !this.selectedWarehouse) {
-      const warehouseData = this.accessibleWarehouses.slice(0, 8).map((w, i) => ({
+      const warehouseData = this.accessibleWarehouses.slice(0, 8).map((w) => ({
         name: w.name,
         value: Math.floor(Math.random() * 50000) + 20000
       }));
+      warehouseDataForTooltip = warehouseData;
 
       this.warehouseDistributionChartData = {
         labels: warehouseData.map(w => {
@@ -350,33 +294,51 @@ export class ReportsComponent implements OnInit {
           hoverOffset: 4
         }]
       };
+    } else {
+      this.warehouseDistributionChartData = null;
+    }
 
-      this.warehouseDistributionChartOptions = {
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 15,
-              font: {
-                size: 11,
-                weight: '500'
-              },
-              usePointStyle: true
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: (context: any) => {
-                const label = warehouseData[context.dataIndex].name;
-                const value = context.parsed;
-                return `${label}: ${value.toLocaleString('fr-FR')} €`;
+    this.applyChartOptions(warehouseDataForTooltip);
+  }
+
+  private applyChartOptions(warehouseDataForTooltip?: { name: string; value: number }[]): void {
+    const mobile = isChartMobile();
+
+    this.stockValueChartOptions = buildLineChartOptions({
+      legendPosition: mobile ? 'bottom' : 'top',
+      beginAtZero: false,
+      yTickCallback: (value) => {
+        const n = Number(value);
+        if (mobile) {
+          return compactAxisTick(n);
+        }
+        return `${n.toLocaleString('fr-FR')} FCFA`;
+      }
+    });
+
+    this.movementsChartOptions = buildLineChartOptions({
+      legendPosition: mobile ? 'bottom' : 'top',
+      beginAtZero: true
+    });
+
+    if (warehouseDataForTooltip) {
+      const warehouseData = warehouseDataForTooltip;
+      this.warehouseDistributionChartOptions = mergeChartOptions(
+        buildDoughnutChartOptions(),
+        {
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: (context: { dataIndex: number; parsed: number }) => {
+                  const label = warehouseData[context.dataIndex].name;
+                  const value = context.parsed;
+                  return `${label}: ${value.toLocaleString('fr-FR')} FCFA`;
+                }
               }
             }
           }
         }
-      };
-    } else {
-      this.warehouseDistributionChartData = null;
+      );
     }
   }
 
@@ -391,7 +353,7 @@ export class ReportsComponent implements OnInit {
       // Si aucun entrepôt, initialiser avec des valeurs par défaut
       this.monthlyStats = [
         { label: 'Mouvements totaux', value: '0', icon: 'pi pi-arrows-h', color: 'var(--primary)' },
-        { label: 'Valeur moyenne', value: '0 €', icon: 'pi pi-euro', color: 'var(--secondary)' },
+        { label: 'Valeur moyenne', value: '0 FCFA', icon: 'pi pi-money-bill', color: 'var(--secondary)' },
         { label: 'Produits actifs', value: '0', icon: 'pi pi-box', color: 'var(--warning)' },
         { label: 'Taux de rotation', value: '0x', icon: 'pi pi-refresh', color: 'var(--info)' }
       ];
@@ -440,7 +402,7 @@ export class ReportsComponent implements OnInit {
       
       this.monthlyStats = [
         { label: 'Mouvements totaux', value: baseMovements.toString(), icon: 'pi pi-arrows-h', color: 'var(--primary)' },
-        { label: 'Valeur moyenne', value: `${baseValue.toLocaleString('fr-FR')} €`, icon: 'pi pi-euro', color: 'var(--secondary)' },
+        { label: 'Valeur moyenne', value: `${baseValue.toLocaleString('fr-FR')} FCFA`, icon: 'pi pi-money-bill', color: 'var(--secondary)' },
         { label: 'Produits actifs', value: baseProducts.toString(), icon: 'pi pi-box', color: 'var(--warning)' },
         { label: 'Taux de rotation', value: (2.0 + Math.random() * 0.5).toFixed(1) + 'x', icon: 'pi pi-refresh', color: 'var(--info)' }
       ];
@@ -452,7 +414,7 @@ export class ReportsComponent implements OnInit {
       
       this.monthlyStats = [
         { label: 'Mouvements totaux', value: totalMovements.toString(), icon: 'pi pi-arrows-h', color: 'var(--primary)' },
-        { label: 'Valeur moyenne', value: `${avgValue.toLocaleString('fr-FR')} €`, icon: 'pi pi-euro', color: 'var(--secondary)' },
+        { label: 'Valeur moyenne', value: `${avgValue.toLocaleString('fr-FR')} FCFA`, icon: 'pi pi-money-bill', color: 'var(--secondary)' },
         { label: 'Produits actifs', value: totalProducts.toString(), icon: 'pi pi-box', color: 'var(--warning)' },
         { label: 'Taux de rotation', value: '2.3x', icon: 'pi pi-refresh', color: 'var(--info)' }
       ];
@@ -478,7 +440,6 @@ export class ReportsComponent implements OnInit {
 
   exportPDF() {
     // TODO: Implémenter l'export PDF
-    console.log('Export PDF...');
   }
 
   isAdminEntreprise(): boolean {

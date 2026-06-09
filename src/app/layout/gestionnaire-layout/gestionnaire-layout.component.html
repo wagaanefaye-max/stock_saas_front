@@ -1,75 +1,109 @@
-<div class="gestionnaire-layout-container">
-  <!-- Header -->
-  <header class="header">
-    <div class="header-left">
-      <h1 class="logo">Stock SaaS</h1>
-      <span class="badge-gestionnaire">Gestionnaire</span>
-    </div>
-    
-    <div class="header-right">
-      <span *ngIf="authService.getCurrentUser()" class="user-name">
-        {{ authService.getCurrentUser()?.name }}
-      </span>
-      <button 
-        pButton 
-        type="button" 
-        icon="pi pi-sign-out" 
-        label="Déconnexion"
-        class="p-button-text"
-        (click)="logout()">
-      </button>
-    </div>
-  </header>
-
-  <div class="layout-content">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <nav class="sidebar-nav">
-        <div class="sidebar-header">
-          <h2>Gestion de Stock</h2>
-          <p class="text-muted">Gestionnaire</p>
+<div class="app-layout gestionnaire-layout">
+  <div class="app-body">
+    <aside class="app-sidebar-desktop">
+      <div class="app-sidebar__brand">
+        <div class="app-sidebar__brand-mark" aria-hidden="true">
+          <i class="pi pi-box"></i>
         </div>
-        <p-divider></p-divider>
-        <ul class="nav-list">
+        <div class="app-sidebar__brand-text">
+          <span class="app-sidebar__app-name">Stock</span>
+          <span class="app-sidebar__role-badge">Gestionnaire</span>
+        </div>
+      </div>
+      <nav class="app-sidebar__nav" aria-label="Menu gestionnaire">
+        <p class="app-sidebar__section-label">Gestion de stock</p>
+        <ul class="app-nav-desktop">
           <li *ngFor="let item of menuItems">
-            <a 
-              [routerLink]="item.routerLink" 
-              routerLinkActive="active"
-              class="nav-item"
-              [class.active]="router.url === item.routerLink">
-              <i [class]="item.icon"></i>
-              <span>{{ item.label }}</span>
+            <a [routerLink]="item.routerLink" routerLinkActive="active" class="app-nav-desktop__link">
+              <span class="app-nav-desktop__icon" aria-hidden="true">
+                <i [class]="item.icon"></i>
+              </span>
+              <span class="app-nav-desktop__label">{{ item.label }}</span>
             </a>
           </li>
         </ul>
       </nav>
+      <div class="app-sidebar__footer" *ngIf="authService.getCurrentUser() as user">
+        <div class="app-sidebar__user">
+          <span class="app-sidebar__avatar" aria-hidden="true">{{ user.name.charAt(0) || '?' }}</span>
+          <span class="app-sidebar__user-name">{{ user.name }}</span>
+        </div>
+        <button type="button" class="app-sidebar__logout" (click)="logout()" title="Déconnexion" aria-label="Déconnexion">
+          <i class="pi pi-sign-out"></i>
+        </button>
+      </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
+    <main class="app-main">
       <router-outlet></router-outlet>
     </main>
   </div>
 
-  <!-- Bottom Navigation Mobile -->
-  <nav class="bottom-nav" *ngIf="menuItems.length > 0">
-    <a 
-      *ngFor="let item of menuItems" 
-      [routerLink]="item.routerLink" 
+  <nav class="app-bottom-nav" aria-label="Navigation principale">
+    <a
+      *ngFor="let item of bottomNavItems"
+      [routerLink]="item.routerLink"
       routerLinkActive="active"
-      class="bottom-nav-item"
-      [class.active]="router.url === item.routerLink"
-      [title]="item.label">
-      <i [class]="item['mobileIcon'] || item.icon"></i>
-      <span class="nav-label">{{ item.label }}</span>
+      class="app-bottom-nav__item"
+      [attr.aria-label]="item.label">
+      <span class="app-bottom-nav__icon-wrap" aria-hidden="true">
+        <i [class]="item.icon"></i>
+      </span>
+      <span class="app-bottom-nav__label">{{ item.label }}</span>
     </a>
-    <button 
-      class="bottom-nav-item logout-item"
-      (click)="logout()"
-      title="Déconnexion">
-      <i class="pi pi-sign-out"></i>
-      <span class="nav-label">Déconnexion</span>
+    <button
+      type="button"
+      class="app-bottom-nav__item app-bottom-nav__item--more"
+      (click)="mobileMenuOpen = true"
+      aria-label="Plus de menus">
+      <span class="app-bottom-nav__icon-wrap" aria-hidden="true">
+        <i class="pi pi-ellipsis-h"></i>
+      </span>
+      <span class="app-bottom-nav__label">Plus</span>
     </button>
   </nav>
-</div>
 
+  <p-sidebar
+    [(visible)]="mobileMenuOpen"
+    position="bottom"
+    styleClass="mobile-menu-drawer"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="true">
+    <ng-template pTemplate="header">
+      <div class="mobile-menu-drawer__header">
+        <div class="mobile-menu-drawer__brand">
+          <div class="app-sidebar__brand-mark" aria-hidden="true">
+            <i class="pi pi-box"></i>
+          </div>
+          <div class="app-sidebar__brand-text">
+            <span class="app-sidebar__app-name">Stock</span>
+            <span class="app-sidebar__role-badge">Gestionnaire</span>
+          </div>
+        </div>
+        <div class="mobile-menu-drawer__user" *ngIf="authService.getCurrentUser() as user">
+          <span class="app-sidebar__avatar" aria-hidden="true">{{ user.name.charAt(0) || '?' }}</span>
+          <span class="app-sidebar__user-name">{{ user.name }}</span>
+        </div>
+      </div>
+    </ng-template>
+    <ul class="mobile-menu-list">
+      <li *ngFor="let item of moreMenuItems">
+        <a [routerLink]="item.routerLink" routerLinkActive="active" (click)="closeMobileMenu()">
+          <span class="mobile-menu-list__icon" aria-hidden="true">
+            <i [class]="item.icon"></i>
+          </span>
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+      <li>
+        <button type="button" class="mobile-menu-logout" (click)="logout()">
+          <span class="mobile-menu-list__icon" aria-hidden="true">
+            <i class="pi pi-sign-out"></i>
+          </span>
+          <span>Déconnexion</span>
+        </button>
+      </li>
+    </ul>
+  </p-sidebar>
+</div>

@@ -1,4 +1,5 @@
 <div class="login-container">
+  <p-toast></p-toast>
   <div class="login-wrapper">
     <!-- Left side - Branding -->
     <div class="login-branding">
@@ -52,17 +53,16 @@
               <i class="pi pi-envelope"></i>
               Email
             </label>
-            <span class="p-input-icon-left w-full">
-          <input 
+          <input
             id="email"
             type="email" 
-            pInputText 
+            pInputText
             [(ngModel)]="email" 
             name="email"
             placeholder="votre@email.com"
-                class="w-full"
-            required>
-            </span>
+            class="w-full"
+            required/>
+
         </div>
 
         <div class="form-group">
@@ -88,16 +88,15 @@
               <p-checkbox [(ngModel)]="rememberMe" [binary]="true" name="rememberMe"></p-checkbox>
               <label for="rememberMe">Se souvenir de moi</label>
             </div>
-            <a href="#" class="forgot-password">Mot de passe oublié ?</a>
+            <a routerLink="/forgot-password" class="forgot-password">Mot de passe oublié ?</a>
           </div>
 
         <button 
           pButton 
           type="submit" 
-          [label]="loading ? 'Connexion...' : 'Se connecter'"
+          label="Se connecter"
           class="p-button-primary w-full login-button"
-          [disabled]="!email || !password || loading"
-          [loading]="loading">
+          [disabled]="!email || !password">
         </button>
       </form>
 

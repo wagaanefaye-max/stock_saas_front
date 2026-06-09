@@ -1,4 +1,6 @@
 <div class="companies-page">
+  <p-toast></p-toast>
+  
   <div class="page-header">
     <div>
       <h1>Gestion des entreprises</h1>
@@ -8,32 +10,42 @@
   </div>
 
   <p-card>
-    <p-toolbar>
-      <div class="p-toolbar-group-start">
-        <span class="p-input-icon-left">
+    <div class="list-toolbar">
+      <div class="list-toolbar__primary">
+        <span class="p-input-icon-left list-toolbar__search">
           <i class="pi pi-search"></i>
-          <input 
-            type="text" 
-            pInputText 
-            [(ngModel)]="globalFilter" 
-            placeholder="Rechercher...">
+          <input
+            type="text"
+            pInputText
+            [(ngModel)]="globalFilter"
+            (input)="onGlobalFilter()"
+            placeholder="Nom ou email…">
         </span>
       </div>
-      <div class="p-toolbar-group-end">
-        <button 
-          pButton 
-          icon="pi pi-file-export" 
-          label="Exporter" 
-          class="p-button-secondary">
+      <div class="list-toolbar__actions">
+        <button
+          pButton
+          icon="pi pi-search"
+          class="p-button-secondary list-toolbar__btn-icon"
+          title="Rechercher">
+        </button>
+        <button
+          pButton
+          icon="pi pi-file-export"
+          label="Exporter"
+          class="p-button-secondary list-toolbar__btn-icon">
         </button>
       </div>
-    </p-toolbar>
+    </div>
 
     <p-table 
       [value]="companies" 
       [paginator]="true" 
-      [rows]="10"
-      [globalFilterFields]="['name','email','plan']"
+      [rows]="size"
+      [totalRecords]="totalRecords"
+      [lazy]="true"
+      (onLazyLoad)="onPageChange($event)"
+      [first]="page * size"
       [tableStyle]="{'min-width': '50rem'}"
       selectionMode="multiple"
       [(selection)]="selectedCompanies"
@@ -45,12 +57,12 @@
             <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
           </th>
           <th style="width: 4rem">Logo</th>
-          <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
-          <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
-          <th pSortableColumn="plan">Plan <p-sortIcon field="plan"></p-sortIcon></th>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Plan</th>
           <th>Utilisateurs</th>
-          <th pSortableColumn="status">Statut <p-sortIcon field="status"></p-sortIcon></th>
-          <th pSortableColumn="createdAt">Date création <p-sortIcon field="createdAt"></p-sortIcon></th>
+          <th>Statut</th>
+          <th>Date création</th>
           <th style="width: 3rem">Actions</th>
         </tr>
       </ng-template>
@@ -75,20 +87,29 @@
           <td>{{ company.name }}</td>
           <td>{{ company.email }}</td>
           <td>
-            <p-tag [value]="company.plan" [severity]="getPlanSeverity(company.plan)"></p-tag>
+            <p-tag [value]="getPlanLabel(company.planCode)" [severity]="getPlanSeverity(company.planCode)"></p-tag>
           </td>
-          <td>{{ company.users }}</td>
+          <td>{{ company.userCount }}</td>
           <td>
-            <p-tag [value]="company.status" [severity]="getSeverity(company.status)"></p-tag>
+            <p-tag [value]="getStatusLabel(company.statusCode)" [severity]="getSeverity(company.statusCode)"></p-tag>
           </td>
-          <td>{{ company.createdAt }}</td>
+          <td>{{ formatDate(company.createdAt) }}</td>
           <td>
             <button 
               pButton 
               icon="pi pi-ellipsis-v" 
               class="p-button-text p-button-sm p-button-rounded action-menu-btn"
-              (click)="showMenu($event, company)">
+              (click)="showMenu($event, company)"
+              [title]="'Actions'">
             </button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9" class="text-center">
+            <p>Aucune entreprise trouvée</p>
           </td>
         </tr>
       </ng-template>
@@ -100,7 +121,7 @@
   <p-dialog 
     [(visible)]="displayDialog" 
     [style]="{width: '800px', maxHeight: '90vh'}"
-    [header]="company.id ? 'Modifier l\'entreprise' : 'Nouvelle entreprise'"
+    header="Nouvelle entreprise"
     [modal]="true"
     [draggable]="false"
     [resizable]="false"
@@ -125,7 +146,7 @@
           </div>
           <div class="form-group">
             <label>Téléphone *</label>
-            <input type="tel" pInputText [(ngModel)]="company.phone" class="w-full" placeholder="77 888 66 55" appPhoneFormat maxlength="12" required>
+            <input type="tel" pInputText [(ngModel)]="company.phone" class="w-full" placeholder="78 900 88 77" appPhoneFormat maxlength="12" required>
           </div>
         </div>
 
@@ -137,13 +158,13 @@
         <div class="form-row">
           <div class="form-group">
             <label>Région *</label>
-            <p-dropdown 
+            <p-select 
               [(ngModel)]="company.region" 
               [options]="regions" 
               placeholder="Sélectionner une région"
               class="w-full"
               required>
-            </p-dropdown>
+            </p-select>
           </div>
           <div class="form-group">
             <label>Pays *</label>
@@ -227,23 +248,27 @@
         <div class="form-row">
           <div class="form-group">
             <label>Plan d'abonnement *</label>
-            <p-dropdown 
-              [(ngModel)]="company.plan" 
+            <p-select 
+              [(ngModel)]="company.planCode" 
               [options]="plans" 
+              optionLabel="label"
+              optionValue="value"
               placeholder="Sélectionner un plan"
               class="w-full"
               required>
-            </p-dropdown>
+            </p-select>
           </div>
-          <div class="form-group">
+          <div class="form-group" *ngIf="company.id">
             <label>Statut *</label>
-            <p-dropdown 
-              [(ngModel)]="company.status" 
+            <p-select 
+              [(ngModel)]="company.statusCode" 
               [options]="statuses" 
+              optionLabel="label"
+              optionValue="value"
               placeholder="Sélectionner un statut"
               class="w-full"
               required>
-            </p-dropdown>
+            </p-select>
           </div>
         </div>
       </div>
@@ -252,6 +277,50 @@
     <ng-template pTemplate="footer">
       <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
       <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveCompany()" [disabled]="!isFormValid()"></button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog détail entreprise (lecture seule) -->
+  <p-dialog 
+    [(visible)]="displayDetailDialog" 
+    [header]="companyDetail?.name ?? 'Détail de l\'entreprise'"
+    [style]="{width: '560px'}"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [styleClass]="'company-detail-dialog'">
+    <div class="detail-content" *ngIf="companyDetail">
+      <div class="detail-section">
+        <div class="detail-logo" *ngIf="companyDetail.logoUrl">
+          <img [src]="companyDetail.logoUrl" [alt]="companyDetail.name + ' logo'" class="detail-logo-img">
+        </div>
+        <div class="detail-logo placeholder" *ngIf="!companyDetail.logoUrl">
+          <i class="pi pi-building"></i>
+        </div>
+      </div>
+      <div class="detail-section" *ngIf="companyDetail.adminName || companyDetail.adminEmail">
+        <h4 class="detail-label">Administrateur</h4>
+        <p><strong>Nom :</strong> {{ companyDetail.adminName || '-' }}</p>
+        <p><strong>Email :</strong> {{ companyDetail.adminEmail || '-' }}</p>
+      </div>
+      <div class="detail-section">
+        <h4 class="detail-label">Coordonnées</h4>
+        <p><strong>Email :</strong> {{ companyDetail.email }}</p>
+        <p><strong>Téléphone :</strong> {{ companyDetail.phone || '-' }}</p>
+        <p><strong>Adresse :</strong> {{ companyDetail.address || '-' }}</p>
+        <p><strong>Région :</strong> {{ companyDetail.region || '-' }}</p>
+        <p><strong>Pays :</strong> {{ companyDetail.country || '-' }}</p>
+      </div>
+      <div class="detail-section">
+        <h4 class="detail-label">Abonnement et statistiques</h4>
+        <p><strong>Plan :</strong> <p-tag [value]="companyDetail.planLabel || getPlanLabel(companyDetail.planCode)" [severity]="getPlanSeverity(companyDetail.planCode)"></p-tag></p>
+        <p><strong>Statut :</strong> <p-tag [value]="companyDetail.statusLabel || getStatusLabel(companyDetail.statusCode)" [severity]="getSeverity(companyDetail.statusCode)"></p-tag></p>
+        <p><strong>Nombre d'utilisateurs :</strong> {{ companyDetail.userCount }}</p>
+        <p><strong>Date de création :</strong> {{ formatDate(companyDetail.createdAt) }}</p>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton label="Fermer" icon="pi pi-times" (click)="displayDetailDialog = false; companyDetail = null"></button>
     </ng-template>
   </p-dialog>
 </div>

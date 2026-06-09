@@ -1,76 +1,194 @@
 <div class="settings-page">
-  <div class="page-header">
-    <h1>Paramètres</h1>
-    <p class="text-muted">Gérez les paramètres de votre entreprise</p>
+  <p-toast></p-toast>
+
+  <header class="page-header">
+    <div>
+      <h1>Paramètres</h1>
+      <p class="text-muted">Informations de l'entreprise et préférences de notification</p>
+    </div>
+  </header>
+
+  <div *ngIf="isLoading" class="settings-loading" aria-busy="true" aria-label="Chargement">
+    <div class="settings-skeleton settings-skeleton--wide"></div>
+    <div class="settings-skeleton settings-skeleton--wide"></div>
+    <div class="settings-skeleton"></div>
   </div>
 
-  <div class="settings-content">
-    <p-card class="settings-card">
-      <h3>Informations de l'entreprise</h3>
-      <p-divider></p-divider>
-      
-      <div class="form-section">
-        <div class="form-group">
-          <label>Nom de l'entreprise</label>
-          <input type="text" pInputText [(ngModel)]="company.name" class="w-full">
-        </div>
-
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" pInputText [(ngModel)]="company.email" class="w-full">
-        </div>
-
-        <div class="form-group">
-          <label>Téléphone</label>
-          <input 
-            type="tel" 
-            pInputText 
-            [(ngModel)]="company.phone" 
-            class="w-full"
-            placeholder="77 888 66 55"
-            appPhoneFormat
-            maxlength="12">
-        </div>
-
-        <div class="form-group">
-          <label>Adresse</label>
-          <input type="text" pInputText [(ngModel)]="company.address" class="w-full">
-        </div>
-
-        <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveSettings()"></button>
-      </div>
-    </p-card>
-
-    <p-card class="settings-card">
-      <h3>Notifications</h3>
-      <p-divider></p-divider>
-      
-      <div class="form-section">
-        <div class="notification-item">
-          <div>
-            <label>Alertes de stock faible</label>
-            <p class="text-muted">Recevoir des notifications lorsque le stock est faible</p>
-          </div>
-          <p-toggleButton [(ngModel)]="notifications.lowStock"></p-toggleButton>
-        </div>
-
-        <div class="notification-item">
-          <div>
-            <label>Mouvements de stock</label>
-            <p class="text-muted">Recevoir des notifications pour chaque mouvement</p>
-          </div>
-          <p-toggleButton [(ngModel)]="notifications.movements"></p-toggleButton>
-        </div>
-
-        <div class="notification-item">
-          <div>
-            <label>Rapports hebdomadaires</label>
-            <p class="text-muted">Recevoir un résumé hebdomadaire par email</p>
-          </div>
-          <p-toggleButton [(ngModel)]="notifications.reports"></p-toggleButton>
+  <div *ngIf="!isLoading" class="settings-grid">
+    <!-- Entreprise -->
+    <section class="settings-card settings-card--company">
+      <div class="settings-card__head">
+        <span class="settings-card__icon settings-card__icon--company" aria-hidden="true">
+          <i class="pi pi-building"></i>
+        </span>
+        <div class="settings-card__titles">
+          <h2>Entreprise</h2>
+          <p class="text-muted">Coordonnées et informations légales</p>
         </div>
       </div>
-    </p-card>
+
+      <div class="settings-card__body">
+        <fieldset class="form-block" [disabled]="isSaving || !companyId">
+          <legend class="form-block__legend">Contact</legend>
+          <div class="form-grid">
+            <div class="field">
+              <label for="company-name">Nom de l'entreprise <span class="required">*</span></label>
+              <input
+                id="company-name"
+                type="text"
+                pInputText
+                [(ngModel)]="company.name"
+                class="input-full"
+                placeholder="Nom de votre société">
+            </div>
+            <div class="field">
+              <label for="company-email">Email <span class="required">*</span></label>
+              <input
+                id="company-email"
+                type="email"
+                pInputText
+                [(ngModel)]="company.email"
+                class="input-full"
+                placeholder="contact@exemple.com">
+            </div>
+            <div class="field">
+              <label for="company-phone">Téléphone</label>
+              <input
+                id="company-phone"
+                type="tel"
+                pInputText
+                [(ngModel)]="company.phone"
+                class="input-full"
+                placeholder="78 900 88 77"
+                appPhoneFormat
+                maxlength="12">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-block" [disabled]="isSaving || !companyId">
+          <legend class="form-block__legend">Localisation</legend>
+          <div class="form-grid">
+            <div class="field">
+              <label for="company-region">Région</label>
+              <input
+                id="company-region"
+                type="text"
+                pInputText
+                [(ngModel)]="company.region"
+                class="input-full"
+                placeholder="Dakar">
+            </div>
+            <div class="field">
+              <label for="company-country">Pays</label>
+              <input
+                id="company-country"
+                type="text"
+                pInputText
+                [(ngModel)]="company.country"
+                class="input-full"
+                placeholder="Sénégal">
+            </div>
+            <div class="field field--full">
+              <label for="company-address">Adresse</label>
+              <input
+                id="company-address"
+                type="text"
+                pInputText
+                [(ngModel)]="company.address"
+                class="input-full"
+                placeholder="Adresse complète">
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="settings-card__footer">
+          <button
+            pButton
+            label="Enregistrer"
+            icon="pi pi-check"
+            class="p-button-primary settings-save-btn"
+            (click)="saveSettings()"
+            [disabled]="isSaving || !companyId"
+            [loading]="isSaving">
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="settings-card settings-card--notifications">
+      <div class="settings-card__head">
+        <span class="settings-card__icon settings-card__icon--notifications" aria-hidden="true">
+          <i class="pi pi-bell"></i>
+        </span>
+        <div class="settings-card__titles">
+          <h2>Notifications</h2>
+          <p class="text-muted">Choisissez ce que vous souhaitez recevoir</p>
+        </div>
+      </div>
+
+      <div class="settings-card__body">
+        <ul class="notification-list">
+          <li class="notification-item">
+            <span class="notification-item__icon notification-item__icon--warning" aria-hidden="true">
+              <i class="pi pi-exclamation-triangle"></i>
+            </span>
+            <div class="notification-item__text">
+              <span class="notification-item__title">Alertes de stock faible</span>
+              <span class="notification-item__desc text-muted">Prévenu lorsque le stock est bas</span>
+            </div>
+            <p-inputSwitch
+              [(ngModel)]="notifications.lowStock"
+              [disabled]="!companyId || isSavingNotifications"
+              inputId="notif-low-stock"
+              ariaLabel="Alertes de stock faible">
+            </p-inputSwitch>
+          </li>
+          <li class="notification-item">
+            <span class="notification-item__icon notification-item__icon--info" aria-hidden="true">
+              <i class="pi pi-sync"></i>
+            </span>
+            <div class="notification-item__text">
+              <span class="notification-item__title">Mouvements de stock</span>
+              <span class="notification-item__desc text-muted">À chaque entrée ou sortie</span>
+            </div>
+            <p-inputSwitch
+              [(ngModel)]="notifications.movements"
+              [disabled]="!companyId || isSavingNotifications"
+              inputId="notif-movements"
+              ariaLabel="Mouvements de stock">
+            </p-inputSwitch>
+          </li>
+          <li class="notification-item">
+            <span class="notification-item__icon notification-item__icon--report" aria-hidden="true">
+              <i class="pi pi-file-pdf"></i>
+            </span>
+            <div class="notification-item__text">
+              <span class="notification-item__title">Résumé hebdomadaire</span>
+              <span class="notification-item__desc text-muted">Récapitulatif par email chaque semaine</span>
+            </div>
+            <p-inputSwitch
+              [(ngModel)]="notifications.reports"
+              [disabled]="!companyId || isSavingNotifications"
+              inputId="notif-reports"
+              ariaLabel="Résumé hebdomadaire">
+            </p-inputSwitch>
+          </li>
+        </ul>
+
+        <div class="settings-card__footer">
+          <button
+            pButton
+            label="Enregistrer les notifications"
+            icon="pi pi-bell"
+            class="p-button-primary settings-save-btn"
+            (click)="saveNotifications()"
+            [disabled]="!companyId || isSavingNotifications"
+            [loading]="isSavingNotifications">
+          </button>
+        </div>
+      </div>
+    </section>
   </div>
 </div>
-

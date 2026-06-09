@@ -1,0 +1,5 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://sen-stocksaas.com/sitemap.xml
+

@@ -1,18 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { DialogModule } from 'primeng/dialog';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { ToolbarModule } from 'primeng/toolbar';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { CalendarModule } from 'primeng/calendar';
 import { TextareaModule } from 'primeng/textarea';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-movements',
@@ -25,106 +29,242 @@ import { AuthService } from '../../services/auth.service';
     CardModule,
     TagModule,
     DialogModule,
-    DropdownModule,
+    SelectModule,
     InputNumberModule,
     InputTextModule,
-    ToolbarModule,
+    SelectButtonModule,
     CalendarModule,
-    TextareaModule
+    TextareaModule,
+    ToastModule
   ],
+  providers: [MessageService],
   templateUrl: './movements.component.html',
   styleUrl: './movements.component.scss'
 })
 export class MovementsComponent implements OnInit {
-  allMovements = [
-    { id: 1, date: '2024-01-20', product: 'Produit A', productId: 1, type: 'Entrée', quantity: 50, warehouse: 'Entrepôt Central Dakar', warehouseId: 1, user: 'Marie Martin', justification: 'Réception de commande fournisseur' },
-    { id: 2, date: '2024-01-19', product: 'Produit B', productId: 2, type: 'Sortie', quantity: 25, warehouse: 'Entrepôt Thiès', warehouseId: 2, user: 'Sophie Bernard', justification: 'Vente client' },
-    { id: 3, date: '2024-01-19', product: 'Produit C', productId: 3, type: 'Entrée', quantity: 100, warehouse: 'Entrepôt Ziguinchor', warehouseId: 3, user: 'Lucie Moreau', justification: 'Réapprovisionnement' },
-    { id: 4, date: '2024-01-18', product: 'Produit A', productId: 1, type: 'Sortie', quantity: 30, warehouse: 'Entrepôt Central Dakar', warehouseId: 1, user: 'Marie Martin', justification: 'Livraison commande' },
-    { id: 5, date: '2024-01-18', product: 'Produit D', productId: 4, type: 'Transfert', quantity: 75, warehouse: 'Entrepôt Kaolack', warehouseId: 5, warehouseDestination: 'Entrepôt Saint-Louis', warehouseDestinationId: 4, user: 'Paul Durand', justification: 'Transfert entre entrepôts' },
-    { id: 6, date: '2024-01-17', product: 'Produit E', productId: 5, type: 'Ajustement', quantity: -5, warehouse: 'Entrepôt Louga', warehouseId: 8, user: 'Sophie Bernard', justification: 'Correction inventaire - casse' },
-    { id: 7, date: '2024-01-17', product: 'Produit A', productId: 1, type: 'Entrée', quantity: 200, warehouse: 'Entrepôt Central Dakar', warehouseId: 1, user: 'Marie Martin', justification: 'Commande fournisseur' },
-    { id: 8, date: '2024-01-16', product: 'Produit B', productId: 2, type: 'Sortie', quantity: 15, warehouse: 'Entrepôt Thiès', warehouseId: 2, user: 'Lucie Moreau', justification: 'Vente client' },
-    { id: 9, date: '2024-01-16', product: 'Produit C', productId: 3, type: 'Transfert', quantity: 50, warehouse: 'Entrepôt Ziguinchor', warehouseId: 3, warehouseDestination: 'Entrepôt Kolda', warehouseDestinationId: 7, user: 'Paul Durand', justification: 'Répartition stock' },
-    { id: 10, date: '2024-01-15', product: 'Produit D', productId: 4, type: 'Ajustement', quantity: 10, warehouse: 'Entrepôt Kaolack', warehouseId: 5, user: 'Sophie Bernard', justification: 'Correction inventaire - erreur comptage' }
-  ];
-  
   movements: any[] = [];
+  totalMovements = 0;
+  rows = 10;
+  loading = false;
+  private first = 0;
+  private searchDebounce: ReturnType<typeof setTimeout> | null = null;
   selectedMovements: any[] = [];
   globalFilter = '';
+  typeFilter = 'ALL';
+  typeFilterChipOptions = [
+    { label: 'Tous', value: 'ALL' },
+    { label: 'Entrée', value: 'ENTREE' },
+    { label: 'Sortie', value: 'SORTIE' },
+    { label: 'Transfert', value: 'TRANSFERT' },
+    { label: 'Ajust.', value: 'AJUSTEMENT' }
+  ];
   
   // Liste des entrepôts accessibles pour le formulaire
   accessibleWarehouses: any[] = [];
   
   // Liste des produits disponibles
-  products = [
-    { id: 1, name: 'Produit A', sku: 'PRD-001' },
-    { id: 2, name: 'Produit B', sku: 'PRD-002' },
-    { id: 3, name: 'Produit C', sku: 'PRD-003' },
-    { id: 4, name: 'Produit D', sku: 'PRD-004' },
-    { id: 5, name: 'Produit E', sku: 'PRD-005' }
-  ];
+  products: any[] = [];
 
   displayDialog = false;
   movement: any = {};
-  types = ['Entrée', 'Sortie', 'Transfert', 'Ajustement'];
+  types: any[] = [];
 
-  constructor(public authService: AuthService) {}
+  constructor(
+    public authService: AuthService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private apiService: ApiService,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit() {
-    this.filterMovements();
     this.loadAccessibleWarehouses();
+    this.loadProducts();
+    this.loadMovementTypes();
+
+    // Vérifier si on doit ouvrir le formulaire automatiquement
+    this.route.queryParams.subscribe(params => {
+      if (params['action'] === 'new') {
+        this.openNew();
+        // Nettoyer l'URL
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {},
+          replaceUrl: true
+        });
+      }
+    });
   }
 
-  filterMovements() {
-    const accessibleIds = this.authService.getAccessibleWarehouseIds();
-    
-    // Si null, l'utilisateur a accès à tous les entrepôts
-    if (accessibleIds === null) {
-      this.movements = [...this.allMovements];
-    } else {
-      // Filtrer selon les entrepôts assignés
-      this.movements = this.allMovements.filter(m => 
-        m.warehouseId && accessibleIds.includes(m.warehouseId)
-      );
+  loadMovementTypes() {
+    this.apiService.get<any[]>('/movements/types').subscribe({
+      next: (data) => {
+        this.types = data.map(t => {
+          // Convertir le code du backend vers le format interne (majuscules)
+          const internalCode = this.convertToInternalCode(t.code);
+          return {
+            label: t.label,
+            value: internalCode,
+            allowsNegative: t.allowsNegative,
+            requiresDestination: t.requiresDestination,
+            description: t.description
+          };
+        });
+        // Si aucun type n'est chargé, définir le premier comme défaut
+        if (this.types.length > 0 && !this.movement.typeCode) {
+          this.movement.typeCode = this.types[0].value;
+        }
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des types de mouvements', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les types de mouvements'
+        });
+      }
+    });
+  }
+
+  convertToInternalCode(backendCode: string): string {
+    switch (backendCode) {
+      case 'Entrée':
+        return 'ENTREE';
+      case 'Sortie':
+        return 'SORTIE';
+      case 'Transfert':
+        return 'TRANSFERT';
+      case 'Ajustement':
+        return 'AJUSTEMENT';
+      default:
+        return backendCode;
     }
+  }
+
+  loadMovements(event?: { first: number; rows: number }) {
+    const first = event?.first ?? this.first;
+    const rows = event?.rows ?? this.rows;
+    const page = first / rows;
+    const params: Record<string, string | number> = {
+      page,
+      size: rows
+    };
+    if (this.typeFilter && this.typeFilter !== 'ALL') {
+      params['type'] = this.typeFilter;
+    }
+    if (this.globalFilter?.trim()) {
+      params['search'] = this.globalFilter.trim();
+    }
+    this.loading = true;
+    this.apiService.get<{ content: any[]; totalElements: number }>('/movements', params).subscribe({
+      next: (data) => {
+        this.movements = (data?.content ?? []).map(m => ({
+          id: m.id,
+          date: m.date,
+          product: m.productName,
+          productId: m.productId,
+          productSku: m.productSku,
+          type: m.typeLabel || m.typeCode,
+          typeCode: m.typeCode,
+          quantity: m.quantity,
+          warehouse: m.warehouseName,
+          warehouseId: m.warehouseId,
+          warehouseDestination: m.destinationWarehouseName,
+          warehouseDestinationId: m.destinationWarehouseId,
+          user: m.userName,
+          userId: m.userId,
+          justification: m.justification,
+          createdAt: m.createdAt
+        }));
+        this.totalMovements = data?.totalElements ?? 0;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des mouvements', error);
+        this.loading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les mouvements',
+          life: 5000
+        });
+      }
+    });
+  }
+
+  onMovementsLazyLoad(event: any) {
+    this.first = event.first ?? 0;
+    this.rows = event.rows ?? this.rows;
+    this.loadMovements({ first: this.first, rows: this.rows });
+  }
+
+  private refreshMovements() {
+    this.loadMovements({ first: this.first, rows: this.rows });
+  }
+
+  onTypeFilterChange() {
+    this.loadMovements({ first: 0, rows: this.rows });
+  }
+
+  onSearchInput() {
+    if (this.searchDebounce) clearTimeout(this.searchDebounce);
+    this.searchDebounce = setTimeout(() => this.loadMovements({ first: 0, rows: this.rows }), 400);
+  }
+
+  trackByMovementId(_index: number, movement: { id?: number }): number {
+    return movement.id ?? _index;
   }
 
   loadAccessibleWarehouses() {
-    const accessibleIds = this.authService.getAccessibleWarehouseIds();
-    const allWarehouses = [
-      { id: 1, name: 'Entrepôt Central Dakar' },
-      { id: 2, name: 'Entrepôt Thiès' },
-      { id: 3, name: 'Entrepôt Ziguinchor' },
-      { id: 4, name: 'Entrepôt Saint-Louis' },
-      { id: 5, name: 'Entrepôt Kaolack' },
-      { id: 6, name: 'Entrepôt Tambacounda' },
-      { id: 7, name: 'Entrepôt Kolda' },
-      { id: 8, name: 'Entrepôt Louga' },
-      { id: 9, name: 'Entrepôt Fatick' },
-      { id: 10, name: 'Entrepôt Matam' },
-      { id: 11, name: 'Entrepôt Kaffrine' },
-      { id: 12, name: 'Entrepôt Sédhiou' },
-      { id: 13, name: 'Entrepôt Kédougou' }
-    ];
-    
-    if (accessibleIds === null) {
-      this.accessibleWarehouses = allWarehouses;
-    } else if (accessibleIds.length === 0 && this.authService.isAdminEntreprise()) {
-      this.accessibleWarehouses = allWarehouses;
-    } else {
-      this.accessibleWarehouses = allWarehouses.filter(w => accessibleIds.includes(w.id));
-    }
+    this.apiService.get<any[]>('/warehouses/simple').subscribe({
+      next: (data) => {
+        this.accessibleWarehouses = data;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des entrepôts', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les entrepôts'
+        });
+      }
+    });
+  }
+
+  loadProducts() {
+    // Charger tous les produits de l'entreprise sans filtrage par entrepôt
+    // car les produits sont globaux, seul le stock est par entrepôt
+    this.apiService.get<any[]>('/products?all=true').subscribe({
+      next: (data) => {
+        this.products = data.map(p => ({
+          id: p.id,
+          name: p.name,
+          sku: p.sku
+        }));
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des produits', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les produits'
+        });
+      }
+    });
   }
 
   getSeverity(type: string): 'success' | 'danger' | 'info' | 'warn' | undefined {
     switch (type) {
+      case 'ENTREE':
       case 'Entrée':
         return 'success';
+      case 'SORTIE':
       case 'Sortie':
         return 'danger';
+      case 'TRANSFERT':
       case 'Transfert':
         return 'info';
+      case 'AJUSTEMENT':
       case 'Ajustement':
         return 'warn';
       default:
@@ -133,86 +273,204 @@ export class MovementsComponent implements OnInit {
   }
 
   openNew() {
+    // Utiliser le premier type disponible ou 'ENTREE' par défaut
+    const defaultType = this.types.length > 0 ? this.types[0].value : 'ENTREE';
     this.movement = {
-      type: 'Entrée',
+      typeCode: defaultType,
       warehouseId: null,
-      warehouseDestinationId: null,
+      destinationWarehouseId: null,
       date: new Date(),
-      quantity: 0
+      quantity: 1
     };
     this.displayDialog = true;
   }
 
+  onWarehouseChange() {
+    // Réinitialiser l'entrepôt de destination si l'entrepôt d'origine change et qu'il était sélectionné
+    if (this.movement.destinationWarehouseId === this.movement.warehouseId) {
+      this.movement.destinationWarehouseId = null;
+    }
+  }
+
   saveMovement() {
-    if (!this.movement.type || !this.movement.productId || !this.movement.warehouseId) {
-      alert('Veuillez remplir tous les champs obligatoires');
+    if (!this.movement.typeCode || !this.movement.productId) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation',
+        detail: 'Veuillez remplir tous les champs obligatoires (type, produit)'
+      });
       return;
     }
 
-    if (this.movement.type === 'Transfert' && !this.movement.warehouseDestinationId) {
-      alert('Veuillez sélectionner un entrepôt de destination pour le transfert');
+    // Trouver le type de mouvement sélectionné
+    const selectedType = this.getSelectedMovementType();
+    
+    if (selectedType?.requiresDestination && !this.movement.destinationWarehouseId) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation',
+        detail: 'Pour un transfert, vous devez choisir l\'entrepôt de destination'
+      });
       return;
     }
 
-    if (this.movement.quantity <= 0) {
-      alert('La quantité doit être supérieure à 0');
+    // Validation : pour un transfert, l'entrepôt d'origine et de destination doivent être différents
+    if (selectedType?.requiresDestination && this.movement.warehouseId && this.movement.warehouseId === this.movement.destinationWarehouseId) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation',
+        detail: 'L\'entrepôt d\'origine et l\'entrepôt de destination doivent être différents'
+      });
       return;
     }
-    
-    // Récupérer le nom du produit
-    const product = this.products.find(p => p.id === this.movement.productId);
-    if (product) {
-      this.movement.product = product.name;
-    }
-    
-    // Récupérer le nom de l'entrepôt
-    const warehouse = this.accessibleWarehouses.find(w => w.id === this.movement.warehouseId);
-    if (warehouse) {
-      this.movement.warehouse = warehouse.name;
+
+    if (!selectedType?.allowsNegative && (!this.movement.quantity || this.movement.quantity <= 0)) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation',
+        detail: 'La quantité doit être supérieure à 0'
+      });
+      return;
     }
 
-    // Récupérer le nom de l'entrepôt de destination pour les transferts
-    if (this.movement.type === 'Transfert' && this.movement.warehouseDestinationId) {
-      const destWarehouse = this.accessibleWarehouses.find(w => w.id === this.movement.warehouseDestinationId);
-      if (destWarehouse) {
-        this.movement.warehouseDestination = destWarehouse.name;
-      }
-    }
-    
-    // Récupérer l'utilisateur actuel
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
-      this.movement.user = currentUser.name;
-    }
-    
-    // TODO: Implémenter la sauvegarde API
-    if (!this.movement.id) {
-      this.movement.id = this.allMovements.length + 1;
-      if (this.movement.date instanceof Date) {
-        this.movement.date = this.movement.date.toISOString().split('T')[0];
-      } else if (!this.movement.date) {
-        this.movement.date = new Date().toISOString().split('T')[0];
-      }
-      this.allMovements.push({ ...this.movement });
-      this.filterMovements();
+    // Préparer la date
+    let movementDate: string;
+    if (this.movement.date instanceof Date) {
+      const year = this.movement.date.getFullYear();
+      const month = String(this.movement.date.getMonth() + 1).padStart(2, '0');
+      const day = String(this.movement.date.getDate()).padStart(2, '0');
+      movementDate = `${year}-${month}-${day}`;
+    } else if (typeof this.movement.date === 'string') {
+      movementDate = this.movement.date;
     } else {
-      const index = this.allMovements.findIndex(m => m.id === this.movement.id);
-      if (index !== -1) {
-        this.allMovements[index] = { ...this.movement };
-        this.filterMovements();
-      }
+      movementDate = new Date().toISOString().split('T')[0];
     }
-    
-    this.displayDialog = false;
-    this.movement = {};
+
+    const request = {
+      typeCode: this.movement.typeCode,
+      productId: this.movement.productId,
+      quantity: this.movement.quantity,
+      date: movementDate,
+      warehouseId: selectedType?.value === 'TRANSFERT' ? null : this.movement.warehouseId,
+      destinationWarehouseId: selectedType?.requiresDestination ? this.movement.destinationWarehouseId : null,
+      justification: this.movement.justification || null
+    };
+
+    this.apiService.post<any>('/movements', request).subscribe({
+      next: (data) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Mouvement créé avec succès'
+        });
+        this.displayDialog = false;
+        this.movement = {};
+        this.refreshMovements();
+      },
+      error: (error) => {
+        console.error('Erreur lors de la création du mouvement', error);
+        const errorMessage = error.error?.message || error.message || 'Une erreur est survenue lors de la création du mouvement';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: errorMessage
+        });
+      }
+    });
+  }
+
+  getSelectedMovementType(): any {
+    return this.types.find(t => t.value === this.movement.typeCode);
+  }
+
+  getMinQuantity(): number {
+    const selectedType = this.getSelectedMovementType();
+    return selectedType?.allowsNegative ? -999999 : 1;
+  }
+
+  allowsNegativeQuantity(): boolean {
+    const selectedType = this.getSelectedMovementType();
+    return selectedType?.allowsNegative || false;
+  }
+
+  getSourceWarehouseLabel(): string {
+    if (this.movement.typeCode !== 'TRANSFERT') {
+      return '';
+    }
+    if (this.movement.warehouseId && this.accessibleWarehouses?.length) {
+      const w = this.accessibleWarehouses.find((wh: any) => wh.id === this.movement.warehouseId);
+      return w?.name || 'Entrepôt source';
+    }
+    return 'Déterminé automatiquement selon le stock du produit';
+  }
+
+  onProductChange() {
+    if (!this.movement.productId) {
+      this.movement.warehouseId = null;
+      return;
+    }
+    this.apiService.get<any>(`/products/${this.movement.productId}`).subscribe({
+      next: (p) => {
+        if (p && p.warehouseId) {
+          this.movement.warehouseId = p.warehouseId;
+        } else {
+          this.movement.warehouseId = null;
+        }
+      },
+      error: () => {
+        this.movement.warehouseId = null;
+      }
+    });
+  }
+
+  requiresDestination(): boolean {
+    const selectedType = this.getSelectedMovementType();
+    return selectedType?.requiresDestination || false;
+  }
+
+  getAvailableDestinationWarehouses(): any[] {
+    // Pour un transfert, exclure l'entrepôt d'origine de la liste des destinations possibles
+    if (this.requiresDestination() && this.movement.warehouseId) {
+      return this.accessibleWarehouses.filter(w => w.id !== this.movement.warehouseId);
+    }
+    return this.accessibleWarehouses;
   }
 
   isFormValid(): boolean {
-    const baseValid = !!(this.movement.type && this.movement.productId && this.movement.warehouseId && this.movement.quantity > 0);
-    if (this.movement.type === 'Transfert') {
-      return baseValid && !!this.movement.warehouseDestinationId;
+    if (!this.movement.typeCode || !this.movement.productId) {
+      return false;
     }
-    return baseValid;
+
+    const selectedType = this.getSelectedMovementType();
+    // Pour les types autres que TRANSFERT, l'entrepôt source doit être renseigné
+    if (selectedType?.value !== 'TRANSFERT' && !this.movement.warehouseId) {
+      return false;
+    }
+    
+    // Vérifier la quantité selon le type
+    if (selectedType?.allowsNegative) {
+      // Pour AJUSTEMENT, la quantité peut être négative
+      if (!this.movement.quantity || this.movement.quantity === 0) {
+        return false;
+      }
+    } else {
+      // Pour les autres types, la quantité doit être positive
+      if (!this.movement.quantity || this.movement.quantity <= 0) {
+        return false;
+      }
+    }
+
+    // Vérifier l'entrepôt de destination si requis
+    if (selectedType?.requiresDestination && !this.movement.destinationWarehouseId) {
+      return false;
+    }
+
+    // Pour un transfert, l'entrepôt d'origine et de destination doivent être différents
+    if (selectedType?.requiresDestination && this.movement.warehouseId === this.movement.destinationWarehouseId) {
+      return false;
+    }
+
+    return true;
   }
 }
 

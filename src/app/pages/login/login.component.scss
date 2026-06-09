@@ -331,6 +331,11 @@
           width: 100%;
           padding-left: 2.5rem;
           font-size: 16px; /* Évite le zoom automatique sur iOS */
+          text-indent: 0; /* Supprime l'indentation du texte */
+
+          &::placeholder {
+            text-indent: 0; /* Supprime l'indentation du placeholder */
+          }
 
           @media (max-width: 480px) {
             padding-left: 2.25rem;

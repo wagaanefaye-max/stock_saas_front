@@ -242,3 +242,83 @@
   }
 }
 
+.warehouse-details {
+  .details-card {
+    margin-bottom: 1.5rem;
+  }
+
+  .details-section {
+    h3.details-section-title {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+      font-size: 1.125rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+
+    .details-section-icon {
+      margin-right: 0.5rem;
+    }
+  }
+
+  .loading-products {
+    padding: 2rem;
+  }
+
+  .loading-spinner {
+    font-size: 2rem;
+  }
+
+  .empty-products {
+    padding: 2rem;
+  }
+
+  .empty-products-icon {
+    font-size: 3rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .detail-item-full {
+    grid-column: 1 / -1;
+  }
+
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      .detail-label {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+
+      .detail-value {
+        font-size: 1rem;
+        color: var(--text-main);
+      }
+    }
+  }
+
+  .text-danger {
+    color: var(--red-500, #ef4444);
+    font-weight: 600;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+}
+

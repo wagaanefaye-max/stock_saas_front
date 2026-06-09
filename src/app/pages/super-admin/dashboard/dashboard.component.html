@@ -1,11 +1,60 @@
 <div class="super-admin-dashboard">
-  <div class="page-header">
-    <h1>Tableau de bord - Super Administrateur</h1>
-    <p class="text-muted">Vue d'ensemble de la plateforme</p>
-  </div>
+  <p-toast></p-toast>
 
-  <!-- Statistiques -->
-  <div class="stats-grid">
+  <header class="dashboard-header">
+    <h1>Plateforme</h1>
+    <p class="dashboard-header__subtitle">Vue d'ensemble — entreprises, abonnements et utilisateurs</p>
+  </header>
+
+  <section class="main-actions" aria-label="Actions principales">
+    <a routerLink="/super-admin/companies" class="main-action-card main-action-companies dashboard-cta-primary">
+      <div class="main-action-icon">
+        <i class="pi pi-briefcase"></i>
+      </div>
+      <div class="main-action-text">
+        <span class="main-action-label">Entreprises</span>
+        <span class="main-action-hint">Gérer les comptes clients</span>
+      </div>
+      <i class="pi pi-chevron-right dashboard-cta-arrow" aria-hidden="true"></i>
+    </a>
+
+    <div class="main-actions-row">
+      <a routerLink="/super-admin/subscription-requests" class="main-action-card main-action-subscriptions">
+        <div class="main-action-icon">
+          <i class="pi pi-credit-card"></i>
+        </div>
+        <span class="main-action-label">Souscriptions</span>
+      </a>
+
+      <a routerLink="/super-admin/platform-users" class="main-action-card main-action-users">
+        <div class="main-action-icon">
+          <i class="pi pi-users"></i>
+        </div>
+        <span class="main-action-label">Utilisateurs</span>
+      </a>
+    </div>
+  </section>
+
+  <nav class="secondary-actions" aria-label="Raccourcis">
+    <a routerLink="/super-admin/companies" class="secondary-link">
+      <i class="pi pi-building"></i>
+      <span>Entreprises</span>
+    </a>
+    <a routerLink="/super-admin/subscription-requests" class="secondary-link">
+      <i class="pi pi-wallet"></i>
+      <span>Abonnements</span>
+    </a>
+    <a routerLink="/super-admin/platform-users" class="secondary-link">
+      <i class="pi pi-user"></i>
+      <span>Utilisateurs</span>
+    </a>
+    <a routerLink="/super-admin/platform-settings" class="secondary-link">
+      <i class="pi pi-cog"></i>
+      <span>Paramètres</span>
+    </a>
+  </nav>
+
+  <section class="stats-grid" aria-label="Statistiques">
     <div *ngFor="let stat of stats" class="stat-card">
       <div class="stat-icon" [style.background-color]="stat.color + '20'">
         <i [class]="stat.icon" [style.color]="stat.color"></i>
@@ -16,50 +65,69 @@
         <span class="stat-change">{{ stat.change }}</span>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Graphiques -->
-  <div class="charts-grid">
+  <section class="charts-grid" aria-label="Graphiques">
     <p-card class="chart-card">
       <h3>Évolution des entreprises</h3>
-      <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+      <div class="chart-wrap chart-wrap--tall">
+        <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+      </div>
     </p-card>
 
     <p-card class="chart-card">
       <h3>Répartition par plan</h3>
-      <p-chart 
-        type="doughnut" 
-        [data]="planChartData"
-        [options]="planChartOptions">
-      </p-chart>
+      <div class="chart-wrap chart-wrap--donut">
+        <p-chart type="doughnut" [data]="planChartData" [options]="planChartOptions"></p-chart>
+      </div>
     </p-card>
-  </div>
+  </section>
 
-  <!-- Tableau récent -->
   <p-card class="recent-card">
-    <h3>Entreprises récemment créées</h3>
-    <div class="recent-table">
+    <div class="recent-card__header">
+      <h3>Entreprises récentes</h3>
+      <a routerLink="/super-admin/companies" class="recent-card__link">Voir tout</a>
+    </div>
+
+    <div *ngIf="recentCompanies.length === 0" class="recent-empty text-muted">
+      Aucune entreprise récente
+    </div>
+
+    <ul class="recent-list" *ngIf="recentCompanies.length > 0">
+      <li *ngFor="let company of recentCompanies" class="recent-item">
+        <div class="recent-item__main">
+          <span class="recent-item__name">{{ company.name }}</span>
+          <span class="badge badge-success">{{ company.status }}</span>
+        </div>
+        <p class="recent-item__email">{{ company.email }}</p>
+        <div class="recent-item__meta">
+          <span class="badge badge-primary">{{ company.plan }}</span>
+          <span class="recent-item__date">{{ company.createdAt }}</span>
+        </div>
+      </li>
+    </ul>
+
+    <div class="recent-table-desktop" *ngIf="recentCompanies.length > 0">
       <table>
         <thead>
           <tr>
             <th>Nom</th>
             <th>Email</th>
             <th>Plan</th>
-            <th>Date création</th>
+            <th>Date</th>
             <th>Statut</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let i of [1,2,3,4,5]">
-            <td>Entreprise {{ i }}</td>
-            <td>{{ getEmail(i) }}</td>
-            <td><span class="badge badge-primary">Premium</span></td>
-            <td>15/01/2024</td>
-            <td><span class="badge badge-success">Actif</span></td>
+          <tr *ngFor="let company of recentCompanies">
+            <td>{{ company.name }}</td>
+            <td>{{ company.email }}</td>
+            <td><span class="badge badge-primary">{{ company.plan }}</span></td>
+            <td>{{ company.createdAt }}</td>
+            <td><span class="badge badge-success">{{ company.status }}</span></td>
           </tr>
         </tbody>
       </table>
     </div>
   </p-card>
 </div>
-

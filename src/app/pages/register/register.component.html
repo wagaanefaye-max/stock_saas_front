@@ -1,4 +1,5 @@
 <div class="register-container">
+  <p-toast></p-toast>
   <div class="register-wrapper">
     <!-- Left side - Branding -->
     <div class="register-branding">
@@ -96,7 +97,7 @@
                   pInputText 
                   [(ngModel)]="companyPhone" 
                   name="companyPhone"
-                  placeholder="77 888 66 55"
+                  placeholder="78 900 88 77"
                   class="w-full"
                   appPhoneFormat
                   maxlength="12"
@@ -139,7 +140,7 @@
               <label for="companyRegion">
                 Région *
               </label>
-              <p-dropdown 
+              <p-select 
                 id="companyRegion"
                 [(ngModel)]="companyRegion" 
                 [options]="regions" 
@@ -147,7 +148,7 @@
                 class="w-full"
                 name="companyRegion"
                 required>
-              </p-dropdown>
+              </p-select>
             </div>
 
             <div class="form-group">
@@ -241,6 +242,16 @@
               <small class="text-muted">
                 Un email de bienvenue avec les instructions de connexion sera envoyé à cette adresse.
               </small>
+            </div>
+
+            <div class="form-group">
+              <div class="info-box">
+                <i class="pi pi-info-circle"></i>
+                <p>
+                  <strong>Note importante :</strong> Après votre inscription, un email de validation sera envoyé à votre adresse. 
+                  Vous devrez cliquer sur le lien dans l'email pour activer votre compte et définir votre mot de passe.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -344,11 +355,10 @@
               *ngIf="currentStep === totalSteps"
               pButton 
               type="submit" 
-              [label]="loading ? 'Inscription en cours...' : 'Créer mon compte'"
+              label="Créer mon compte"
               icon="pi pi-check"
               class="p-button-primary"
-              [disabled]="!isStepValid(3) || loading"
-              [loading]="loading">
+              [disabled]="!isStepValid(3)">
             </button>
           </div>
         </form>

@@ -1,4 +1,6 @@
 <div class="products-page">
+  <p-toast></p-toast>
+  
   <div class="page-header">
     <div>
       <h1>Produits</h1>
@@ -14,32 +16,103 @@
   </div>
 
   <p-card>
-    <p-toolbar>
-      <div class="p-toolbar-group-start">
-        <span class="p-input-icon-left">
+    <div class="list-toolbar">
+      <div class="list-toolbar__primary">
+        <span class="p-input-icon-left list-toolbar__search">
           <i class="pi pi-search"></i>
-          <input 
-            type="text" 
-            pInputText 
-            [(ngModel)]="globalFilter" 
-            placeholder="Rechercher...">
+          <input
+            type="text"
+            pInputText
+            [(ngModel)]="globalFilter"
+            placeholder="Rechercher un produit…">
         </span>
       </div>
-      <div class="p-toolbar-group-end">
-        <button 
-          pButton 
-          icon="pi pi-file-export" 
-          label="Exporter" 
-          class="p-button-secondary">
+      <div class="list-toolbar__actions">
+        <button
+          pButton
+          [label]="showFilterPanel ? 'Masquer' : 'Filtres'"
+          icon="pi pi-filter"
+          class="p-button-outlined p-button-sm list-toolbar__filter-toggle"
+          (click)="showFilterPanel = !showFilterPanel">
+        </button>
+        <button
+          pButton
+          icon="pi pi-file-export"
+          label="Exporter"
+          class="p-button-secondary list-toolbar__btn-icon">
         </button>
       </div>
-    </p-toolbar>
+    </div>
+
+    <!-- Panneau de filtres (nom, référence, date, catégorie) -->
+    <div *ngIf="showFilterPanel" class="filter-panel">
+      <div class="filter-row">
+        <div class="filter-field">
+          <label>Nom</label>
+          <input type="text" pInputText [(ngModel)]="filterName" placeholder="Contient..." class="w-full">
+        </div>
+        <div class="filter-field">
+          <label>Référence</label>
+          <input type="text" pInputText [(ngModel)]="filterReference" placeholder="Contient..." class="w-full">
+        </div>
+        <div class="filter-field">
+          <label>Code (SKU)</label>
+          <input type="text" pInputText [(ngModel)]="filterSku" placeholder="Contient..." class="w-full">
+        </div>
+      </div>
+      <div class="filter-row">
+        <div class="filter-field">
+          <label>Catégorie</label>
+          <p-select
+            [(ngModel)]="filterCategoryCode"
+            [options]="categories"
+            optionLabel="label"
+            optionValue="code"
+            placeholder="Toutes"
+            [showClear]="true"
+            [appendTo]="'body'"
+            [filter]="categories.length > 6"
+            filterPlaceholder="Rechercher…"
+            class="w-full"
+            [style]="{ width: '100%' }">
+          </p-select>
+        </div>
+        <div class="filter-field">
+          <label>Date de création du</label>
+          <p-calendar
+            [(ngModel)]="filterDateFrom"
+            dateFormat="dd/mm/yy"
+            placeholder="jj/mm/aaaa"
+            [showIcon]="true"
+            class="w-full">
+          </p-calendar>
+        </div>
+        <div class="filter-field">
+          <label>Date de création au</label>
+          <p-calendar
+            [(ngModel)]="filterDateTo"
+            dateFormat="dd/mm/yy"
+            placeholder="jj/mm/aaaa"
+            [showIcon]="true"
+            class="w-full">
+          </p-calendar>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button pButton label="Filtrer" icon="pi pi-search" class="p-button-sm" (click)="applyFilters()"></button>
+        <button pButton label="Réinitialiser" icon="pi pi-refresh" class="p-button-outlined p-button-sm" (click)="resetFilters()"></button>
+      </div>
+    </div>
 
     <p-table 
-      [value]="products" 
+      [value]="products"
+      [lazy]="true"
       [paginator]="true" 
-      [rows]="10"
-      [globalFilterFields]="['name','sku','category']"
+      [rows]="rows"
+      [totalRecords]="totalProducts"
+      [loading]="loading"
+      (onLazyLoad)="onProductsLazyLoad($event)"
+      [rowTrackBy]="trackByProductId"
       [tableStyle]="{'min-width': '50rem'}"
       selectionMode="multiple"
       [(selection)]="selectedProducts"
@@ -50,14 +123,48 @@
           <th style="width: 3rem">
             <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
           </th>
-          <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
-          <th pSortableColumn="sku">SKU <p-sortIcon field="sku"></p-sortIcon></th>
-          <th>Catégorie</th>
-          <th *ngIf="authService.isAdminEntreprise()">Entrepôt</th>
-          <th pSortableColumn="stock">Stock <p-sortIcon field="stock"></p-sortIcon></th>
-          <th pSortableColumn="price">Prix <p-sortIcon field="price"></p-sortIcon></th>
-          <th>Statut</th>
-          <th>Actions</th>
+          <th pSortableColumn="reference">
+            <i class="pi pi-hashtag" style="margin-right: 0.5rem;"></i>
+            Référence
+            <p-sortIcon field="reference"></p-sortIcon>
+          </th>
+          <th pSortableColumn="name">
+            <i class="pi pi-tag" style="margin-right: 0.5rem;"></i>
+            Nom du produit
+            <p-sortIcon field="name"></p-sortIcon>
+          </th>
+          <th pSortableColumn="sku">
+            <i class="pi pi-barcode" style="margin-right: 0.5rem;"></i>
+            Code produit
+            <p-sortIcon field="sku"></p-sortIcon>
+          </th>
+          <th>
+            <i class="pi pi-folder" style="margin-right: 0.5rem;"></i>
+            Catégorie
+          </th>
+          <th pSortableColumn="stock">
+            <i class="pi pi-box" style="margin-right: 0.5rem;"></i>
+            Stock disponible
+            <p-sortIcon field="stock"></p-sortIcon>
+          </th>
+          <th pSortableColumn="price">
+            <i class="pi pi-money-bill" style="margin-right: 0.5rem;"></i>
+            Prix
+            <p-sortIcon field="price"></p-sortIcon>
+          </th>
+          <th>
+            <i class="pi pi-info-circle" style="margin-right: 0.5rem;"></i>
+            Statut
+          </th>
+          <th pSortableColumn="createdAt">
+            <i class="pi pi-calendar" style="margin-right: 0.5rem;"></i>
+            Date de création
+            <p-sortIcon field="createdAt"></p-sortIcon>
+          </th>
+          <th *ngIf="authService.isAdminEntreprise()" style="width: 3rem">
+            <i class="pi pi-cog" style="margin-right: 0.5rem;"></i>
+            Actions
+          </th>
         </tr>
       </ng-template>
 
@@ -66,101 +173,184 @@
           <td>
             <p-tableCheckbox [value]="product"></p-tableCheckbox>
           </td>
+          <td><code class="product-reference">{{ product.reference || '-' }}</code></td>
           <td>{{ product.name }}</td>
           <td>{{ product.sku }}</td>
-          <td>{{ product.category }}</td>
+          <td>{{ product.category || '-' }}</td>
+          <td>{{ product.stock || 0 }}</td>
+          <td>{{ product.price | number:'1.0-0' }} FCFA</td>
+          <td>
+            <p-tag [value]="product.statusLabel || product.status || 'N/A'" [severity]="getSeverity(product.statusLabel || product.status)"></p-tag>
+          </td>
+          <td>{{ product.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
           <td *ngIf="authService.isAdminEntreprise()">
-            <span *ngIf="product.warehouseName">{{ product.warehouseName }}</span>
-            <span *ngIf="!product.warehouseName" class="text-muted">-</span>
-          </td>
-          <td>{{ product.stock }}</td>
-          <td>{{ product.price | number:'1.2-2' }} €</td>
-          <td>
-            <p-tag [value]="product.status" [severity]="getSeverity(product.status)"></p-tag>
-          </td>
-          <td>
             <button 
               pButton 
-              icon="pi pi-pencil" 
-              class="p-button-text p-button-sm"
-              (click)="editProduct(product)"
-              *ngIf="authService.isAdminEntreprise()">
+              icon="pi pi-ellipsis-v" 
+              class="p-button-text p-button-sm p-button-rounded action-menu-btn"
+              (click)="showMenu($event, product)"
+              [title]="'Actions'">
             </button>
-            <button 
-              pButton 
-              icon="pi pi-trash" 
-              class="p-button-text p-button-sm p-button-danger"
-              (click)="editProduct(product)"
-              *ngIf="authService.isAdminEntreprise()">
-            </button>
-            <span *ngIf="!authService.isAdminEntreprise()" class="text-muted" style="font-size: 0.875rem;">Lecture seule</span>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [attr.colspan]="authService.isAdminEntreprise() ? 11 : 10" class="empty-state-cell">
+            <div class="empty-state">
+              <i class="pi pi-box empty-state-icon"></i>
+              <p class="empty-state-text">Aucun produit</p>
+              @if (authService.isAdminEntreprise()) {
+                <button pButton label="Nouveau produit" icon="pi pi-plus" class="p-button-sm" (click)="openNew()"></button>
+              }
+            </div>
           </td>
         </tr>
       </ng-template>
     </p-table>
+    
+    <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
   </p-card>
 
-  <p-dialog 
-    [(visible)]="displayDialog" 
-    [style]="{width: '600px'}"
+  <p-dialog
+    [(visible)]="displayDialog"
+    styleClass="product-form-dialog"
+    [style]="{ width: '520px', maxWidth: '95vw' }"
     [header]="product.id ? 'Modifier le produit' : 'Nouveau produit'"
     [modal]="true"
     [draggable]="false"
     [resizable]="false"
-    [dismissableMask]="false">
+    [dismissableMask]="true">
+    <div class="product-form">
+      <div class="product-form__field" *ngIf="product.id && product.reference">
+        <label for="product-reference">Référence</label>
+        <input
+          id="product-reference"
+          type="text"
+          pInputText
+          [value]="product.reference"
+          class="w-full"
+          readonly>
+      </div>
+
+      <div class="product-form__field">
+        <label for="product-name">Nom du produit <span class="required">*</span></label>
+        <input
+          id="product-name"
+          type="text"
+          pInputText
+          [(ngModel)]="product.name"
+          class="w-full"
+          placeholder="Nom du produit"
+          required>
+      </div>
+
+      <div class="product-form__field">
+        <label for="product-category">Catégorie</label>
+        <p-select
+          inputId="product-category"
+          [(ngModel)]="product.categoryCode"
+          [options]="categories"
+          optionLabel="label"
+          optionValue="code"
+          placeholder="Choisir une catégorie"
+          [showClear]="true"
+          [appendTo]="'body'"
+          [filter]="categories.length > 6"
+          filterPlaceholder="Rechercher…"
+          class="w-full"
+          [style]="{ width: '100%' }">
+        </p-select>
+        <button
+          *ngIf="authService.isAdminEntreprise()"
+          type="button"
+          class="product-form__link"
+          (click)="openCreateCategoryDialog()">
+          + Nouvelle catégorie
+        </button>
+      </div>
+
+      <div class="product-form__field">
+        <label for="product-quantity">Quantité initiale</label>
+        <p-inputNumber
+          inputId="product-quantity"
+          [(ngModel)]="product.quantity"
+          [min]="0"
+          [showButtons]="true"
+          placeholder="0"
+          class="w-full"
+          [style]="{ width: '100%' }">
+        </p-inputNumber>
+      </div>
+
+      <div class="product-form__field">
+        <label for="product-purchase-price">Prix d'achat (FCFA)</label>
+        <p-inputNumber
+          inputId="product-purchase-price"
+          [(ngModel)]="product.purchasePrice"
+          [min]="0"
+          [maxFractionDigits]="2"
+          mode="decimal"
+          placeholder="0"
+          class="w-full"
+          [style]="{ width: '100%' }">
+        </p-inputNumber>
+      </div>
+
+      <div class="product-form__field">
+        <label for="product-price">Prix de vente (FCFA)</label>
+        <p-inputNumber
+          inputId="product-price"
+          [(ngModel)]="product.price"
+          [min]="0"
+          [maxFractionDigits]="2"
+          mode="decimal"
+          placeholder="0"
+          class="w-full"
+          [style]="{ width: '100%' }">
+        </p-inputNumber>
+        <p *ngIf="isLossPricing()" class="product-form__hint product-form__hint--warn">
+          Le prix de vente est inférieur au prix d'achat.
+        </p>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        label="Annuler"
+        class="p-button-text"
+        (click)="displayDialog = false">
+      </button>
+      <button
+        pButton
+        label="Enregistrer"
+        (click)="saveProduct()"
+        [disabled]="!isFormValid()">
+      </button>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog
+    [(visible)]="displayCategoryDialog"
+    [style]="{width: '450px'}"
+    header="Nouvelle catégorie"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false">
     <div class="form-group">
-      <label>Nom *</label>
-      <input type="text" pInputText [(ngModel)]="product.name" class="w-full" required>
+      <label>Libellé *</label>
+      <input type="text" pInputText [(ngModel)]="newCategory.label" class="w-full" placeholder="Ex: Pharmacie">
     </div>
     <div class="form-group">
-      <label>SKU *</label>
-      <input type="text" pInputText [(ngModel)]="product.sku" class="w-full" required>
-    </div>
-    <div class="form-group">
-      <label>Catégorie</label>
-      <input type="text" pInputText [(ngModel)]="product.category" class="w-full">
-    </div>
-    <div class="form-group">
-      <label>Stock initial</label>
-      <p-inputNumber 
-        [(ngModel)]="product.stock" 
-        [min]="0" 
-        [showButtons]="true"
-        class="w-full">
-      </p-inputNumber>
-    </div>
-    <div class="form-group">
-      <label>Prix</label>
-      <p-inputNumber 
-        [(ngModel)]="product.price" 
-        [min]="0" 
-        [maxFractionDigits]="2"
-        mode="decimal"
-        class="w-full">
-      </p-inputNumber>
-    </div>
-    <div class="form-group" *ngIf="authService.isAdminEntreprise()">
-      <label>
-        Entrepôt *
-        <span class="text-muted" style="font-size: 0.75rem; font-weight: normal;">(Obligatoire pour l'admin entreprise)</span>
-      </label>
-      <p-dropdown 
-        [(ngModel)]="product.warehouseId" 
-        [options]="warehouses" 
-        optionLabel="name"
-        optionValue="id"
-        placeholder="Sélectionner un entrepôt"
-        class="w-full"
-        [appendTo]="'body'"
-        required>
-      </p-dropdown>
-      <small class="text-muted">
-        Le produit sera ajouté dans l'entrepôt sélectionné.
-      </small>
+      <label>Code *</label>
+      <input type="text" pInputText [(ngModel)]="newCategory.code" class="w-full" placeholder="Ex: PHARMACIE">
+      <small class="text-muted">Le code doit etre unique (ex: PHARMACIE).</small>
     </div>
     <ng-template pTemplate="footer">
-      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
-      <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveProduct()" [disabled]="!isFormValid()"></button>
+      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayCategoryDialog = false"></button>
+      <button pButton label="Créer" icon="pi pi-check" (click)="createCategory()"></button>
     </ng-template>
   </p-dialog>
 </div>

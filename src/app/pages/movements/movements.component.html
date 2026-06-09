@@ -1,4 +1,6 @@
 <div class="movements-page">
+  <p-toast></p-toast>
+  
   <div class="page-header">
     <div>
       <h1>Mouvements de stock</h1>
@@ -8,32 +10,48 @@
   </div>
 
   <p-card>
-    <p-toolbar>
-      <div class="p-toolbar-group-start">
-        <span class="p-input-icon-left">
+    <div class="list-toolbar">
+      <div class="list-toolbar__primary">
+        <span class="p-input-icon-left list-toolbar__search">
           <i class="pi pi-search"></i>
-          <input 
-            type="text" 
-            pInputText 
-            [(ngModel)]="globalFilter" 
-            placeholder="Rechercher...">
+          <input
+            type="text"
+            pInputText
+            [(ngModel)]="globalFilter"
+            (ngModelChange)="onSearchInput()"
+            placeholder="Produit, entrepôt…">
         </span>
       </div>
-      <div class="p-toolbar-group-end">
-        <button 
-          pButton 
-          icon="pi pi-file-export" 
-          label="Exporter" 
-          class="p-button-secondary">
+      <div class="list-toolbar__filters list-toolbar__filters--inline">
+        <div class="list-filter-chips">
+          <p-selectButton
+            [options]="typeFilterChipOptions"
+            [(ngModel)]="typeFilter"
+            optionLabel="label"
+            optionValue="value"
+            (ngModelChange)="onTypeFilterChange()">
+          </p-selectButton>
+        </div>
+      </div>
+      <div class="list-toolbar__actions">
+        <button
+          pButton
+          icon="pi pi-file-export"
+          label="Exporter"
+          class="p-button-secondary list-toolbar__btn-icon">
         </button>
       </div>
-    </p-toolbar>
+    </div>
 
     <p-table 
-      [value]="allMovements"
+      [value]="movements"
+      [lazy]="true"
       [paginator]="true" 
-      [rows]="10"
-      [globalFilterFields]="['product','type','warehouse','user','justification']"
+      [rows]="rows"
+      [totalRecords]="totalMovements"
+      [loading]="loading"
+      (onLazyLoad)="onMovementsLazyLoad($event)"
+      [rowTrackBy]="trackByMovementId"
       [tableStyle]="{'min-width': '50rem'}"
       selectionMode="multiple"
       [(selection)]="selectedMovements"
@@ -110,102 +128,158 @@
     [dismissableMask]="false">
     
     <div class="form-group">
-      <label>Type de mouvement *</label>
-      <p-dropdown 
-        [(ngModel)]="movement.type" 
+      <label>
+        <i class="pi pi-arrows-h" style="margin-right: 0.5rem;"></i>
+        Type de mouvement *
+      </label>
+      <p-select 
+        [(ngModel)]="movement.typeCode" 
         [options]="types" 
-        placeholder="Sélectionner un type"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Choisir le type de mouvement"
         class="w-full"
         [appendTo]="'body'"
         required>
-      </p-dropdown>
+      </p-select>
+<!--      <small class="text-muted">-->
+<!--        <i class="pi pi-info-circle" style="font-size: 0.75rem;"></i>-->
+<!--        <span *ngFor="let type of types; let last = last">-->
+<!--          <strong>{{ type.label }}</strong> : {{ type.description }}<span *ngIf="!last"> | </span>-->
+<!--        </span>-->
+<!--      </small>-->
     </div>
 
     <div class="form-row">
       <div class="form-group">
-        <label>Date *</label>
+        <label>
+          <i class="pi pi-calendar" style="margin-right: 0.5rem;"></i>
+          Date du mouvement *
+        </label>
         <p-calendar 
           [(ngModel)]="movement.date" 
           [showIcon]="true"
           dateFormat="dd/mm/yy"
           [appendTo]="'body'"
+          placeholder="Sélectionner la date"
           class="w-full"
+          [style]="{ width: '100%' }"
           required>
         </p-calendar>
       </div>
       <div class="form-group">
-        <label>Produit *</label>
-        <p-dropdown 
+        <label>
+          <i class="pi pi-shopping-bag" style="margin-right: 0.5rem;"></i>
+          Produit concerné *
+        </label>
+        <p-select 
           [(ngModel)]="movement.productId" 
           [options]="products" 
           optionLabel="name"
           optionValue="id"
-          placeholder="Sélectionner un produit"
+          placeholder="Choisir le produit"
           class="w-full"
+          [style]="{ width: '100%' }"
           [appendTo]="'body'"
+          (onChange)="onProductChange()"
           required>
-        </p-dropdown>
+        </p-select>
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
-        <label>Quantité *</label>
+        <label>
+          <i class="pi pi-hashtag" style="margin-right: 0.5rem;"></i>
+          Quantité *
+        </label>
         <p-inputNumber 
           [(ngModel)]="movement.quantity" 
-          [min]="movement.type === 'Ajustement' ? -999999 : 1"
+          [min]="getMinQuantity()"
           [showButtons]="true"
+          placeholder="0"
           class="w-full"
           required>
         </p-inputNumber>
-        <small class="text-muted" *ngIf="movement.type === 'Ajustement'">
-          Quantité positive pour ajout, négative pour retrait
-        </small>
       </div>
       <div class="form-group">
-        <label>Entrepôt *</label>
-        <p-dropdown 
-          [(ngModel)]="movement.warehouseId" 
-          [options]="accessibleWarehouses" 
-          optionLabel="name"
-          optionValue="id"
-          placeholder="Sélectionner un entrepôt"
-          class="w-full"
-          [appendTo]="'body'"
-          required>
-        </p-dropdown>
+        <label>
+          <i class="pi pi-warehouse" style="margin-right: 0.5rem;"></i>
+          Entrepôt *
+        </label>
+        <ng-container *ngIf="movement.typeCode === 'TRANSFERT'; else editableWarehouse">
+          <div class="readonly-warehouse">
+            <input
+              pInputText
+              class="w-full"
+              [readonly]="true"
+              [value]="getSourceWarehouseLabel()">
+          </div>
+        </ng-container>
+        <ng-template #editableWarehouse>
+          <p-select 
+            [(ngModel)]="movement.warehouseId" 
+            [options]="accessibleWarehouses" 
+            optionLabel="name"
+            optionValue="id"
+            placeholder="Choisir l'entrepôt"
+            class="w-full"
+            [appendTo]="'body'"
+            (ngModelChange)="onWarehouseChange()"
+            required>
+          </p-select>
+        </ng-template>
       </div>
     </div>
 
-    <div class="form-group" *ngIf="movement.type === 'Transfert'">
-      <label>Entrepôt de destination *</label>
-      <p-dropdown 
-        [(ngModel)]="movement.warehouseDestinationId" 
-        [options]="accessibleWarehouses" 
+    <div class="form-group" *ngIf="requiresDestination()">
+      <label>
+        <i class="pi pi-map-marker" style="margin-right: 0.5rem;"></i>
+        Entrepôt de destination *
+      </label>
+      <p-select 
+        [(ngModel)]="movement.destinationWarehouseId" 
+        [options]="getAvailableDestinationWarehouses()" 
         optionLabel="name"
         optionValue="id"
-        placeholder="Sélectionner l'entrepôt de destination"
+        placeholder="Choisir où envoyer les produits"
         class="w-full"
         [appendTo]="'body'"
         [filterBy]="'name'"
         required>
-      </p-dropdown>
+      </p-select>
     </div>
 
     <div class="form-group">
-      <label>Justification / Notes</label>
+      <label>
+        <i class="pi pi-file-edit" style="margin-right: 0.5rem;"></i>
+        Notes ou raison du mouvement
+      </label>
       <textarea
         pTextarea 
         [(ngModel)]="movement.justification" 
         [rows]="3"
-        placeholder="Raison du mouvement (optionnel)"
+        placeholder="Ex: Réception de commande fournisseur, Vente client, Correction d'inventaire..."
         class="w-full">
       </textarea>
     </div>
 
     <ng-template pTemplate="footer">
-      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
-      <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveMovement()" [disabled]="!isFormValid()"></button>
+      <button 
+        pButton 
+        label="Annuler" 
+        icon="pi pi-times" 
+        class="p-button-text" 
+        (click)="displayDialog = false">
+      </button>
+      <button 
+        pButton 
+        label="Enregistrer le mouvement" 
+        icon="pi pi-check" 
+        (click)="saveMovement()" 
+        [disabled]="!isFormValid()"
+        [title]="!isFormValid() ? 'Veuillez remplir tous les champs obligatoires' : 'Cliquez pour enregistrer'">
+      </button>
     </ng-template>
   </p-dialog>
 </div>

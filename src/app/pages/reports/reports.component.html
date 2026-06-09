@@ -8,7 +8,7 @@
       </p>
     </div>
     <div class="header-actions">
-      <p-dropdown 
+      <p-select 
         *ngIf="accessibleWarehouses.length > 1"
         [options]="warehouseFilterOptions" 
         [(ngModel)]="selectedWarehouse"
@@ -17,14 +17,14 @@
         [showClear]="true"
         styleClass="warehouse-filter"
         (onChange)="onWarehouseFilterChange()">
-      </p-dropdown>
-      <p-dropdown 
+      </p-select>
+      <p-select 
         [options]="periods" 
         [(ngModel)]="selectedPeriod"
         placeholder="Période"
         optionLabel="label"
         styleClass="period-dropdown">
-      </p-dropdown>
+      </p-select>
       <button pButton label="Exporter PDF" icon="pi pi-file-pdf" (click)="exportPDF()"></button>
     </div>
   </div>
@@ -46,20 +46,26 @@
   <div class="reports-grid">
     <p-card class="report-card large-card">
       <h3>Valeur du stock (12 derniers mois)</h3>
-      <p-chart type="line" [data]="stockValueChartData" [options]="stockValueChartOptions"></p-chart>
+      <div class="chart-wrap chart-wrap--tall">
+        <p-chart type="line" [data]="stockValueChartData" [options]="stockValueChartOptions"></p-chart>
+      </div>
     </p-card>
 
     <p-card class="report-card large-card">
       <h3>Mouvements par type</h3>
-      <p-chart type="line" [data]="movementsChartData" [options]="movementsChartOptions"></p-chart>
+      <div class="chart-wrap chart-wrap--tall">
+        <p-chart type="line" [data]="movementsChartData" [options]="movementsChartOptions"></p-chart>
+      </div>
     </p-card>
 
     <p-card class="report-card" *ngIf="accessibleWarehouses.length > 1 && warehouseDistributionChartData && !selectedWarehouse">
-      <h3>Répartition de la valeur par entrepôt</h3>
-      <p class="text-muted" style="margin-bottom: 1rem; font-size: 0.875rem;">
-        Comparaison de la valeur du stock entre vos entrepôts
+      <h3>Répartition par entrepôt</h3>
+      <p class="text-muted chart-caption">
+        Valeur du stock par entrepôt
       </p>
-      <p-chart type="doughnut" [data]="warehouseDistributionChartData" [options]="warehouseDistributionChartOptions"></p-chart>
+      <div class="chart-wrap chart-wrap--donut">
+        <p-chart type="doughnut" [data]="warehouseDistributionChartData" [options]="warehouseDistributionChartOptions"></p-chart>
+      </div>
     </p-card>
 
     <p-card class="report-card">
@@ -74,7 +80,7 @@
             </div>
           </div>
           <div class="product-values">
-            <span class="product-value">{{ product.value | number }} €</span>
+            <span class="product-value">{{ product.value | number }} FCFA</span>
             <small class="product-quantity">{{ product.quantity }} unités</small>
           </div>
         </div>
@@ -104,7 +110,7 @@
           <div class="warehouse-metrics">
             <div class="metric">
               <span class="metric-label">Valeur stock</span>
-              <span class="metric-value">{{ warehouse.stockValue | number }} €</span>
+              <span class="metric-value">{{ warehouse.stockValue | number }} FCFA</span>
             </div>
             <div class="metric">
               <span class="metric-label">Mouvements</span>

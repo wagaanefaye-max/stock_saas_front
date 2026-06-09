@@ -1,4 +1,6 @@
 <div class="warehouses-page">
+  <p-toast></p-toast>
+  
   <div class="page-header">
     <div>
       <h1>Entrepôts</h1>
@@ -15,32 +17,32 @@
 
   <!-- Vue tableau pour Admin Entreprise -->
   <p-card *ngIf="authService.isAdminEntreprise()">
-    <p-toolbar>
-      <div class="p-toolbar-group-start">
-        <span class="p-input-icon-left">
+    <div class="list-toolbar">
+      <div class="list-toolbar__primary">
+        <span class="p-input-icon-left list-toolbar__search">
           <i class="pi pi-search"></i>
-          <input 
-            type="text" 
-            pInputText 
-            [(ngModel)]="globalFilter" 
-            placeholder="Rechercher...">
+          <input
+            type="text"
+            pInputText
+            [(ngModel)]="globalFilter"
+            placeholder="Nom, région…">
         </span>
       </div>
-      <div class="p-toolbar-group-end">
-        <button 
-          pButton 
-          icon="pi pi-file-export" 
-          label="Exporter" 
-          class="p-button-secondary">
+      <div class="list-toolbar__actions">
+        <button
+          pButton
+          icon="pi pi-file-export"
+          label="Exporter"
+          class="p-button-secondary list-toolbar__btn-icon">
         </button>
       </div>
-    </p-toolbar>
+    </div>
 
     <p-table 
       [value]="warehouses" 
       [paginator]="true" 
       [rows]="10"
-      [globalFilterFields]="['name','location','region','status']"
+      [globalFilterFields]="['name','region','description','statusLabel']"
       [tableStyle]="{'min-width': '50rem'}"
       selectionMode="multiple"
       [(selection)]="selectedWarehouses"
@@ -52,14 +54,9 @@
             <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
           </th>
           <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
-          <th pSortableColumn="location">Localisation <p-sortIcon field="location"></p-sortIcon></th>
           <th pSortableColumn="region">Région <p-sortIcon field="region"></p-sortIcon></th>
-          <th>Adresse</th>
-          <th pSortableColumn="capacity">Capacité <p-sortIcon field="capacity"></p-sortIcon></th>
-          <th>Utilisé</th>
-          <th>Disponible</th>
-          <th>Utilisation</th>
-          <th pSortableColumn="status">Statut <p-sortIcon field="status"></p-sortIcon></th>
+          <th>Description</th>
+          <th pSortableColumn="statusLabel">Statut <p-sortIcon field="statusLabel"></p-sortIcon></th>
           <th style="width: 3rem">Actions</th>
         </tr>
       </ng-template>
@@ -69,32 +66,14 @@
           <td>
             <p-tableCheckbox [value]="warehouse"></p-tableCheckbox>
           </td>
-          <td>
-            <strong>{{ warehouse.name }}</strong>
-          </td>
-          <td>{{ warehouse.location }}</td>
+          <td><strong>{{ warehouse.name }}</strong></td>
           <td>{{ warehouse.region }}</td>
           <td>
-            <span *ngIf="warehouse.address">{{ warehouse.address }}</span>
-            <span *ngIf="!warehouse.address" class="text-muted">-</span>
-          </td>
-          <td>{{ warehouse.capacity | number }}</td>
-          <td>{{ warehouse.used | number }}</td>
-          <td>{{ warehouse.capacity - warehouse.used | number }}</td>
-          <td>
-            <div class="usage-indicator">
-              <div class="usage-bar">
-                <div 
-                  class="usage-fill" 
-                  [style.width.%]="getUsagePercentage(warehouse.used, warehouse.capacity)"
-                  [style.background-color]="getUsagePercentage(warehouse.used, warehouse.capacity) > 80 ? 'var(--danger)' : getUsagePercentage(warehouse.used, warehouse.capacity) > 60 ? 'var(--warning)' : 'var(--primary)'">
-                </div>
-              </div>
-              <span class="usage-text">{{ getUsagePercentage(warehouse.used, warehouse.capacity) }}%</span>
-            </div>
+            <span *ngIf="warehouse.description">{{ warehouse.description }}</span>
+            <span *ngIf="!warehouse.description" class="text-muted">-</span>
           </td>
           <td>
-            <p-tag [value]="warehouse.status" [severity]="getSeverity(warehouse.status)"></p-tag>
+            <p-tag [value]="warehouse.statusLabel || warehouse.status || 'N/A'" [severity]="getSeverity(warehouse.statusLabel || warehouse.status)"></p-tag>
           </td>
           <td>
             <button 
@@ -110,7 +89,7 @@
 
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td [attr.colspan]="11" class="text-center">
+          <td [attr.colspan]="7" class="text-center">
             <div class="empty-state">
               <i class="pi pi-inbox" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
               <p>Aucun entrepôt trouvé</p>
@@ -127,35 +106,19 @@
       <div class="warehouse-header">
         <div>
           <h3>{{ warehouse.name }}</h3>
-          <p class="text-muted">{{ warehouse.location }}, {{ warehouse.region }}</p>
+          <p class="text-muted">{{ warehouse.region }}</p>
         </div>
-        <p-tag [value]="warehouse.status" [severity]="getSeverity(warehouse.status)"></p-tag>
+        <p-tag [value]="warehouse.statusLabel || warehouse.status || 'N/A'" [severity]="getSeverity(warehouse.statusLabel || warehouse.status)"></p-tag>
       </div>
-
-      <div class="warehouse-stats">
-        <div class="stat-item">
-          <span class="stat-label">Capacité</span>
-          <span class="stat-value">{{ warehouse.capacity | number }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Utilisé</span>
-          <span class="stat-value">{{ warehouse.used | number }}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">Disponible</span>
-          <span class="stat-value">{{ warehouse.capacity - warehouse.used | number }}</span>
-        </div>
-      </div>
-
-      <div class="warehouse-progress">
-        <div class="progress-bar">
-          <div 
-            class="progress-fill" 
-            [style.width.%]="getUsagePercentage(warehouse.used, warehouse.capacity)"
-            [style.background-color]="getUsagePercentage(warehouse.used, warehouse.capacity) > 80 ? 'var(--danger)' : 'var(--primary)'">
-          </div>
-        </div>
-        <span class="progress-text">{{ getUsagePercentage(warehouse.used, warehouse.capacity) }}% utilisé</span>
+      <p *ngIf="warehouse.description" class="warehouse-description">{{ warehouse.description }}</p>
+      <div class="warehouse-actions" style="margin-top: 1rem;">
+        <button 
+          pButton 
+          label="Voir détails" 
+          icon="pi pi-eye" 
+          class="p-button-outlined p-button-sm w-full"
+          (click)="viewWarehouseDetails(warehouse)">
+        </button>
       </div>
     </p-card>
     
@@ -180,70 +143,161 @@
     
     <div class="form-group">
       <label>Nom de l'entrepôt *</label>
-      <input type="text" pInputText [(ngModel)]="warehouse.name" class="w-full" required>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label>Localisation *</label>
-        <input type="text" pInputText [(ngModel)]="warehouse.location" class="w-full" required>
-      </div>
-      <div class="form-group">
-        <label>Région *</label>
-        <p-dropdown 
-          [(ngModel)]="warehouse.region" 
-          [options]="regions" 
-          placeholder="Sélectionner une région"
-          class="w-full"
-          [appendTo]="'body'"
-          required>
-        </p-dropdown>
-      </div>
+      <input type="text" pInputText [(ngModel)]="warehouse.name" class="w-full" placeholder="Ex: Entrepôt Central" required>
     </div>
 
     <div class="form-group">
-      <label>Adresse</label>
-      <input type="text" pInputText [(ngModel)]="warehouse.address" class="w-full" placeholder="Adresse complète (optionnel)">
+      <label>Région *</label>
+      <p-select 
+        [(ngModel)]="warehouse.region" 
+        [options]="regions" 
+        placeholder="Sélectionner une région"
+        class="w-full"
+        [appendTo]="'body'"
+        required>
+      </p-select>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label>Capacité totale *</label>
-        <p-inputNumber 
-          [(ngModel)]="warehouse.capacity" 
-          [min]="0" 
-          [showButtons]="true"
-          class="w-full"
-          required>
-        </p-inputNumber>
-      </div>
-      <div class="form-group">
-        <label>Stock actuel</label>
-        <p-inputNumber 
-          [(ngModel)]="warehouse.used" 
-          [min]="0" 
-          [max]="warehouse.capacity"
-          [showButtons]="true"
-          class="w-full">
-        </p-inputNumber>
-      </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea 
+        pInputText 
+        [(ngModel)]="warehouse.description" 
+        class="w-full" 
+        rows="3"
+        placeholder="Description de l'entrepôt (optionnel)">
+      </textarea>
     </div>
 
     <div class="form-group">
       <label>Statut *</label>
-      <p-dropdown 
-        [(ngModel)]="warehouse.status" 
+      <p-select 
+        [(ngModel)]="warehouse.statusCode" 
         [options]="statuses" 
+        optionLabel="label"
+        optionValue="value"
         placeholder="Sélectionner un statut"
         class="w-full"
         [appendTo]="'body'"
         required>
-      </p-dropdown>
+      </p-select>
     </div>
 
     <ng-template pTemplate="footer">
       <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
       <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveWarehouse()" [disabled]="!isFormValid()"></button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog pour voir les détails d'un entrepôt avec ses produits -->
+  <p-dialog 
+    [(visible)]="displayDetailsDialog" 
+    [style]="{width: '900px', maxWidth: '90vw'}"
+    [header]="'Détails de l\'entrepôt: ' + (selectedWarehouseDetails?.name || '')"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="true"
+    [dismissableMask]="true"
+    [maximizable]="true">
+    
+    <div *ngIf="selectedWarehouseDetails" class="warehouse-details">
+      <!-- Informations de l'entrepôt -->
+      <p-card class="details-card">
+        <div class="details-section">
+          <h3 class="details-section-title">
+            <i class="pi pi-info-circle details-section-icon"></i>
+            Informations générales
+          </h3>
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Nom:</span>
+              <span class="detail-value">{{ selectedWarehouseDetails.name }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Région:</span>
+              <span class="detail-value">{{ selectedWarehouseDetails.region }}</span>
+            </div>
+            <div class="detail-item detail-item-full">
+              <span class="detail-label">Description:</span>
+              <span class="detail-value">{{ selectedWarehouseDetails.description || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Statut:</span>
+              <p-tag 
+                [value]="selectedWarehouseDetails.statusLabel || selectedWarehouseDetails.status || 'N/A'" 
+                [severity]="getSeverity(selectedWarehouseDetails.statusLabel || selectedWarehouseDetails.status)">
+              </p-tag>
+            </div>
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Liste des produits -->
+      <p-card>
+        <div class="details-section">
+          <h3 class="details-section-title">
+            <i class="pi pi-box details-section-icon"></i>
+            Produits en stock ({{ warehouseProducts.length }})
+          </h3>
+          
+          <div *ngIf="warehouseProducts.length === 0" class="empty-state empty-products">
+            <i class="pi pi-inbox empty-products-icon"></i>
+            <p>Aucun produit dans cet entrepôt</p>
+          </div>
+
+          <p-table 
+            *ngIf="warehouseProducts.length > 0"
+            [value]="warehouseProducts" 
+            [paginator]="true" 
+            [rows]="10"
+            [tableStyle]="{'min-width': '50rem'}"
+            [rowHover]="true">
+            
+            <ng-template pTemplate="header">
+              <tr>
+                <th pSortableColumn="productReference">Référence <p-sortIcon field="productReference"></p-sortIcon></th>
+                <th pSortableColumn="productName">Produit <p-sortIcon field="productName"></p-sortIcon></th>
+                <th pSortableColumn="sku">SKU <p-sortIcon field="sku"></p-sortIcon></th>
+                <th>Catégorie</th>
+                <th>Prix</th>
+                <th pSortableColumn="quantity">Quantité <p-sortIcon field="quantity"></p-sortIcon></th>
+                <th>Seuil min</th>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-product>
+              <tr>
+                <td><code class="product-reference">{{ product.productReference || '-' }}</code></td>
+                <td>
+                  <strong>{{ product.productName }}</strong>
+                </td>
+                <td>{{ product.sku }}</td>
+                <td>
+                  <span *ngIf="product.category">{{ product.category }}</span>
+                  <span *ngIf="!product.category" class="text-muted">-</span>
+                </td>
+                <td>{{ product.price | number:'1.0-0' }} FCFA</td>
+                <td>
+                  <span [class]="product.quantity <= (product.minThreshold || 0) ? 'text-danger' : ''">
+                    <strong>{{ product.quantity | number }}</strong>
+                  </span>
+                </td>
+                <td>{{ product.minThreshold | number }}</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-card>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button 
+        pButton 
+        label="Fermer" 
+        icon="pi pi-times" 
+        class="p-button-secondary"
+        (click)="displayDetailsDialog = false">
+      </button>
     </ng-template>
   </p-dialog>
 </div>

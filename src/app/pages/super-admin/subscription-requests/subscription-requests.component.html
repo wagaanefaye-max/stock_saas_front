@@ -1,0 +1,233 @@
+<div class="subscription-requests-page">
+  <p-toast></p-toast>
+
+  <div class="page-header">
+    <h1>Souscriptions</h1>
+    <p class="text-muted">Toutes les demandes : en attente, validées et refusées</p>
+  </div>
+
+  <p-card>
+    <div class="list-toolbar list-toolbar--chips-only">
+      <div class="list-filter-chips list-filter-chips--scroll">
+        <p-selectButton
+          [options]="statusFilterOptions"
+          [(ngModel)]="statusFilter"
+          optionLabel="label"
+          optionValue="value"
+          (ngModelChange)="onFilterChange()">
+        </p-selectButton>
+      </div>
+      <div class="list-toolbar__actions">
+        <button
+          pButton
+          icon="pi pi-refresh"
+          class="p-button-text list-toolbar__btn-icon"
+          title="Actualiser"
+          (click)="loadAll()"
+          [disabled]="loading"></button>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-state">
+      <i class="pi pi-spin pi-spinner"></i> Chargement...
+    </div>
+
+    <p-table
+      *ngIf="!loading"
+      [value]="filteredRequests"
+      [rowHover]="true"
+      styleClass="p-datatable-sm"
+      [tableStyle]="{ 'min-width': '64rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Date</th>
+          <th>Entreprise</th>
+          <th>Plan</th>
+          <th>Durée</th>
+          <th>Paiement</th>
+          <th>Montant</th>
+          <th>Statut</th>
+          <th>Période / Détail</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-row>
+        <tr [class.row-pending]="row.requestStatus === 'PENDING'">
+          <td>{{ formatDate(row.createdAt) }}</td>
+          <td>{{ row.companyName }}</td>
+          <td>{{ row.planLabel }}</td>
+          <td>{{ row.durationLabel }}</td>
+          <td>{{ row.paymentProviderLabel }}</td>
+          <td>{{ formatAmount(row.amountPaid) }}</td>
+          <td>
+            <p-tag [value]="row.requestStatusLabel" [severity]="statusSeverity(row.requestStatus)"></p-tag>
+          </td>
+          <td class="detail-cell">
+            <span *ngIf="row.requestStatus === 'APPROVED' && row.periodStart">
+              {{ formatDate(row.periodStart) }} → {{ formatDate(row.periodEnd) }}
+            </span>
+            <span *ngIf="row.requestStatus === 'REJECTED' && row.rejectionReason" class="reject-text">
+              {{ row.rejectionReason }}
+            </span>
+            <span *ngIf="row.requestStatus === 'PENDING'" class="text-muted">—</span>
+            <small *ngIf="row.validatedByEmail && row.requestStatus !== 'PENDING'" class="validated-by">
+              par {{ row.validatedByEmail }}
+            </small>
+          </td>
+          <td class="actions-cell">
+            <button
+              pButton
+              icon="pi pi-image"
+              class="p-button-text p-button-sm"
+              title="Voir capture"
+              [disabled]="!row.proofUrl"
+              (click)="viewProof(row)"></button>
+            <ng-container *ngIf="isPending(row)">
+              <button
+                pButton
+                icon="pi pi-check"
+                class="p-button-text p-button-success p-button-sm"
+                title="Valider"
+                [loading]="processingId === row.id"
+                (click)="approve(row)"></button>
+              <button
+                pButton
+                icon="pi pi-times"
+                class="p-button-text p-button-danger p-button-sm"
+                title="Refuser"
+                (click)="openReject(row)"></button>
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9" class="empty-message">
+            Aucune souscription pour ce filtre.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-dialog
+    styleClass="app-mobile-dialog"
+    header="Justificatif de paiement"
+    [(visible)]="proofDialogVisible"
+    [modal]="true"
+    [draggable]="false"
+    [breakpoints]="dialogBreakpoints"
+    [style]="dialogStyle"
+    (onHide)="closeProof()">
+    <div class="proof-dialog" *ngIf="selectedRequest">
+      <p>
+        <strong>{{ selectedRequest.companyName }}</strong> —
+        {{ selectedRequest.paymentProviderLabel }}
+        <p-tag
+          [value]="selectedRequest.requestStatusLabel"
+          [severity]="statusSeverity(selectedRequest.requestStatus)"
+          styleClass="ml-2"></p-tag>
+      </p>
+      <img *ngIf="proofPreviewUrl" [src]="proofPreviewUrl" alt="Capture paiement" class="proof-image" />
+      <div class="proof-actions dialog-footer-mobile" *ngIf="isPending(selectedRequest)">
+        <button pButton label="Valider" icon="pi pi-check" class="p-button-success" (click)="approve(selectedRequest!)"></button>
+        <button pButton label="Refuser" icon="pi pi-times" class="p-button-danger p-button-outlined" (click)="openReject(selectedRequest!)"></button>
+      </div>
+    </div>
+  </p-dialog>
+
+  <p-dialog
+    styleClass="reject-subscription-dialog"
+    [(visible)]="rejectDialogVisible"
+    [modal]="true"
+    [closable]="!rejectSubmitting"
+    [closeOnEscape]="!rejectSubmitting"
+    [draggable]="false"
+    [resizable]="false"
+    [breakpoints]="dialogBreakpoints"
+    [style]="dialogStyle"
+    (onHide)="onRejectDialogHide()">
+    <ng-template pTemplate="header">
+      <div class="reject-dialog-header">
+        <span class="reject-dialog-header__icon" aria-hidden="true">
+          <i class="pi pi-times-circle"></i>
+        </span>
+        <div>
+          <span class="reject-dialog-header__title">Refuser la demande</span>
+          <span class="reject-dialog-header__hint">L'entreprise pourra soumettre une nouvelle demande</span>
+        </div>
+      </div>
+    </ng-template>
+
+    <div class="reject-dialog-body" *ngIf="selectedRequest">
+      <div class="reject-summary">
+        <div class="reject-summary__row">
+          <span class="reject-summary__label">Entreprise</span>
+          <strong>{{ selectedRequest.companyName }}</strong>
+        </div>
+        <div class="reject-summary__row">
+          <span class="reject-summary__label">Offre</span>
+          <span>{{ selectedRequest.planLabel }} · {{ selectedRequest.durationLabel }}</span>
+        </div>
+        <div class="reject-summary__row">
+          <span class="reject-summary__label">Paiement</span>
+          <span>{{ selectedRequest.paymentProviderLabel }} — {{ formatAmount(selectedRequest.amountPaid) }}</span>
+        </div>
+        <div class="reject-summary__row">
+          <span class="reject-summary__label">Date</span>
+          <span>{{ formatDate(selectedRequest.createdAt) }}</span>
+        </div>
+      </div>
+
+      <div class="reject-presets">
+        <span class="reject-presets__label">Motif fréquent</span>
+        <div class="reject-presets__chips">
+          <button
+            type="button"
+            *ngFor="let preset of rejectPresets"
+            class="reject-preset-chip"
+            [class.active]="rejectPresetKey === preset.key"
+            (click)="selectRejectPreset(preset)">
+            {{ preset.label }}
+          </button>
+        </div>
+      </div>
+
+      <div class="reject-field">
+        <label for="reject-reason-input">Message envoyé à l'entreprise</label>
+        <textarea
+          id="reject-reason-input"
+          pInputTextarea
+          rows="4"
+          class="reject-textarea"
+          [(ngModel)]="rejectReason"
+          (ngModelChange)="onRejectReasonChange()"
+          [disabled]="rejectSubmitting"
+          maxlength="500"
+          placeholder="Précisez pourquoi la demande est refusée (recommandé)…"></textarea>
+        <div class="reject-field__meta">
+          <small class="text-muted">Visible dans l'historique de souscription</small>
+          <small [class.reject-field__limit-warn]="rejectReason.length >= 450">{{ rejectReason.length }}/500</small>
+        </div>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="reject-dialog-footer">
+        <button
+          pButton
+          label="Annuler"
+          class="p-button-text reject-footer-cancel"
+          [disabled]="rejectSubmitting"
+          (click)="closeRejectDialog()"></button>
+        <button
+          pButton
+          label="Confirmer le refus"
+          icon="pi pi-times"
+          class="p-button-danger reject-footer-confirm"
+          [loading]="rejectSubmitting"
+          (click)="confirmReject()"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

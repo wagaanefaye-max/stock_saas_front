@@ -1,13 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
-import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { DividerModule } from 'primeng/divider';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { catchError, finalize, of } from 'rxjs';
+import { ApiService } from '../../../services/api.service';
+
+interface PlatformSettings {
+  subscriptionMonthlyPriceFcfa: number;
+  maintenanceMode: boolean;
+  allowNewRegistrations: boolean;
+}
 
 @Component({
   selector: 'app-platform-settings',
@@ -16,37 +24,104 @@ import { PhoneFormatDirective } from '../../../directives/phone-format.directive
     CommonModule,
     FormsModule,
     CardModule,
-    InputTextModule,
     ButtonModule,
     ToggleButtonModule,
     DividerModule,
     InputNumberModule,
-    PhoneFormatDirective
+    ToastModule
   ],
+  providers: [MessageService],
   templateUrl: './platform-settings.component.html',
   styleUrl: './platform-settings.component.scss'
 })
-export class PlatformSettingsComponent {
-  platformSettings = {
-    name: 'Stock SaaS',
-    supportEmail: 'support@stocksaas.com',
-    supportPhone: '77 123 45 67',
-    maxCompanies: 100,
-    maxUsersPerCompany: 50,
+export class PlatformSettingsComponent implements OnInit {
+  loading = false;
+  saving = false;
+
+  platformSettings: PlatformSettings = {
+    subscriptionMonthlyPriceFcfa: 5000,
     maintenanceMode: false,
     allowNewRegistrations: true
   };
 
-  plans = [
-    { name: 'Free', price: 0, maxUsers: 10, maxWarehouses: 3, trialDays: 14 },
-    { name: 'Basique', price: 29.99, maxUsers: 5, maxWarehouses: 2 },
-    { name: 'Standard', price: 79.99, maxUsers: 20, maxWarehouses: 5 },
-    { name: 'Premium', price: 149.99, maxUsers: 50, maxWarehouses: 10 }
-  ];
+  constructor(
+    private apiService: ApiService,
+    private messageService: MessageService
+  ) {}
 
-  saveSettings() {
-    // TODO: Implémenter la sauvegarde
-    console.log('Settings saved', this.platformSettings);
+  ngOnInit(): void {
+    this.loadSettings();
+  }
+
+  loadSettings(): void {
+    this.loading = true;
+    this.apiService.get<PlatformSettings>('/platform-settings')
+      .pipe(
+        catchError(error => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: error?.error?.message || 'Impossible de charger les paramètres'
+          });
+          return of(null);
+        }),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe(data => {
+        if (!data) return;
+        this.platformSettings = {
+          subscriptionMonthlyPriceFcfa: data.subscriptionMonthlyPriceFcfa ?? 5000,
+          maintenanceMode: !!data.maintenanceMode,
+          allowNewRegistrations: data.allowNewRegistrations !== false
+        };
+      });
+  }
+
+  saveSettings(): void {
+    const price = Number(this.platformSettings.subscriptionMonthlyPriceFcfa);
+    if (!price || price <= 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation',
+        detail: 'Le montant mensuel doit être supérieur à 0.'
+      });
+      return;
+    }
+
+    this.saving = true;
+    this.apiService.put<PlatformSettings>('/platform-settings', {
+      subscriptionMonthlyPriceFcfa: price,
+      maintenanceMode: this.platformSettings.maintenanceMode,
+      allowNewRegistrations: this.platformSettings.allowNewRegistrations
+    })
+      .pipe(
+        catchError(error => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: error?.error?.message || 'Enregistrement impossible'
+          });
+          return of(null);
+        }),
+        finalize(() => {
+          this.saving = false;
+        })
+      )
+      .subscribe(data => {
+        if (!data) return;
+        this.platformSettings = {
+          subscriptionMonthlyPriceFcfa: data.subscriptionMonthlyPriceFcfa,
+          maintenanceMode: !!data.maintenanceMode,
+          allowNewRegistrations: data.allowNewRegistrations !== false
+        };
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Paramètres enregistrés',
+          detail: 'Le tarif mensuel et les options plateforme ont été mis à jour.',
+          life: 3500
+        });
+      });
   }
 }
-

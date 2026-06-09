@@ -1,22 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-
-export enum UserRole {
-  SUPER_ADMIN = 'SUPER_ADMIN',
-  ADMIN_ENTREPRISE = 'ADMIN_ENTREPRISE',
-  GESTIONNAIRE = 'GESTIONNAIRE',
-  UTILISATEUR = 'UTILISATEUR'
-}
-
-export interface User {
-  id: number;
-  email: string;
-  name: string;
-  role: UserRole;
-  entrepriseId?: number;
-  entrepriseName?: string;
-  assignedWarehouses?: number[]; // IDs des entrepôts assignés (pour les gestionnaires)
-}
+import { BehaviorSubject, Observable, catchError, map, throwError } from 'rxjs';
+import { Router } from '@angular/router';
+import { ApiService } from './api.service';
+import { User, UserRole } from '../models/user.model';
+import { LoginRequest, RegisterRequest, AuthResponse } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -24,82 +11,189 @@ export interface User {
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
+  private readonly USER_KEY = 'currentUser';
 
-  constructor() {
-    // Récupérer l'utilisateur depuis le localStorage au démarrage
-    const savedUser = localStorage.getItem('currentUser');
+  constructor(
+    private apiService: ApiService,
+    private router: Router
+  ) {
+    this.loadUserFromStorage();
+  }
+
+  /**
+   * Charge l'utilisateur depuis le localStorage (cookie gère la session côté serveur).
+   */
+  private loadUserFromStorage(): void {
+    const savedUser = localStorage.getItem(this.USER_KEY);
     if (savedUser) {
-      this.currentUserSubject.next(JSON.parse(savedUser));
+      try {
+        const user = JSON.parse(savedUser);
+        this.currentUserSubject.next(user);
+      } catch (e) {
+        console.error('Erreur lors du chargement de l\'utilisateur:', e);
+        this.clearStorage();
+      }
     }
   }
 
+  /**
+   * Connexion (le JWT est envoyé dans un cookie HttpOnly par le serveur).
+   */
   login(email: string, password: string): Observable<User> {
-    // TODO: Implémenter l'appel API réel
-    // Pour l'instant, simulation basée sur l'email
-    return new Observable(observer => {
-      setTimeout(() => {
-        let user: User;
-        
-        if (email.includes('superadmin') || email.includes('admin@platform')) {
-          user = {
-            id: 1,
-            email: email,
-            name: 'Super Administrateur',
-            role: UserRole.SUPER_ADMIN
-          };
-        } else if (email.includes('admin@')) {
-          user = {
-            id: 2,
-            email: email,
-            name: 'Admin Entreprise',
-            role: UserRole.ADMIN_ENTREPRISE,
-            entrepriseId: 1,
-            entrepriseName: 'Entreprise Test'
-          };
-        } else {
-          user = {
-            id: 3,
-            email: email,
-            name: 'Utilisateur',
-            role: UserRole.UTILISATEUR,
-            entrepriseId: 1,
-            entrepriseName: 'Entreprise Test'
-          };
-        }
+    const loginRequest: LoginRequest = { email, password };
 
-        this.currentUserSubject.next(user);
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        observer.next(user);
-        observer.complete();
-      }, 500);
+    return this.apiService.post<AuthResponse>('/auth/login', loginRequest).pipe(
+      map((response: AuthResponse) => {
+        const user: User = {
+          id: undefined,
+          email: response.email,
+          name: response.name,
+          role: response.role as UserRole,
+          companyId: response.companyId,
+          companyName: response.companyName
+        };
+        this.setCurrentUser(user);
+        return user;
+      }),
+      catchError((error) => {
+        console.error('Erreur de connexion:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Inscription
+   */
+  register(registerRequest: RegisterRequest): Observable<any> {
+    return this.apiService.post<any>('/auth/register', registerRequest).pipe(
+      catchError((error) => {
+        console.error('Erreur d\'inscription:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+  
+  /**
+   * Demande de réinitialisation de mot de passe
+   */
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.apiService.post<{ message: string }>('/auth/forgot-password', { email }).pipe(
+      catchError((error) => {
+        console.error('Erreur lors de la demande de réinitialisation de mot de passe:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+  
+  /**
+   * Valide le compte et définit le mot de passe. Le serveur envoie le cookie d'authentification, on restaure l'utilisateur.
+   */
+  verifyAccount(token: string, password: string, passwordConfirmation: string): Observable<{ message: string }> {
+    return this.apiService.post<AuthResponse>('/auth/verify-account', {
+      token,
+      password,
+      passwordConfirmation: passwordConfirmation || password
+    }).pipe(
+      map((response: AuthResponse) => {
+        if (response?.email) {
+          const user: User = {
+            id: undefined,
+            email: response.email,
+            name: response.name,
+            role: response.role as UserRole,
+            companyId: response.companyId,
+            companyName: response.companyName
+          };
+          this.setCurrentUser(user);
+        }
+        return { message: 'Mot de passe défini. Vous êtes connecté.' };
+      }),
+      catchError((error) => {
+        console.error('Erreur de validation de compte:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Déconnexion
+   */
+  logout(): void {
+    // Appeler l'endpoint de déconnexion du backend
+    this.apiService.post<any>('/auth/logout', {}).subscribe({
+      next: () => {
+        // Nettoyer le localStorage et rediriger
+        this.clearStorage();
+        this.currentUserSubject.next(null);
+        this.router.navigate(['/login']);
+      },
+      error: (error) => {
+        // Même en cas d'erreur, nettoyer le localStorage et rediriger
+        console.error('Erreur lors de la déconnexion:', error);
+        this.clearStorage();
+        this.currentUserSubject.next(null);
+        this.router.navigate(['/login']);
+      }
     });
   }
 
-  logout(): void {
-    this.currentUserSubject.next(null);
-    localStorage.removeItem('currentUser');
+  /**
+   * Sauvegarde l'utilisateur actuel
+   */
+  private setCurrentUser(user: User): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    this.currentUserSubject.next(user);
   }
 
+  /**
+   * Nettoie le localStorage
+   */
+  private clearStorage(): void {
+    localStorage.removeItem(this.USER_KEY);
+  }
+
+  /**
+   * Récupère l'utilisateur actuel
+   */
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
   }
 
+  /**
+   * Vérifie si l'utilisateur est connecté (cookie envoyé automatiquement par le navigateur).
+   */
+  isAuthenticated(): boolean {
+    return this.getCurrentUser() !== null;
+  }
+
+  /**
+   * Vérifie si l'utilisateur est super admin
+   */
   isSuperAdmin(): boolean {
     const user = this.getCurrentUser();
     return user?.role === UserRole.SUPER_ADMIN;
   }
 
+  /**
+   * Vérifie si l'utilisateur est admin entreprise
+   */
   isAdminEntreprise(): boolean {
     const user = this.getCurrentUser();
-    // return user?.role === UserRole.ADMIN_ENTREPRISE;
-    return true;
+    return user?.role === UserRole.ADMIN_ENTREPRISE;
   }
 
+  /**
+   * Vérifie si l'utilisateur a un rôle spécifique
+   */
   hasRole(role: UserRole): boolean {
     const user = this.getCurrentUser();
     return user?.role === role;
   }
 
+  /**
+   * Vérifie si l'utilisateur est gestionnaire
+   */
   isGestionnaire(): boolean {
     const user = this.getCurrentUser();
     return user?.role === UserRole.GESTIONNAIRE;
@@ -107,10 +201,6 @@ export class AuthService {
 
   /**
    * Vérifie si l'utilisateur a accès à un entrepôt spécifique
-   * - Super Admin : accès à tous
-   * - Admin Entreprise : accès à tous les entrepôts de son entreprise
-   * - Gestionnaire : accès uniquement aux entrepôts assignés
-   * - Utilisateur : accès uniquement aux entrepôts assignés
    */
   hasWarehouseAccess(warehouseId: number): boolean {
     const user = this.getCurrentUser();
@@ -126,8 +216,8 @@ export class AuthService {
       return true; // TODO: Vérifier que l'entrepôt appartient à l'entreprise
     }
 
-    // Gestionnaire et Utilisateur : accès uniquement aux entrepôts assignés
-    if (user.role === UserRole.GESTIONNAIRE || user.role === UserRole.UTILISATEUR) {
+    // Gestionnaire : accès uniquement aux entrepôts assignés
+    if (user.role === UserRole.GESTIONNAIRE) {
       return user.assignedWarehouses?.includes(warehouseId) ?? false;
     }
 
@@ -140,7 +230,6 @@ export class AuthService {
   getAccessibleWarehouseIds(): number[] | null {
     const user = this.getCurrentUser();
     if (!user) {
-      // Si pas d'utilisateur, retourner null pour afficher tous (pour les tests)
       return null;
     }
 
@@ -149,8 +238,7 @@ export class AuthService {
       return null;
     }
 
-    // Gestionnaire et Utilisateur : retourner les entrepôts assignés
+    // Gestionnaire : retourner les entrepôts assignés
     return user.assignedWarehouses || [];
   }
 }
-

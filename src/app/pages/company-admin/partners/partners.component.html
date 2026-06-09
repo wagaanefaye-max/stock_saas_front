@@ -1,0 +1,125 @@
+<div class="partners-page">
+  <p-toast></p-toast>
+  <div class="page-header">
+    <div>
+      <h1>Partenaires</h1>
+      <p class="text-muted">Gérer vos clients et fournisseurs</p>
+    </div>
+    <div class="header-actions">
+      <button pButton label="Nouveau partenaire" icon="pi pi-plus" class="p-button-sm partners-create-btn" (click)="openNew()"></button>
+    </div>
+  </div>
+
+  <p-card>
+    <div class="list-toolbar">
+      <div class="list-toolbar__primary">
+        <span class="p-input-icon-left list-toolbar__search">
+          <i class="pi pi-search"></i>
+          <input
+            type="text"
+            pInputText
+            [(ngModel)]="globalFilter"
+            (ngModelChange)="onSearchInput()"
+            placeholder="Nom ou email…">
+        </span>
+      </div>
+      <div class="list-toolbar__filters list-toolbar__filters--inline">
+        <div class="list-filter-chips">
+          <p-selectButton
+            [options]="roleFilterOptions"
+            [(ngModel)]="selectedRoleFilter"
+            optionLabel="label"
+            optionValue="value"
+            (ngModelChange)="onRoleFilterChange()">
+          </p-selectButton>
+        </div>
+      </div>
+    </div>
+
+    <p-table
+      [value]="partners"
+      [lazy]="true"
+      [paginator]="true"
+      [rows]="rows"
+      [totalRecords]="totalPartners"
+      [loading]="loading"
+      (onLazyLoad)="onPartnersLazyLoad($event)"
+      [rowTrackBy]="trackByPartnerId"
+      [tableStyle]="{'min-width': '50rem'}"
+      [rowHover]="true">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Rôle</th>
+          <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Adresse</th>
+          <th style="width: 7rem">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-p>
+        <tr>
+          <td><p-tag [value]="getRoleLabel(p.role)" [severity]="getRoleSeverity(p.role)"></p-tag></td>
+          <td>{{ p.name }}</td>
+          <td>{{ p.email || '-' }}</td>
+          <td>{{ p.phone | phoneFormat }}</td>
+          <td><span [title]="p.address">{{ (p.address | slice:0:30) || '-' }}{{ (p.address && p.address.length > 30) ? '…' : '' }}</span></td>
+          <td>
+            <button pButton icon="pi pi-ellipsis-v" class="p-button-text p-button-sm p-button-rounded" (click)="showMenu($event, p)" title="Actions"></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="empty-state-cell">
+            <div class="empty-state">
+              <i class="pi pi-users empty-state-icon"></i>
+              <p class="empty-state-text">Aucun partenaire (client ou fournisseur)</p>
+              <button pButton label="Nouveau partenaire" icon="pi pi-plus" class="p-button-sm partners-create-btn" (click)="openNew()"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
+
+  <p-dialog
+    [(visible)]="displayDialog"
+    [header]="partner.id ? 'Modifier le partenaire' : 'Nouveau partenaire'"
+    [modal]="true"
+    [style]="{ width: '500px' }"
+    [draggable]="false"
+    [resizable]="false"
+    (onHide)="partner = {}">
+    <div class="form-group">
+      <label>Rôle *</label>
+      <p-select [options]="roleOptions" [(ngModel)]="partner.role" optionLabel="label" optionValue="value" class="w-full" [disabled]="!!partner.id"></p-select>
+    </div>
+    <div class="form-group">
+      <label>Nom *</label>
+      <input type="text" pInputText [(ngModel)]="partner.name" class="w-full" placeholder="Nom ou raison sociale">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" pInputText [(ngModel)]="partner.email" class="w-full" placeholder="email@exemple.com">
+    </div>
+    <div class="form-group">
+      <label>Téléphone</label>
+      <input type="tel" pInputText [(ngModel)]="partner.phone" class="w-full" placeholder="78 900 88 77" appPhoneFormat maxlength="12">
+    </div>
+    <div class="form-group">
+      <label>Adresse</label>
+      <input type="text" pInputText [(ngModel)]="partner.address" class="w-full" placeholder="Adresse">
+    </div>
+    <div class="form-group">
+      <label>Description / Notes</label>
+      <textarea pInputText [(ngModel)]="partner.description" class="w-full" rows="2" placeholder="Notes optionnelles"></textarea>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
+      <button pButton label="Enregistrer" icon="pi pi-check" (click)="savePartner()" [disabled]="!partner.name?.trim()"></button>
+    </ng-template>
+  </p-dialog>
+</div>

@@ -1,70 +1,66 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './pages/login/login.component';
-import { RegisterComponent } from './pages/register/register.component';
-import { LayoutComponent } from './layout/layout.component';
-import { SuperAdminLayoutComponent } from './layout/super-admin-layout/super-admin-layout.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { ProductsComponent } from './pages/products/products.component';
-import { WarehousesComponent } from './pages/warehouses/warehouses.component';
-import { MovementsComponent } from './pages/movements/movements.component';
-import { ReportsComponent } from './pages/reports/reports.component';
-import { SettingsComponent } from './pages/settings/settings.component';
-import { SuperAdminDashboardComponent } from './pages/super-admin/dashboard/dashboard.component';
-import { CompaniesComponent } from './pages/super-admin/companies/companies.component';
-import { PlatformUsersComponent } from './pages/super-admin/platform-users/platform-users.component';
-import { PlatformSettingsComponent } from './pages/super-admin/platform-settings/platform-settings.component';
-import { CompanyAdminDashboardComponent } from './pages/company-admin/dashboard/dashboard.component';
-import { CompanyUsersComponent } from './pages/company-admin/users/users.component';
-import { CompanyAdminLayoutComponent } from './layout/company-admin-layout/company-admin-layout.component';
-import { GestionnaireLayoutComponent } from './layout/gestionnaire-layout/gestionnaire-layout.component';
+import { authGuard } from './guards/auth.guard';
+import { superAdminGuard } from './guards/super-admin.guard';
+import { adminEntrepriseGuard } from './guards/admin-entreprise.guard';
+import { gestionnaireGuard } from './guards/gestionnaire.guard';
 
 export const routes: Routes = [
   {
     path: 'login',
-    component: LoginComponent
+    loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./pages/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
   },
   {
     path: 'register',
-    component: RegisterComponent
+    loadComponent: () => import('./pages/register/register.component').then(m => m.RegisterComponent)
+  },
+  {
+    path: 'verify-account',
+    loadComponent: () => import('./pages/verify-account/verify-account.component').then(m => m.VerifyAccountComponent)
   },
   {
     path: 'gestionnaire',
-    component: GestionnaireLayoutComponent,
+    loadComponent: () => import('./layout/gestionnaire-layout/gestionnaire-layout.component').then(m => m.GestionnaireLayoutComponent),
+    canActivate: [gestionnaireGuard],
     children: [
-  {
-    path: '',
+      {
+        path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'
       },
       {
         path: 'dashboard',
-        component: DashboardComponent
+        loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
         path: 'products',
-        component: ProductsComponent
+        loadComponent: () => import('./pages/products/products.component').then(m => m.ProductsComponent)
       },
       {
         path: 'warehouses',
-        component: WarehousesComponent
+        loadComponent: () => import('./pages/warehouses/warehouses.component').then(m => m.WarehousesComponent)
       },
       {
         path: 'movements',
-        component: MovementsComponent
+        loadComponent: () => import('./pages/movements/movements.component').then(m => m.MovementsComponent)
       },
       {
-        path: 'reports',
-        component: ReportsComponent
+        path: 'inventories',
+        loadComponent: () => import('./pages/inventories/inventories.component').then(m => m.InventoriesComponent)
       },
       {
         path: 'settings',
-        component: SettingsComponent
+        loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent)
       }
     ]
   },
   {
     path: 'gestion',
-    component: LayoutComponent,
+    loadComponent: () => import('./layout/layout.component').then(m => m.LayoutComponent),
+    canActivate: [authGuard],
     children: [
       {
         path: '',
@@ -73,33 +69,34 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
-        component: DashboardComponent
+        loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
         path: 'products',
-        component: ProductsComponent
+        loadComponent: () => import('./pages/products/products.component').then(m => m.ProductsComponent)
       },
       {
         path: 'warehouses',
-        component: WarehousesComponent
+        loadComponent: () => import('./pages/warehouses/warehouses.component').then(m => m.WarehousesComponent)
       },
       {
         path: 'movements',
-        component: MovementsComponent
+        loadComponent: () => import('./pages/movements/movements.component').then(m => m.MovementsComponent)
       },
       {
-        path: 'reports',
-        component: ReportsComponent
+        path: 'inventories',
+        loadComponent: () => import('./pages/inventories/inventories.component').then(m => m.InventoriesComponent)
       },
       {
         path: 'settings',
-        component: SettingsComponent
+        loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent)
       }
     ]
   },
   {
     path: 'company-admin',
-    component: CompanyAdminLayoutComponent,
+    loadComponent: () => import('./layout/company-admin-layout/company-admin-layout.component').then(m => m.CompanyAdminLayoutComponent),
+    canActivate: [adminEntrepriseGuard],
     children: [
       {
         path: '',
@@ -108,37 +105,50 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
-        component: CompanyAdminDashboardComponent
+        loadComponent: () => import('./pages/company-admin/dashboard/dashboard.component').then(m => m.CompanyAdminDashboardComponent)
       },
       {
         path: 'users',
-        component: CompanyUsersComponent
+        loadComponent: () => import('./pages/company-admin/users/users.component').then(m => m.CompanyUsersComponent)
+      },
+      {
+        path: 'partners',
+        loadComponent: () => import('./pages/company-admin/partners/partners.component').then(m => m.PartnersComponent)
+      },
+      {
+        path: 'invoices',
+        loadComponent: () => import('./pages/company-admin/invoices/invoices.component').then(m => m.InvoicesComponent)
       },
       {
         path: 'products',
-        component: ProductsComponent
+        loadComponent: () => import('./pages/products/products.component').then(m => m.ProductsComponent)
       },
       {
         path: 'warehouses',
-        component: WarehousesComponent
+        loadComponent: () => import('./pages/warehouses/warehouses.component').then(m => m.WarehousesComponent)
       },
       {
         path: 'movements',
-        component: MovementsComponent
+        loadComponent: () => import('./pages/movements/movements.component').then(m => m.MovementsComponent)
       },
       {
-        path: 'reports',
-        component: ReportsComponent
+        path: 'inventories',
+        loadComponent: () => import('./pages/inventories/inventories.component').then(m => m.InventoriesComponent)
       },
       {
         path: 'settings',
-        component: SettingsComponent
+        loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent)
+      },
+      {
+        path: 'subscriptions',
+        loadComponent: () => import('./pages/company-admin/subscriptions/subscriptions.component').then(m => m.CompanySubscriptionsComponent)
       }
     ]
   },
   {
     path: 'super-admin',
-    component: SuperAdminLayoutComponent,
+    loadComponent: () => import('./layout/super-admin-layout/super-admin-layout.component').then(m => m.SuperAdminLayoutComponent),
+    canActivate: [superAdminGuard],
     children: [
       {
         path: '',
@@ -147,19 +157,23 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
-        component: SuperAdminDashboardComponent
+        loadComponent: () => import('./pages/super-admin/dashboard/dashboard.component').then(m => m.SuperAdminDashboardComponent)
       },
       {
         path: 'companies',
-        component: CompaniesComponent
+        loadComponent: () => import('./pages/super-admin/companies/companies.component').then(m => m.CompaniesComponent)
       },
       {
         path: 'platform-users',
-        component: PlatformUsersComponent
+        loadComponent: () => import('./pages/super-admin/platform-users/platform-users.component').then(m => m.PlatformUsersComponent)
       },
       {
         path: 'platform-settings',
-        component: PlatformSettingsComponent
+        loadComponent: () => import('./pages/super-admin/platform-settings/platform-settings.component').then(m => m.PlatformSettingsComponent)
+      },
+      {
+        path: 'subscription-requests',
+        loadComponent: () => import('./pages/super-admin/subscription-requests/subscription-requests.component').then(m => m.SubscriptionRequestsComponent)
       }
     ]
   },
@@ -173,4 +187,3 @@ export const routes: Routes = [
     redirectTo: 'gestionnaire/dashboard'
   }
 ];
-

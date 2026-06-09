@@ -1,18 +1,33 @@
 .platform-settings-page {
+  max-width: 42rem;
+
   .page-header {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 
     h1 {
       font-size: 2rem;
       font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 0.5rem;
+      margin: 0 0 0.35rem;
     }
+
+    .text-muted {
+      margin: 0;
+      font-size: 0.9375rem;
+    }
+  }
+
+  .settings-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--text-muted);
+    padding: 2rem 0;
   }
 
   .settings-content {
     display: grid;
-    gap: 1.5rem;
+    gap: 1.25rem;
 
     .settings-card {
       h3 {
@@ -65,53 +80,33 @@
         }
       }
 
-      .plans-list {
-        .plan-item {
-          padding: 1.5rem;
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          margin-bottom: 1rem;
+    }
+  }
 
-          &:last-child {
-            margin-bottom: 0;
-          }
+  .settings-card--pricing {
+    .pricing-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
 
-          .plan-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+      label {
+        font-weight: 500;
+        color: var(--text-main);
+        font-size: 0.875rem;
+      }
 
-            h4 {
-              font-size: 1.25rem;
-              font-weight: 600;
-              color: var(--text-main);
-              margin: 0;
-            }
-
-            .plan-price {
-              font-size: 1.5rem;
-              font-weight: 700;
-              color: var(--primary);
-            }
-          }
-
-          .plan-details {
-            margin-bottom: 1rem;
-
-            p {
-              color: var(--text-muted);
-              margin-bottom: 0.5rem;
-
-              i {
-                margin-right: 0.5rem;
-                color: var(--primary);
-              }
-            }
-          }
-        }
+      .pricing-hint {
+        margin: 0.25rem 0 0;
+        font-size: 0.8125rem;
+        line-height: 1.45;
       }
     }
+  }
+
+  .settings-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-bottom: 1rem;
   }
 }
 

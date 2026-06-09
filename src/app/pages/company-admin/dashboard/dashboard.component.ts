@@ -1,123 +1,163 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
+import { buildDoughnutChartOptions, buildLineChartOptions } from '../../../utils/chart-options.util';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
-import { AuthService } from '../../../services/auth.service';
+import { MessageService } from 'primeng/api';
+import { ApiService } from '../../../services/api.service';
+
+interface DashboardInvoice {
+  id: number;
+  status: string;
+  total: number;
+  invoiceDate: string;
+  clientName?: string | null;
+}
+
+interface DashboardProduct {
+  id: number;
+  stock?: number | null;
+}
 
 @Component({
   selector: 'app-company-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, CardModule, ChartModule],
+  imports: [CommonModule, RouterModule, ToastModule, CardModule, ChartModule],
+  providers: [MessageService],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
 export class CompanyAdminDashboardComponent implements OnInit {
-  stats = [
-    {
-      title: 'Utilisateurs actifs',
-      value: '24',
-      icon: 'pi pi-users',
-      color: 'var(--primary)',
-      change: '+3 ce mois'
-    },
-    {
-      title: 'Produits totaux',
-      value: '1,234',
-      icon: 'pi pi-box',
-      color: 'var(--secondary)',
-      change: '+12%'
-    },
-    {
-      title: 'Entrepôts',
-      value: '8',
-      icon: 'pi pi-building',
-      color: 'var(--warning)',
-      change: '+2'
-    },
-    {
-      title: 'Mouvements (mois)',
-      value: '456',
-      icon: 'pi pi-arrows-h',
-      color: 'var(--danger)',
-      change: '+8%'
-    }
-  ];
+  invoices: DashboardInvoice[] = [];
+  products: DashboardProduct[] = [];
 
-  chartData: any;
+  totalInvoices = 0;
+  paidInvoices = 0;
+  unpaidInvoices = 0;
+  paidRevenue = 0;
+  lowStockProducts = 0;
+
+  salesByMonthData: any;
+  statusChartData: any;
   chartOptions: any;
+  doughnutChartOptions: any;
 
-  constructor(public authService: AuthService) {}
+  constructor(
+    private apiService: ApiService,
+    private messageService: MessageService
+  ) {}
 
-  ngOnInit() {
-    // Palette de couleurs pour différencier les types de mouvements
-    const colors = {
-      primary: '#2563EB',      // Bleu - Entrées
-      secondary: '#16A34A',     // Vert - Sorties
-      warning: '#F59E0B',       // Orange - Transferts
-      danger: '#DC2626',        // Rouge - Ajustements
-      info: '#06B6D4'           // Cyan - Autres
-    };
+  ngOnInit(): void {
+    this.refreshChartOptions();
+    this.loadDashboardData();
+  }
 
-    this.chartData = {
-      labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.refreshChartOptions();
+  }
+
+  private loadDashboardData(): void {
+    this.apiService.get<DashboardInvoice[]>('/invoices').subscribe({
+      next: (invoices) => {
+        this.invoices = invoices || [];
+        this.computeInvoiceKpis();
+        this.buildSalesByMonthChart();
+        this.buildStatusChart();
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger les données des ventes.'
+        });
+      }
+    });
+
+    this.apiService.get<DashboardProduct[]>('/products').subscribe({
+      next: (products) => {
+        this.products = products || [];
+        this.lowStockProducts = this.products.filter(p => (Number(p.stock) || 0) <= 5).length;
+      },
+      error: () => {
+        this.lowStockProducts = 0;
+      }
+    });
+  }
+
+  private computeInvoiceKpis(): void {
+    this.totalInvoices = this.invoices.length;
+    this.paidInvoices = this.invoices.filter(i => i.status === 'PAID').length;
+    this.unpaidInvoices = this.totalInvoices - this.paidInvoices;
+    this.paidRevenue = this.invoices
+      .filter(i => i.status === 'PAID')
+      .reduce((sum, i) => sum + (Number(i.total) || 0), 0);
+  }
+
+  private buildSalesByMonthChart(): void {
+    const monthlyMap = new Map<string, number>();
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      monthlyMap.set(key, 0);
+    }
+
+    this.invoices
+      .filter(i => i.status === 'PAID' && !!i.invoiceDate)
+      .forEach(i => {
+        const d = new Date(i.invoiceDate);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (monthlyMap.has(key)) {
+          monthlyMap.set(key, (monthlyMap.get(key) || 0) + (Number(i.total) || 0));
+        }
+      });
+
+    const labels = Array.from(monthlyMap.keys()).map(k => {
+      const [y, m] = k.split('-');
+      return `${m}/${y.slice(2)}`;
+    });
+    const values = Array.from(monthlyMap.values());
+
+    this.salesByMonthData = {
+      labels,
       datasets: [
         {
-          label: 'Entrées',
-          data: [45, 39, 50, 51, 36, 35],
-          fill: true,
-          backgroundColor: 'rgba(37, 99, 235, 0.15)',
-          borderColor: colors.primary,
-          borderWidth: 2,
-          tension: 0.4,
-          pointBackgroundColor: colors.primary,
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 4
-        },
-        {
-          label: 'Sorties',
-          data: [20, 20, 30, 30, 20, 20],
-          fill: true,
-          backgroundColor: 'rgba(220, 38, 38, 0.15)',
-          borderColor: colors.danger,
-          borderWidth: 2,
-          tension: 0.4,
-          pointBackgroundColor: colors.danger,
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 4
+          label: 'Ventes payées (FCFA)',
+          data: values,
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37, 99, 235, 0.2)',
+          tension: 0.3,
+          fill: true
         }
       ]
     };
+  }
 
-    this.chartOptions = {
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-          labels: {
-            usePointStyle: true,
-            padding: 15,
-            font: {
-              size: 12,
-              weight: '500'
-            }
-          }
+  private buildStatusChart(): void {
+    const paid = this.paidInvoices;
+    const unpaid = this.unpaidInvoices;
+    this.statusChartData = {
+      labels: ['Payées', 'Impayées'],
+      datasets: [
+        {
+          data: [paid, unpaid],
+          backgroundColor: ['#16a34a', '#f59e0b']
         }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'rgba(0, 0, 0, 0.05)'
-          }
-        },
-        x: {
-          grid: {
-            display: false
-          }
-        }
-      }
+      ]
     };
+  }
+
+  private refreshChartOptions(): void {
+    this.chartOptions = {
+      ...buildLineChartOptions({ legendPosition: 'bottom' })
+    };
+    this.doughnutChartOptions = { ...buildDoughnutChartOptions() };
+  }
+
+  formatMoney(value: number): string {
+    return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(value || 0);
   }
 }

@@ -1,12 +1,45 @@
 <div class="platform-settings-page">
+  <p-toast></p-toast>
 
-  <div class="settings-content">
+  <header class="page-header">
+    <div>
+      <h1>Paramètres plateforme</h1>
+      <p class="text-muted">Tarif d'abonnement et options globales</p>
+    </div>
+  </header>
 
+  <div *ngIf="loading" class="settings-loading">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Chargement…</span>
+  </div>
+
+  <div *ngIf="!loading" class="settings-content">
+    <p-card class="settings-card settings-card--pricing">
+      <h3>Tarif abonnement entreprise</h3>
+      <p-divider></p-divider>
+
+      <div class="pricing-form">
+        <label for="monthly-price">Montant mensuel à payer (FCFA)</label>
+        <p-inputNumber
+          inputId="monthly-price"
+          [(ngModel)]="platformSettings.subscriptionMonthlyPriceFcfa"
+          [min]="1"
+          [maxFractionDigits]="0"
+          mode="decimal"
+          suffix=" FCFA"
+          placeholder="5000"
+          [style]="{ width: '100%' }">
+        </p-inputNumber>
+        <p class="text-muted pricing-hint">
+          Ce montant s'applique à toutes les entreprises pour le calcul des souscriptions (1, 3, 6 ou 12 mois avec réductions).
+        </p>
+      </div>
+    </p-card>
 
     <p-card class="settings-card">
       <h3>Mode maintenance</h3>
       <p-divider></p-divider>
-      
+
       <div class="form-section">
         <div class="setting-item">
           <div>
@@ -26,28 +59,15 @@
       </div>
     </p-card>
 
-    <p-card class="settings-card">
-      <h3>Plans d'abonnement</h3>
-      <p-divider></p-divider>
-      
-      <div class="plans-list">
-        <div *ngFor="let plan of plans" class="plan-item">
-          <div class="plan-header">
-            <h4>{{ plan.name }}</h4>
-            <span class="plan-price">
-              <span *ngIf="plan.name === 'Free'">14 jours d'essai</span>
-              <span *ngIf="plan.name !== 'Free'">{{ plan.price }} €/mois</span>
-            </span>
-          </div>
-          <div class="plan-details">
-            <p><i class="pi pi-users"></i> {{ plan.maxUsers }} utilisateurs max</p>
-            <p><i class="pi pi-building"></i> {{ plan.maxWarehouses }} entrepôts max</p>
-            <p *ngIf="plan.trialDays"><i class="pi pi-calendar"></i> {{ plan.trialDays }} jours d'essai gratuit</p>
-          </div>
-          <button pButton label="Modifier" icon="pi pi-pencil" class="p-button-text"></button>
-        </div>
-      </div>
-    </p-card>
+    <div class="settings-actions">
+      <button
+        pButton
+        label="Enregistrer"
+        icon="pi pi-check"
+        (click)="saveSettings()"
+        [loading]="saving"
+        [disabled]="saving">
+      </button>
+    </div>
   </div>
 </div>
-
