@@ -23,7 +23,7 @@
           inputId="inventory-warehouse-filter-mobile"
           [options]="warehouseFilterOptions"
           [(ngModel)]="warehouseFilter"
-          (onChange)="loadInventories()"
+          (onChange)="onFilterChange()"
           optionLabel="label"
           optionValue="value"
           placeholder="Tous les entrepôts"
@@ -39,20 +39,20 @@
         [(ngModel)]="statusFilter"
         optionLabel="label"
         optionValue="value"
-        (ngModelChange)="loadInventories()">
+        (ngModelChange)="onFilterChange()">
       </p-selectButton>
     </div>
   </div>
 
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="filteredInventories.length === 0" class="mobile-list__empty">
+    <div *ngIf="inventories.length === 0" class="mobile-list__empty">
       <i class="pi pi-clipboard"></i>
       <p>Aucun inventaire</p>
       <p class="text-muted small">Créez un inventaire pour un entrepôt pour lancer un comptage.</p>
     </div>
 
-    <ul *ngIf="filteredInventories.length > 0" class="mobile-list__items">
-      <li *ngFor="let inv of filteredInventories" class="mobile-card">
+    <ul *ngIf="inventories.length > 0" class="mobile-list__items">
+      <li *ngFor="let inv of inventories" class="mobile-card">
         <div class="mobile-card__top">
           <div class="mobile-card__main">
             <span class="mobile-card__title">{{ inv.warehouseName }}</span>
@@ -81,6 +81,18 @@
         </div>
       </li>
     </ul>
+
+    <p-paginator
+      *ngIf="totalRecords > 0"
+      class="mobile-list__paginator entity-paginator"
+      [rows]="size"
+      [totalRecords]="totalRecords"
+      [first]="first"
+      (onPageChange)="onPageChange($event)"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} sur {totalRecords}"
+      [rowsPerPageOptions]="[10, 20, 50]">
+    </p-paginator>
   </div>
 
   <p-card class="table-card hide-mobile">
@@ -92,7 +104,7 @@
             inputId="inventory-warehouse-filter"
             [options]="warehouseFilterOptions"
             [(ngModel)]="warehouseFilter"
-            (onChange)="loadInventories()"
+            (onChange)="onFilterChange()"
             optionLabel="label"
             optionValue="value"
             placeholder="Tous les entrepôts"
@@ -106,7 +118,7 @@
             [(ngModel)]="statusFilter"
             optionLabel="label"
             optionValue="value"
-            (ngModelChange)="loadInventories()">
+            (ngModelChange)="onFilterChange()">
           </p-selectButton>
         </div>
       </div>

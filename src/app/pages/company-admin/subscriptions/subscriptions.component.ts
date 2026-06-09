@@ -255,9 +255,9 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
         this.detailProofUrl = URL.createObjectURL(blob);
         this.detailProofLoading = false;
       },
-      error: () => {
+      error: (err: { userMessage?: string }) => {
         this.detailProofLoading = false;
-        this.detailProofError = 'Impossible d\'afficher le justificatif.';
+        this.detailProofError = err?.userMessage || 'Impossible d\'afficher le justificatif.';
       }
     });
   }

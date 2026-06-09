@@ -13,8 +13,19 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ApiService } from '../../services/api.service';
+
+interface InventoriesPageResponse {
+  content: any[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
 @Component({
   selector: 'app-inventories',
   standalone: true,
@@ -33,6 +44,7 @@ import { ApiService } from '../../services/api.service';
     ToastModule,
     SelectButtonModule,
     ProgressSpinnerModule,
+    PaginatorModule,
   ],
   providers: [MessageService],
   templateUrl: './inventories.component.html',
@@ -43,11 +55,13 @@ export class InventoriesComponent implements OnInit {
   warehouses: any[] = [];
   /** Options pour le filtre entrepôt (Tous + liste des entrepôts) */
   warehouseFilterOptions: { label: string; value: number | null }[] = [];
-  /** Filtre texte (client-side sur la liste chargée) */
-  globalFilter = '';
   /** Filtres envoyés au backend */
   warehouseFilter: number | null = null;
   statusFilter: 'ALL' | 'DRAFT' | 'IN_PROGRESS' | 'CLOSED' = 'ALL';
+  page = 0;
+  size = 10;
+  totalRecords = 0;
+  first = 0;
   statusFilterOptions = [
     { label: 'Tous', value: 'ALL' },
     { label: 'En cours', value: 'IN_PROGRESS' },
@@ -99,12 +113,15 @@ export class InventoriesComponent implements OnInit {
   }
 
   loadInventories() {
-    const params: Record<string, string | number | null> = {};
+    const params: Record<string, string | number | null> = {
+      page: this.page,
+      size: this.size
+    };
     if (this.warehouseFilter != null) params['warehouseId'] = this.warehouseFilter;
     if (this.statusFilter !== 'ALL') params['status'] = this.statusFilter;
-    this.apiService.get<any[]>('/inventories', params).subscribe({
-      next: (data) => {
-        this.inventories = (data || []).map(inv => ({
+    this.apiService.get<InventoriesPageResponse>('/inventories', params).subscribe({
+      next: (response) => {
+        this.inventories = (response.content || []).map(inv => ({
           id: inv.id,
           warehouseId: inv.warehouseId,
           warehouseName: inv.warehouseName,
@@ -117,6 +134,8 @@ export class InventoriesComponent implements OnInit {
           createdAt: inv.createdAt,
           lines: inv.lines || []
         }));
+        this.totalRecords = response.totalElements;
+        this.first = response.page * response.size;
       },
       error: () => {
         this.messageService.add({
@@ -126,6 +145,22 @@ export class InventoriesComponent implements OnInit {
         });
       }
     });
+  }
+
+  onFilterChange() {
+    this.page = 0;
+    this.first = 0;
+    this.loadInventories();
+  }
+
+  onPageChange(event: { first?: number; rows?: number; page?: number }) {
+    const nextRows = event.rows ?? this.size;
+    this.size = nextRows;
+    this.page = event.first !== undefined
+      ? Math.floor(event.first / nextRows)
+      : (event.page ?? 0);
+    this.first = this.page * this.size;
+    this.loadInventories();
   }
 
   openCreate() {
@@ -343,14 +378,4 @@ export class InventoriesComponent implements OnInit {
     return Number(counted) - Number(theoretical);
   }
 
-  get filteredInventories(): any[] {
-    const term = (this.globalFilter || '').toLowerCase().trim();
-    if (!term) return this.inventories;
-    return this.inventories.filter(
-      inv =>
-        (inv.warehouseName || '').toLowerCase().includes(term) ||
-        (inv.statusLabel || '').toLowerCase().includes(term) ||
-        (inv.createdByName || '').toLowerCase().includes(term)
-    );
-  }
 }

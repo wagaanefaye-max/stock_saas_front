@@ -1,6 +1,32 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError, from, mergeMap, Observable, throwError } from 'rxjs';
 import { ApiService } from './api.service';
+
+function readBlobErrorMessage(error: unknown, fallback: string): Observable<never> {
+  const httpError = error as { error?: unknown; message?: string };
+  const blob = httpError?.error;
+  if (blob instanceof Blob) {
+    return from(blob.text()).pipe(
+      mergeMap((text) => {
+        let message = fallback;
+        try {
+          const parsed = JSON.parse(text) as { message?: string };
+          if (parsed?.message) {
+            message = parsed.message;
+          }
+        } catch {
+          // Réponse non JSON
+        }
+        return throwError(() => ({ ...(httpError as object), userMessage: message }));
+      })
+    );
+  }
+  const jsonMessage = (httpError?.error as { message?: string } | undefined)?.message;
+  return throwError(() => ({
+    ...(httpError as object),
+    userMessage: jsonMessage || httpError?.message || fallback
+  }));
+}
 
 export interface SubscriptionStatus {
   companyId: number;
@@ -161,6 +187,8 @@ export class SubscriptionService {
   }
 
   getProofBlob(recordId: number): Observable<Blob> {
-    return this.api.getBlob(`/subscriptions/requests/${recordId}/proof`);
+    return this.api.getBlob(`/subscriptions/requests/${recordId}/proof`).pipe(
+      catchError((err) => readBlobErrorMessage(err, 'Impossible d\'afficher le justificatif.'))
+    );
   }
 }

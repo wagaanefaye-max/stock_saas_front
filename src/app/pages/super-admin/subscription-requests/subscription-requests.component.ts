@@ -45,6 +45,7 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
   statusFilter: StatusFilter = 'ALL';
   statusFilterOptions: { label: string; value: StatusFilter }[] = [];
   proofPreviewUrl: string | null = null;
+  proofError: string | null = null;
   proofDialogVisible = false;
   selectedRequest: SubscriptionRecord | null = null;
   rejectDialogVisible = false;
@@ -153,24 +154,28 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
 
   viewProof(req: SubscriptionRecord): void {
     this.revokeProofUrl();
+    this.proofError = null;
     this.selectedRequest = req;
     this.proofDialogVisible = true;
     this.subscriptionService.getProofBlob(req.id).subscribe({
       next: (blob) => {
         this.proofPreviewUrl = URL.createObjectURL(blob);
       },
-      error: () =>
+      error: (err: { userMessage?: string }) => {
+        this.proofError = err?.userMessage || 'Impossible d\'afficher le justificatif.';
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Impossible d\'afficher le justificatif'
-        })
+          detail: this.proofError
+        });
+      }
     });
   }
 
   closeProof(): void {
     this.proofDialogVisible = false;
     this.revokeProofUrl();
+    this.proofError = null;
     this.selectedRequest = null;
   }
 
