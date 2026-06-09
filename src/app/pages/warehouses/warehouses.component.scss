@@ -38,15 +38,6 @@
     margin-bottom: 1rem;
   }
 
-  .action-menu-btn {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
   .usage-indicator {
     display: flex;
     align-items: center;
@@ -95,17 +86,52 @@
     }
   }
 
+  .admin-warehouses,
+  .non-admin-warehouses {
+    .warehouses-paginator {
+      margin-top: 1.5rem;
+
+      ::ng-deep .p-paginator {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 0;
+        background: transparent;
+        border: none;
+      }
+    }
+  }
+
   .warehouses-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 1.5rem;
 
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
     .warehouse-card {
+      height: 100%;
+
+      ::ng-deep .p-card-body {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
       .warehouse-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 1.5rem;
+        gap: 1rem;
+        margin-bottom: 1rem;
+
+        &__info {
+          min-width: 0;
+          flex: 1;
+        }
 
         h3 {
           font-size: 1.25rem;
@@ -113,6 +139,18 @@
           color: var(--text-main);
           margin-bottom: 0.25rem;
         }
+      }
+
+      .warehouse-card__icon {
+        font-size: 0.75rem;
+        margin-right: 0.25rem;
+      }
+
+      .warehouse-description {
+        margin: 0 0 1rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: var(--text-main);
       }
 
       .warehouse-stats {
@@ -169,8 +207,29 @@
 
       .warehouse-actions {
         display: flex;
+        flex-wrap: wrap;
         gap: 0.5rem;
         justify-content: flex-end;
+        margin-top: auto;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+
+        .p-button-icon-only {
+          width: 2.25rem;
+          height: 2.25rem;
+        }
+
+        &__delete {
+          background: var(--danger, #dc2626);
+          border-color: var(--danger, #dc2626);
+          color: #fff;
+
+          &:hover {
+            background: #b91c1c;
+            border-color: #b91c1c;
+            color: #fff;
+          }
+        }
       }
     }
   }
@@ -180,33 +239,6 @@
   background: transparent;
   border: none;
   padding: 0 0 1rem 0;
-}
-
-::ng-deep .p-menu {
-  min-width: 180px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.5rem;
-
-  .p-menuitem-link {
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    transition: all 0.2s;
-
-    &:hover {
-      background: rgba(37, 99, 235, 0.1);
-    }
-
-    .p-menuitem-icon {
-      margin-right: 0.75rem;
-    }
-  }
-
-  .p-menu-separator {
-    margin: 0.5rem 0;
-    border-top: 1px solid var(--border);
-  }
 }
 
 .warehouse-details {

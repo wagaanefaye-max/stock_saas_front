@@ -11,9 +11,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { ToolbarModule } from 'primeng/toolbar';
-import { MenuModule } from 'primeng/menu';
-import { Menu } from 'primeng/menu';
-import { ViewChild } from '@angular/core';
 import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -36,7 +33,6 @@ import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../utils/dialog-mob
     InputNumberModule,
     SelectModule,
     ToolbarModule,
-    MenuModule,
     ToastModule,
     PaginatorModule,
   ],
@@ -46,20 +42,16 @@ import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../utils/dialog-mob
 })
 export class WarehousesComponent implements OnInit {
   warehouses: any[] = [];
-  selectedWarehouses: any[] = [];
   displayDialog = false;
   displayDetailsDialog = false;
   warehouse: any = {};
   selectedWarehouseDetails: any = null;
   warehouseProducts: any[] = [];
   globalFilter = '';
-  menuItems: any[] = [];
-  selectedWarehouse: any = null;
   readonly dialogStyle = APP_DIALOG_STYLE;
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
-  readonly mobileRows = 10;
-  mobileFirst = 0;
-  @ViewChild('actionMenu') actionMenu!: Menu;
+  rows = 10;
+  first = 0;
 
   // Régions du Sénégal
   regions = [
@@ -133,19 +125,22 @@ export class WarehousesComponent implements OnInit {
   }
 
   get paginatedWarehouses(): any[] {
-    return this.filteredWarehouses.slice(this.mobileFirst, this.mobileFirst + this.mobileRows);
+    return this.filteredWarehouses.slice(this.first, this.first + this.rows);
   }
 
   get paginatedWarehousesNonAdmin(): any[] {
-    return this.warehouses.slice(this.mobileFirst, this.mobileFirst + this.mobileRows);
+    return this.warehouses.slice(this.first, this.first + this.rows);
   }
 
   onGlobalFilterChange(): void {
-    this.mobileFirst = 0;
+    this.first = 0;
   }
 
-  onMobilePageChange(event: { first?: number }): void {
-    this.mobileFirst = event.first ?? 0;
+  onPageChange(event: { first?: number; rows?: number }): void {
+    this.first = event.first ?? 0;
+    if (event.rows != null) {
+      this.rows = event.rows;
+    }
   }
 
   getSeverity(status: string): 'success' | 'warn' | 'danger' | undefined {
@@ -183,9 +178,9 @@ export class WarehousesComponent implements OnInit {
       return;
     }
 
-    this.warehouse = { 
+    this.warehouse = {
       ...warehouse,
-      statusCode: warehouse.statusCode || (warehouse.status === 'Actif' ? 'ACTIF' : warehouse.status === 'Inactif' ? 'INACTIF' : 'MAINTENANCE'),
+      statusCode: this.resolveStatusCode(warehouse),
       status: warehouse.statusLabel || warehouse.status
     };
     this.displayDialog = true;
@@ -306,13 +301,24 @@ export class WarehousesComponent implements OnInit {
     });
   }
 
+  private resolveStatusCode(warehouse: any): 'ACTIF' | 'INACTIF' | 'MAINTENANCE' {
+    const raw = String(warehouse.statusCode ?? warehouse.statusLabel ?? warehouse.status ?? '').trim().toUpperCase();
+    if (raw === 'INACTIF' || raw.includes('INACTIF')) {
+      return 'INACTIF';
+    }
+    if (raw === 'MAINTENANCE' || raw.includes('MAINTENANCE')) {
+      return 'MAINTENANCE';
+    }
+    return 'ACTIF';
+  }
+
   toggleWarehouseStatus(warehouse: any) {
     // Vérifier que seul l'admin entreprise peut changer le statut d'un entrepôt
     if (!this.authService.isAdminEntreprise()) {
       return;
     }
     
-    const currentStatusCode = warehouse.statusCode || (warehouse.status === 'Actif' ? 'ACTIF' : warehouse.status === 'Inactif' ? 'INACTIF' : 'MAINTENANCE');
+    const currentStatusCode = this.resolveStatusCode(warehouse);
     const newStatusCode = currentStatusCode === 'ACTIF' ? 'INACTIF' : 'ACTIF';
     const newStatus = newStatusCode === 'ACTIF' ? 'Actif' : 'Inactif';
     const action = newStatusCode === 'ACTIF' ? 'activer' : 'désactiver';
@@ -352,51 +358,8 @@ export class WarehousesComponent implements OnInit {
     });
   }
 
-  showMenu(event: Event, warehouse: any) {
-    // Vérifier que seul l'admin entreprise peut accéder au menu
-    if (!this.authService.isAdminEntreprise()) {
-      return;
-    }
-
-    this.selectedWarehouse = warehouse;
-    const statusCode = warehouse.statusCode || (warehouse.status === 'Actif' ? 'ACTIF' : warehouse.status === 'Inactif' ? 'INACTIF' : 'MAINTENANCE');
-    const isActive = statusCode === 'ACTIF';
-    
-    this.menuItems = [
-      {
-        label: 'Voir détails',
-        icon: 'pi pi-eye',
-        command: () => {
-          this.viewWarehouseDetails(warehouse);
-        }
-      },
-      {
-        label: 'Modifier',
-        icon: 'pi pi-pencil',
-        command: () => {
-          this.editWarehouse(warehouse);
-        }
-      },
-      {
-        label: isActive ? 'Désactiver' : 'Activer',
-        icon: isActive ? 'pi pi-ban' : 'pi pi-check-circle',
-        command: () => {
-          this.toggleWarehouseStatus(warehouse);
-        }
-      },
-      {
-        separator: true
-      },
-      {
-        label: 'Supprimer',
-        icon: 'pi pi-trash',
-        styleClass: 'text-red-500',
-        command: () => {
-          this.deleteWarehouse(warehouse);
-        }
-      }
-    ];
-    this.actionMenu.toggle(event);
+  isWarehouseActive(warehouse: any): boolean {
+    return this.resolveStatusCode(warehouse) === 'ACTIF';
   }
 
   isFormValid(): boolean {
