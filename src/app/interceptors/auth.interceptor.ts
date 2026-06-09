@@ -29,25 +29,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           url.includes('/api/auth/forgot-password') ||
           url.includes('/api/auth/logout');
 
-        // Ne pas déclencher de logout/redirection pour les endpoints d'auth publics
         if (!isAuthEndpoint && authService.isAuthenticated()) {
-        // Vérifier si le message d'erreur indique un problème d'accès
-        const errorMessage = error.error?.message || error.message || '';
-        if (errorMessage.includes('Access Denied') || 
-            errorMessage.includes('Unauthorized') || 
-            errorMessage.includes('Forbidden') ||
-            error.status === 401) {
-          
-          // Nettoyer les données d'authentification
-          authService.logout();
-          
-          // Rediriger vers la page de login avec un message
+          authService.clearLocalSession();
           router.navigate(['/login'], {
             queryParams: {
               error: 'Votre session a expiré. Veuillez vous reconnecter.'
             }
           });
-        }
         }
       }
 

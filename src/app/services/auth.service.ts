@@ -154,6 +154,14 @@ export class AuthService {
   }
 
   /**
+   * Efface la session locale sans appeler l'API (cookie absent ou expiré).
+   */
+  clearLocalSession(): void {
+    this.clearStorage();
+    this.currentUserSubject.next(null);
+  }
+
+  /**
    * Récupère l'utilisateur actuel
    */
   getCurrentUser(): User | null {
