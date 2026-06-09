@@ -9,6 +9,18 @@ server {
     gzip_min_length 1024;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml image/svg+xml;
 
+    # Proxy API → même origine pour les cookies HttpOnly (évite 403 cross-domain)
+    location /api/ {
+        proxy_pass ${API_UPSTREAM}/api/;
+        proxy_ssl_server_name on;
+        proxy_set_header Host ${API_HOST};
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cookie_domain ${API_HOST} $host;
+        proxy_cookie_domain .sen-stocksaas.com $host;
+    }
+
     location / {
         try_files $uri $uri/ /index.html;
     }
