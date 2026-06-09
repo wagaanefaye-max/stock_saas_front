@@ -13,6 +13,8 @@ import { ToggleButtonModule } from 'primeng/togglebutton';
 import { TooltipModule } from 'primeng/tooltip';
 import { DividerModule } from 'primeng/divider';
 import { MenuModule } from 'primeng/menu';
+import { PaginatorModule } from 'primeng/paginator';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Menu } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -68,6 +70,8 @@ interface PageResponse {
     DividerModule,
     MenuModule,
     ToastModule,
+    PaginatorModule,
+    ProgressSpinnerModule,
     PhoneFormatDirective
   ],
   providers: [MessageService],
@@ -77,6 +81,7 @@ interface PageResponse {
 export class CompaniesComponent implements OnInit, OnDestroy {
   companies: Company[] = [];
   selectedCompanies: Company[] = [];
+  loading = false;
   displayDialog = false;
   company: any = {};
   globalFilter = '';
@@ -142,7 +147,8 @@ export class CompaniesComponent implements OnInit, OnDestroy {
 
   loadCompanies() {
     const search = this.globalFilter && this.globalFilter.trim() ? this.globalFilter.trim() : undefined;
-    
+
+    this.loading = true;
     this.apiService.get<PageResponse>(`/companies?page=${this.page}&size=${this.size}${search ? `&search=${encodeURIComponent(search)}` : ''}`)
       .pipe(
         catchError(error => {
@@ -166,6 +172,7 @@ export class CompaniesComponent implements OnInit, OnDestroy {
       .subscribe(response => {
         this.companies = response.content;
         this.totalRecords = response.totalElements;
+        this.loading = false;
       });
   }
 

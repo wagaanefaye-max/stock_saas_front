@@ -22,12 +22,12 @@ export class GestionnaireLayoutComponent implements OnInit {
 
   ngOnInit() {
     this.menuItems = [
-      { label: 'Accueil', icon: 'pi pi-th-large', routerLink: '/gestionnaire/dashboard' },
-      { label: 'Produits', icon: 'pi pi-shopping-bag', routerLink: '/gestionnaire/products' },
-      { label: 'Entrepôts', icon: 'pi pi-warehouse', routerLink: '/gestionnaire/warehouses' },
-      { label: 'Mouvements', icon: 'pi pi-sync', routerLink: '/gestionnaire/movements' },
-      { label: 'Inventaires', icon: 'pi pi-clipboard', routerLink: '/gestionnaire/inventories' },
-      { label: 'Paramètres', icon: 'pi pi-sliders-h', routerLink: '/gestionnaire/settings' }
+      { label: 'Accueil', mobileLabel: 'Accueil', icon: 'pi pi-th-large', routerLink: '/gestionnaire/dashboard' },
+      { label: 'Produits', mobileLabel: 'Produits', icon: 'pi pi-shopping-bag', routerLink: '/gestionnaire/products' },
+      { label: 'Entrepôts', mobileLabel: 'Dépôts', icon: 'pi pi-warehouse', routerLink: '/gestionnaire/warehouses' },
+      { label: 'Mouvements', mobileLabel: 'Mvts', icon: 'pi pi-sync', routerLink: '/gestionnaire/movements' },
+      { label: 'Inventaires', mobileLabel: 'Invent.', icon: 'pi pi-clipboard', routerLink: '/gestionnaire/inventories' },
+      { label: 'Paramètres', mobileLabel: 'Réglages', icon: 'pi pi-sliders-h', routerLink: '/gestionnaire/settings' }
     ];
     this.bottomNavItems = [
       this.menuItems[0],

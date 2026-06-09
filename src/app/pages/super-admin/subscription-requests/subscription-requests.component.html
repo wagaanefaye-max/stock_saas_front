@@ -1,12 +1,104 @@
-<div class="subscription-requests-page">
+<div class="subscription-requests-page mobile-page">
   <p-toast></p-toast>
 
   <div class="page-header">
     <h1>Souscriptions</h1>
-    <p class="text-muted">Toutes les demandes : en attente, validées et refusées</p>
+    <p class="text-muted mobile-page__subtitle">Toutes les demandes : en attente, validées et refusées</p>
   </div>
 
-  <p-card>
+  <div class="mobile-toolbar show-mobile-only">
+    <div class="mobile-toolbar__chips list-filter-chips list-filter-chips--scroll">
+      <p-selectButton
+        [options]="statusFilterOptions"
+        [(ngModel)]="statusFilter"
+        optionLabel="label"
+        optionValue="value"
+        (ngModelChange)="onFilterChange()">
+      </p-selectButton>
+    </div>
+  </div>
+
+  <div class="mobile-list show-mobile-only">
+    <div *ngIf="loading" class="mobile-list__loading">
+      <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
+    </div>
+
+    <div *ngIf="!loading && filteredRequests.length === 0" class="mobile-list__empty">
+      <i class="pi pi-inbox"></i>
+      <p>Aucune souscription pour ce filtre.</p>
+    </div>
+
+    <ul *ngIf="!loading && filteredRequests.length > 0" class="mobile-list__items">
+      <li
+        *ngFor="let row of filteredRequests"
+        class="mobile-card"
+        [class.mobile-card--pending]="row.requestStatus === 'PENDING'">
+        <div class="mobile-card__top">
+          <div class="mobile-card__main">
+            <span class="mobile-card__title">{{ row.companyName }}</span>
+            <span class="mobile-card__subtitle">{{ formatDate(row.createdAt) }}</span>
+          </div>
+          <p-tag [value]="row.requestStatusLabel" [severity]="statusSeverity(row.requestStatus)"></p-tag>
+        </div>
+        <div class="mobile-card__stats mobile-card__stats--2">
+          <div class="mobile-card__stat">
+            <span class="mobile-card__stat-label">Plan</span>
+            <span class="mobile-card__stat-value">{{ row.planLabel }}</span>
+          </div>
+          <div class="mobile-card__stat">
+            <span class="mobile-card__stat-label">Durée</span>
+            <span class="mobile-card__stat-value">{{ row.durationLabel }}</span>
+          </div>
+          <div class="mobile-card__stat">
+            <span class="mobile-card__stat-label">Paiement</span>
+            <span class="mobile-card__stat-value">{{ row.paymentProviderLabel }}</span>
+          </div>
+          <div class="mobile-card__stat">
+            <span class="mobile-card__stat-label">Montant</span>
+            <span class="mobile-card__stat-value">{{ formatAmount(row.amountPaid) }}</span>
+          </div>
+        </div>
+        <div class="mobile-card__footer subscription-card__detail">
+          <ng-container *ngIf="row.requestStatus === 'APPROVED' && row.periodStart">
+            <span>{{ formatDate(row.periodStart) }} → {{ formatDate(row.periodEnd) }}</span>
+          </ng-container>
+          <span *ngIf="row.requestStatus === 'REJECTED' && row.rejectionReason" class="reject-text">
+            {{ row.rejectionReason }}
+          </span>
+          <span *ngIf="row.requestStatus === 'PENDING'" class="text-muted">—</span>
+          <small *ngIf="row.validatedByEmail && row.requestStatus !== 'PENDING'" class="validated-by">
+            par {{ row.validatedByEmail }}
+          </small>
+        </div>
+        <div class="mobile-card__actions">
+          <button
+            pButton
+            label="Justificatif"
+            icon="pi pi-image"
+            class="p-button-outlined p-button-sm"
+            [disabled]="!row.proofUrl"
+            (click)="viewProof(row)"></button>
+          <ng-container *ngIf="isPending(row)">
+            <button
+              pButton
+              label="Valider"
+              icon="pi pi-check"
+              class="p-button-success p-button-sm"
+              [loading]="processingId === row.id"
+              (click)="approve(row)"></button>
+            <button
+              pButton
+              label="Refuser"
+              icon="pi pi-times"
+              class="p-button-danger p-button-outlined p-button-sm"
+              (click)="openReject(row)"></button>
+          </ng-container>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <p-card class="table-card hide-mobile">
     <div class="list-toolbar list-toolbar--chips-only">
       <div class="list-filter-chips list-filter-chips--scroll">
         <p-selectButton
@@ -137,7 +229,7 @@
   </p-dialog>
 
   <p-dialog
-    styleClass="reject-subscription-dialog"
+    styleClass="reject-subscription-dialog app-mobile-dialog"
     [(visible)]="rejectDialogVisible"
     [modal]="true"
     [closable]="!rejectSubmitting"

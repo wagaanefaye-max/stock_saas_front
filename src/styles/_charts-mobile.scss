@@ -50,29 +50,29 @@
 
 @media (max-width: 768px) {
   .chart-wrap {
-    height: 220px;
-    min-height: 200px;
+    height: 190px;
+    min-height: 170px;
 
     &--donut {
-      height: 210px;
+      height: 175px;
       max-width: 100%;
     }
 
     &--tall {
-      height: 240px;
+      height: 200px;
     }
   }
 
   .charts-grid,
   .reports-grid {
     grid-template-columns: 1fr !important;
-    gap: 0.75rem !important;
+    gap: 0.5rem !important;
 
     .chart-card,
     .report-card {
       h3 {
-        font-size: 0.875rem;
-        margin-bottom: 0.5rem;
+        font-size: 0.8rem;
+        margin-bottom: 0.35rem;
       }
 
       &.large-card {

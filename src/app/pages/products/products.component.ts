@@ -16,6 +16,8 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
 import { CalendarModule } from 'primeng/calendar';
+import { PaginatorModule } from 'primeng/paginator';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
 
@@ -36,7 +38,9 @@ import { ApiService } from '../../services/api.service';
     MenuModule,
     ToastModule,
     TooltipModule,
-    CalendarModule
+    CalendarModule,
+    PaginatorModule,
+    ProgressSpinnerModule
   ],
   providers: [MessageService],
   templateUrl: './products.component.html',
@@ -47,7 +51,7 @@ export class ProductsComponent implements OnInit {
   totalProducts = 0;
   rows = 10;
   loading = false;
-  private first = 0;
+  first = 0;
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
   /** Filtres de recherche (envoyés à l'API) */
@@ -146,7 +150,19 @@ export class ProductsComponent implements OnInit {
     return `${y}-${m}-${day}`;
   }
 
+  onGlobalFilterChange() {
+    if (this.searchDebounce) {
+      clearTimeout(this.searchDebounce);
+    }
+    this.searchDebounce = setTimeout(() => {
+      this.filterName = this.globalFilter.trim();
+      this.first = 0;
+      this.loadProducts({ first: 0, rows: this.rows });
+    }, 350);
+  }
+
   applyFilters() {
+    this.first = 0;
     this.loadProducts({ first: 0, rows: this.rows });
   }
 
@@ -157,6 +173,8 @@ export class ProductsComponent implements OnInit {
     this.filterCategoryCode = null;
     this.filterDateFrom = null;
     this.filterDateTo = null;
+    this.globalFilter = '';
+    this.first = 0;
     this.loadProducts({ first: 0, rows: this.rows });
   }
 

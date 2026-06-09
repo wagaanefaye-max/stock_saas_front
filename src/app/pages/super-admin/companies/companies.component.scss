@@ -221,6 +221,18 @@
   justify-content: center;
   width: 48px;
   height: 48px;
+  flex-shrink: 0;
+
+  &--mobile {
+    width: 40px;
+    height: 40px;
+
+    .company-logo,
+    .company-logo-placeholder {
+      width: 40px;
+      height: 40px;
+    }
+  }
 
   .company-logo {
     width: 48px;

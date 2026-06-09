@@ -1,4 +1,19 @@
 .inventories-page {
+  .mobile-toolbar__chips {
+    ::ng-deep .p-selectbutton {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+
+      .p-button {
+        flex: 1 1 auto;
+        min-height: 38px;
+        font-size: 0.75rem;
+        padding: 0.35rem 0.5rem;
+      }
+    }
+  }
+
   .inventory-filter-dropdown {
     margin-right: 0.75rem;
   }

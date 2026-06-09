@@ -15,9 +15,11 @@ import { MenuModule } from 'primeng/menu';
 import { Menu } from 'primeng/menu';
 import { ViewChild } from '@angular/core';
 import { ToastModule } from 'primeng/toast';
+import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
+import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../utils/dialog-mobile.util';
 
 @Component({
   selector: 'app-warehouses',
@@ -36,6 +38,7 @@ import { ApiService } from '../../services/api.service';
     ToolbarModule,
     MenuModule,
     ToastModule,
+    PaginatorModule,
   ],
   providers: [MessageService],
   templateUrl: './warehouses.component.html',
@@ -52,6 +55,10 @@ export class WarehousesComponent implements OnInit {
   globalFilter = '';
   menuItems: any[] = [];
   selectedWarehouse: any = null;
+  readonly dialogStyle = APP_DIALOG_STYLE;
+  readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
+  readonly mobileRows = 10;
+  mobileFirst = 0;
   @ViewChild('actionMenu') actionMenu!: Menu;
 
   // Régions du Sénégal
@@ -110,6 +117,35 @@ export class WarehousesComponent implements OnInit {
         });
       }
     });
+  }
+
+  get filteredWarehouses(): any[] {
+    const term = (this.globalFilter || '').toLowerCase().trim();
+    if (!term) {
+      return this.warehouses;
+    }
+    return this.warehouses.filter((w) =>
+      ['name', 'region', 'description', 'statusLabel', 'status'].some((field) => {
+        const val = w[field];
+        return val != null && String(val).toLowerCase().includes(term);
+      })
+    );
+  }
+
+  get paginatedWarehouses(): any[] {
+    return this.filteredWarehouses.slice(this.mobileFirst, this.mobileFirst + this.mobileRows);
+  }
+
+  get paginatedWarehousesNonAdmin(): any[] {
+    return this.warehouses.slice(this.mobileFirst, this.mobileFirst + this.mobileRows);
+  }
+
+  onGlobalFilterChange(): void {
+    this.mobileFirst = 0;
+  }
+
+  onMobilePageChange(event: { first?: number }): void {
+    this.mobileFirst = event.first ?? 0;
   }
 
   getSeverity(status: string): 'success' | 'warn' | 'danger' | undefined {

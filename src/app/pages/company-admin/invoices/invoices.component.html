@@ -1,16 +1,17 @@
-<div class="invoices-page">
+<div class="invoices-page mobile-page">
   <p-toast></p-toast>
   <div class="page-header">
     <div>
       <h1>Factures</h1>
-      <p class="text-muted">Créer et gérer les factures clients</p>
+      <p class="text-muted mobile-page__subtitle">Créer et gérer les factures clients</p>
     </div>
-    <div class="header-actions">
+    <div class="header-actions hide-mobile">
       <button pButton label="Nouvelle facture" icon="pi pi-plus" class="p-button-sm" (click)="openCreateDialog()"></button>
     </div>
   </div>
 
-  <p-card>
+  <!-- Vue desktop : tableau -->
+  <p-card class="table-card hide-mobile">
     <div class="list-toolbar">
       <div class="list-toolbar__primary">
         <div class="list-toolbar__filters-row">
@@ -91,13 +92,113 @@
     </p-table>
   </p-card>
 
+  <!-- Vue mobile : cartes -->
+  <div class="show-mobile-only">
+    <div class="mobile-toolbar">
+      <span class="mobile-toolbar__search p-input-icon-left">
+        <i class="pi pi-hashtag"></i>
+        <input
+          type="text"
+          pInputText
+          [(ngModel)]="invoiceNumberFilter"
+          (ngModelChange)="loadInvoices()"
+          placeholder="N° facture">
+      </span>
+      <span class="mobile-toolbar__search p-input-icon-left">
+        <i class="pi pi-user"></i>
+        <input
+          type="text"
+          pInputText
+          [(ngModel)]="clientNameFilter"
+          (ngModelChange)="loadInvoices()"
+          placeholder="Client">
+      </span>
+    </div>
+    <div class="mobile-toolbar__chips">
+      <p-selectButton
+        [options]="statusFilterOptions"
+        [(ngModel)]="statusFilter"
+        optionLabel="label"
+        optionValue="value"
+        (ngModelChange)="loadInvoices()">
+      </p-selectButton>
+    </div>
+
+    <div class="mobile-list">
+      <div *ngIf="invoicesLoading" class="mobile-list__loading">
+        <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
+      </div>
+
+      <div *ngIf="!invoicesLoading && filteredInvoices.length === 0" class="mobile-list__empty">
+        <i class="pi pi-file"></i>
+        <p>Aucune facture</p>
+        <button pButton label="Créer une facture" icon="pi pi-plus" class="p-button-sm" (click)="openCreateDialog()"></button>
+      </div>
+
+      <ul *ngIf="!invoicesLoading && filteredInvoices.length > 0" class="mobile-list__items">
+        <li *ngFor="let inv of paginatedInvoices" class="mobile-card">
+          <div class="mobile-card__top">
+            <div class="mobile-card__main">
+              <span class="mobile-card__title">{{ inv.invoiceNumber }}</span>
+              <span class="mobile-card__subtitle">{{ inv.clientName || '—' }}</span>
+            </div>
+            <button
+              pButton
+              icon="pi pi-ellipsis-v"
+              class="p-button-text p-button-rounded mobile-card__menu"
+              (click)="showMenu($event, inv)"
+              aria-label="Actions">
+            </button>
+          </div>
+          <div class="mobile-card__stats">
+            <div class="mobile-card__stat">
+              <span class="mobile-card__stat-label">Date</span>
+              <span class="mobile-card__stat-value">{{ formatDate(inv.invoiceDate) }}</span>
+            </div>
+            <div class="mobile-card__stat">
+              <span class="mobile-card__stat-label">Échéance</span>
+              <span class="mobile-card__stat-value">{{ formatDate(inv.dueDate ?? null) }}</span>
+            </div>
+            <div class="mobile-card__stat">
+              <span class="mobile-card__stat-label">Total</span>
+              <span class="mobile-card__stat-value">{{ formatMoney(inv.total) }}</span>
+            </div>
+          </div>
+          <div class="mobile-card__footer">
+            <p-tag [value]="inv.statusLabel" [severity]="getStatusSeverity(inv.status)"></p-tag>
+          </div>
+        </li>
+      </ul>
+
+      <p-paginator
+        *ngIf="!invoicesLoading && filteredInvoices.length > mobileRows"
+        class="mobile-list__paginator"
+        [rows]="mobileRows"
+        [totalRecords]="filteredInvoices.length"
+        [first]="mobileFirst"
+        (onPageChange)="onMobilePageChange($event)"
+        [showCurrentPageReport]="false">
+      </p-paginator>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    class="mobile-fab show-mobile-only"
+    (click)="openCreateDialog()"
+    aria-label="Nouvelle facture">
+    <i class="pi pi-plus"></i>
+  </button>
+
   <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
 
   <p-dialog
+    styleClass="app-mobile-dialog"
     [(visible)]="displayCreateDialog"
     header="Nouvelle facture"
     [modal]="true"
-    [style]="{ width: '1000px' }"
+    [style]="dialogStyle"
+    [breakpoints]="dialogBreakpoints"
     [draggable]="false"
     [resizable]="false"
     (onHide)="displayCreateDialog = false">
@@ -201,10 +302,12 @@
 
   <!-- Modifier facture (brouillon uniquement) -->
   <p-dialog
+    styleClass="app-mobile-dialog"
     [(visible)]="displayEditDialog"
     header="Modifier la facture"
     [modal]="true"
-    [style]="{ width: '700px' }"
+    [style]="dialogStyle"
+    [breakpoints]="dialogBreakpoints"
     [draggable]="false"
     [resizable]="false"
     (onHide)="displayEditDialog = false; editingInvoiceId = null">
@@ -289,14 +392,15 @@
 
   <!-- Détail facture -->
   <p-dialog
+    styleClass="app-mobile-dialog invoice-detail-dialog"
     [(visible)]="displayDetailDialog"
     [header]="selectedInvoice ? 'Facture ' + selectedInvoice.invoiceNumber : 'Détail facture'"
     [modal]="true"
-    [style]="{ width: '640px' }"
+    [style]="dialogStyle"
+    [breakpoints]="dialogBreakpoints"
     [draggable]="false"
     [resizable]="false"
     [closable]="true"
-    styleClass="invoice-detail-dialog"
     (onHide)="selectedInvoice = null">
     <div *ngIf="selectedInvoice" class="invoice-detail">
       <div class="detail-header">

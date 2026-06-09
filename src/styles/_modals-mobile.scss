@@ -103,15 +103,16 @@ $modal-radius: 20px;
       }
 
       .p-dialog-title {
-        font-size: 1.05rem;
+        font-size: 0.9375rem;
         text-align: center;
         width: 100%;
       }
     }
 
     .p-dialog-content {
-      padding: 0.85rem 1rem 1rem;
+      padding: 0.65rem 0.85rem 0.85rem;
       max-height: calc(92dvh - 8.5rem);
+      font-size: 0.8125rem;
     }
 
     .p-dialog-footer {
@@ -125,6 +126,8 @@ $modal-radius: 20px;
         width: 100%;
         justify-content: center;
         margin: 0 !important;
+        min-height: 42px;
+        font-size: 0.8125rem;
       }
     }
   }

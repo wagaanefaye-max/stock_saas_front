@@ -12,11 +12,14 @@ import { SelectModule } from 'primeng/select';
 import { PasswordModule } from 'primeng/password';
 import { MenuModule } from 'primeng/menu';
 import { Menu } from 'primeng/menu';
+import { PaginatorModule } from 'primeng/paginator';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { UserRole } from '../../../models/user.model';
 import { ApiService } from '../../../services/api.service';
-import { catchError, of } from 'rxjs';
+import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
+import { catchError, finalize, of } from 'rxjs';
 
 interface User {
   id: number;
@@ -57,6 +60,8 @@ interface PageResponse {
     SelectModule,
     PasswordModule,
     MenuModule,
+    PaginatorModule,
+    ProgressSpinnerModule,
     ToastModule,
   ],
   providers: [MessageService],
@@ -66,9 +71,12 @@ interface PageResponse {
 export class PlatformUsersComponent implements OnInit {
   users: User[] = [];
   selectedUsers: User[] = [];
+  loading = false;
   displayDialog = false;
   user: any = {};
   globalFilter = '';
+  readonly dialogStyle = APP_DIALOG_STYLE;
+  readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
   roles = [
     { label: 'Administrateur Entreprise', value: UserRole.ADMIN_ENTREPRISE },
     { label: 'Gestionnaire', value: UserRole.GESTIONNAIRE }
@@ -115,9 +123,11 @@ export class PlatformUsersComponent implements OnInit {
 
   loadUsers() {
     const search = this.globalFilter && this.globalFilter.trim() ? this.globalFilter.trim() : undefined;
-    
+
+    this.loading = true;
     this.apiService.get<PageResponse>(`/users?page=${this.page}&size=${this.size}${search ? `&search=${encodeURIComponent(search)}` : ''}`)
       .pipe(
+        finalize(() => (this.loading = false)),
         catchError(error => {
           console.error('Erreur lors du chargement des utilisateurs:', error);
           this.messageService.add({

@@ -5,6 +5,7 @@
 @import './styles/list-filters';
 @import './styles/charts-mobile';
 @import './styles/modals-mobile';
+@import './styles/mobile-list';
 
 /* Variables de couleurs personnalisées */
 :root {
@@ -28,11 +29,11 @@
   color: var(--text-main);
 
   @media (max-width: 768px) {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   @media (max-width: 480px) {
-    font-size: 14px;
+    font-size: 12px;
   }
 }
 
@@ -51,11 +52,11 @@ body {
   font-size: 16px;
 
   @media (max-width: 768px) {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   @media (max-width: 480px) {
-    font-size: 14px;
+    font-size: 12px;
   }
 }
 
@@ -69,16 +70,16 @@ body {
   font-size: 0.875rem;
 
   @media (max-width: 768px) {
-    min-height: 44px;
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
+    min-height: 40px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 600;
   }
 
   @media (max-width: 480px) {
-    min-height: 42px;
-    padding: 0.625rem 0.875rem;
-    font-size: 0.8125rem;
+    min-height: 38px;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.75rem;
   }
 
   &.p-button-sm {
@@ -250,10 +251,9 @@ body {
   }
 }
 
-/* Sidebar */
-.p-sidebar {
-  background: var(--bg-card);
-  border-right: 1px solid var(--border);
+/* Drawer / Sidebar mobile */
+.p-drawer.mobile-menu-drawer {
+  background: #f1f5f9;
 }
 
 /* Menu */
@@ -344,11 +344,11 @@ h1 {
   line-height: 1.2;
 
   @media (max-width: 768px) {
-    font-size: 1.75rem;
+    font-size: 1.125rem;
   }
 
   @media (max-width: 480px) {
-    font-size: 1.5rem;
+    font-size: 1.05rem;
   }
 }
 
@@ -358,11 +358,11 @@ h2 {
   line-height: 1.3;
 
   @media (max-width: 768px) {
-    font-size: 1.375rem;
+    font-size: 1.05rem;
   }
 
   @media (max-width: 480px) {
-    font-size: 1.25rem;
+    font-size: 0.975rem;
   }
 }
 
@@ -372,11 +372,11 @@ h3 {
   line-height: 1.4;
 
   @media (max-width: 768px) {
-    font-size: 1.125rem;
+    font-size: 0.975rem;
   }
 
   @media (max-width: 480px) {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -385,11 +385,11 @@ p {
   line-height: 1.6;
 
   @media (max-width: 768px) {
-    font-size: 0.9375rem;
+    font-size: 0.8125rem;
   }
 
   @media (max-width: 480px) {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
   }
 }
 

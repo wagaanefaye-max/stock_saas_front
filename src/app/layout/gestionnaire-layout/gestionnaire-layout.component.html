@@ -49,7 +49,7 @@
       <span class="app-bottom-nav__icon-wrap" aria-hidden="true">
         <i [class]="item.icon"></i>
       </span>
-      <span class="app-bottom-nav__label">{{ item.label }}</span>
+      <span class="app-bottom-nav__label">{{ item['mobileLabel'] || item.label }}</span>
     </a>
     <button
       type="button"
@@ -61,6 +61,16 @@
       </span>
       <span class="app-bottom-nav__label">Plus</span>
     </button>
+    <button
+      type="button"
+      class="app-bottom-nav__item app-bottom-nav__item--logout"
+      (click)="logout()"
+      aria-label="Déconnexion">
+      <span class="app-bottom-nav__icon-wrap" aria-hidden="true">
+        <i class="pi pi-sign-out"></i>
+      </span>
+      <span class="app-bottom-nav__label">Sortir</span>
+    </button>
   </nav>
 
   <p-sidebar
@@ -69,24 +79,7 @@
     styleClass="mobile-menu-drawer"
     [modal]="true"
     [dismissible]="true"
-    [showCloseIcon]="true">
-    <ng-template pTemplate="header">
-      <div class="mobile-menu-drawer__header">
-        <div class="mobile-menu-drawer__brand">
-          <div class="app-sidebar__brand-mark" aria-hidden="true">
-            <i class="pi pi-box"></i>
-          </div>
-          <div class="app-sidebar__brand-text">
-            <span class="app-sidebar__app-name">Stock</span>
-            <span class="app-sidebar__role-badge">Gestionnaire</span>
-          </div>
-        </div>
-        <div class="mobile-menu-drawer__user" *ngIf="authService.getCurrentUser() as user">
-          <span class="app-sidebar__avatar" aria-hidden="true">{{ user.name.charAt(0) || '?' }}</span>
-          <span class="app-sidebar__user-name">{{ user.name }}</span>
-        </div>
-      </div>
-    </ng-template>
+    [showCloseIcon]="false">
     <ul class="mobile-menu-list">
       <li *ngFor="let item of moreMenuItems">
         <a [routerLink]="item.routerLink" routerLinkActive="active" (click)="closeMobileMenu()">
@@ -95,14 +88,6 @@
           </span>
           <span>{{ item.label }}</span>
         </a>
-      </li>
-      <li>
-        <button type="button" class="mobile-menu-logout" (click)="logout()">
-          <span class="mobile-menu-list__icon" aria-hidden="true">
-            <i class="pi pi-sign-out"></i>
-          </span>
-          <span>Déconnexion</span>
-        </button>
       </li>
     </ul>
   </p-sidebar>

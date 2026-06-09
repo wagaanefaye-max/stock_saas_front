@@ -40,9 +40,9 @@
     .p-inputtext {
       width: 100%;
       /* padding explicite : le global .p-inputtext (mobile) écrase padding-inline-start */
-      padding: 0.5rem 0.75rem 0.5rem 2.5rem;
-      font-size: 1rem;
-      min-height: var(--app-touch-min, 44px);
+      padding: 0.45rem 0.65rem 0.45rem 2.35rem;
+      font-size: 16px; /* évite zoom iOS */
+      min-height: 42px;
     }
   }
 
@@ -69,7 +69,7 @@
     min-width: 0;
 
     label {
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       font-weight: 600;
       color: var(--text-muted);
     }
@@ -112,9 +112,9 @@
   .p-button {
     flex: 1 1 calc(50% - 0.2rem);
     min-width: 0;
-    min-height: var(--app-touch-min, 40px);
-    padding: 0.5rem 0.35rem;
-    font-size: 0.8rem;
+    min-height: 38px;
+    padding: 0.4rem 0.3rem;
+    font-size: 0.7rem;
     justify-content: center;
     border-radius: 10px !important;
   }
@@ -516,6 +516,44 @@
     .list-filter-chips--scroll {
       order: 1;
     }
+  }
+
+  /* Produits : recherche + boutons filtres sur une ligne, panneau collé */
+  .products-page .list-toolbar {
+    flex-direction: row !important;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0.35rem !important;
+    margin-bottom: 0.75rem;
+
+    &:has(+ .filter-panel) {
+      margin-bottom: 0;
+    }
+
+    &__primary {
+      flex: 1 1 auto;
+      width: auto !important;
+      min-width: 0;
+    }
+
+    &__actions {
+      width: auto !important;
+      flex: 0 0 auto;
+      gap: 0.35rem;
+
+      .p-button {
+        flex: 0 0 auto;
+        min-height: 42px;
+        min-width: 42px;
+      }
+    }
+  }
+
+  .products-page .list-toolbar + .filter-panel {
+    margin-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    padding-top: 0.65rem;
   }
 
   .reports-page .page-header .header-actions {

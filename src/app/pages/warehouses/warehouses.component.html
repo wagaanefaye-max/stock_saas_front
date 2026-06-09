@@ -1,22 +1,23 @@
-<div class="warehouses-page">
+<div class="warehouses-page mobile-page">
   <p-toast></p-toast>
   
   <div class="page-header">
     <div>
       <h1>Entrepôts</h1>
-      <p class="text-muted">Gérez vos entrepôts et leurs capacités</p>
+      <p class="text-muted mobile-page__subtitle">Gérez vos entrepôts et leurs capacités</p>
     </div>
     <button 
       pButton 
       label="Nouvel entrepôt" 
       icon="pi pi-plus" 
+      class="hide-mobile"
       (click)="openNew()"
       *ngIf="authService.isAdminEntreprise()">
     </button>
   </div>
 
-  <!-- Vue tableau pour Admin Entreprise -->
-  <p-card *ngIf="authService.isAdminEntreprise()">
+  <!-- Vue tableau pour Admin Entreprise (desktop) -->
+  <p-card *ngIf="authService.isAdminEntreprise()" class="table-card hide-mobile">
     <div class="list-toolbar">
       <div class="list-toolbar__primary">
         <span class="p-input-icon-left list-toolbar__search">
@@ -25,6 +26,7 @@
             type="text"
             pInputText
             [(ngModel)]="globalFilter"
+            (ngModelChange)="onGlobalFilterChange()"
             placeholder="Nom, région…">
         </span>
       </div>
@@ -39,10 +41,9 @@
     </div>
 
     <p-table 
-      [value]="warehouses" 
+      [value]="filteredWarehouses" 
       [paginator]="true" 
       [rows]="10"
-      [globalFilterFields]="['name','region','description','statusLabel']"
       [tableStyle]="{'min-width': '50rem'}"
       selectionMode="multiple"
       [(selection)]="selectedWarehouses"
@@ -100,8 +101,67 @@
     </p-table>
   </p-card>
 
-  <!-- Vue cartes pour Gestionnaires/Utilisateurs -->
-  <div class="warehouses-grid" *ngIf="!authService.isAdminEntreprise()">
+  <!-- Vue mobile : cartes admin -->
+  <div *ngIf="authService.isAdminEntreprise()" class="show-mobile-only">
+    <div class="mobile-toolbar">
+      <span class="mobile-toolbar__search p-input-icon-left">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          pInputText
+          [(ngModel)]="globalFilter"
+          (ngModelChange)="onGlobalFilterChange()"
+          placeholder="Nom, région…">
+      </span>
+    </div>
+
+    <div class="mobile-list">
+      <div *ngIf="filteredWarehouses.length === 0" class="mobile-list__empty">
+        <i class="pi pi-inbox"></i>
+        <p>Aucun entrepôt trouvé</p>
+      </div>
+
+      <ul *ngIf="filteredWarehouses.length > 0" class="mobile-list__items">
+        <li *ngFor="let warehouse of paginatedWarehouses" class="mobile-card">
+          <div class="mobile-card__top">
+            <div class="mobile-card__main">
+              <span class="mobile-card__title">{{ warehouse.name }}</span>
+              <span class="mobile-card__subtitle">{{ warehouse.region }}</span>
+            </div>
+            <button
+              pButton
+              icon="pi pi-ellipsis-v"
+              class="p-button-text p-button-rounded mobile-card__menu"
+              (click)="showMenu($event, warehouse)"
+              aria-label="Actions">
+            </button>
+          </div>
+          <p *ngIf="warehouse.description" class="mobile-card__subtitle">{{ warehouse.description }}</p>
+          <div class="mobile-card__stats mobile-card__stats--2">
+            <div class="mobile-card__stat mobile-card__stat--tag">
+              <p-tag
+                [value]="warehouse.statusLabel || warehouse.status || 'N/A'"
+                [severity]="getSeverity(warehouse.statusLabel || warehouse.status)">
+              </p-tag>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <p-paginator
+        *ngIf="filteredWarehouses.length > mobileRows"
+        class="mobile-list__paginator"
+        [rows]="mobileRows"
+        [totalRecords]="filteredWarehouses.length"
+        [first]="mobileFirst"
+        (onPageChange)="onMobilePageChange($event)"
+        [showCurrentPageReport]="false">
+      </p-paginator>
+    </div>
+  </div>
+
+  <!-- Vue cartes pour Gestionnaires/Utilisateurs (desktop) -->
+  <div class="warehouses-grid hide-mobile" *ngIf="!authService.isAdminEntreprise()">
     <p-card *ngFor="let warehouse of warehouses" class="warehouse-card">
       <div class="warehouse-header">
         <div>
@@ -128,13 +188,71 @@
     </div>
   </div>
 
+  <!-- Vue mobile : cartes non-admin -->
+  <div *ngIf="!authService.isAdminEntreprise()" class="show-mobile-only">
+    <div class="mobile-list">
+      <div *ngIf="warehouses.length === 0" class="mobile-list__empty">
+        <i class="pi pi-inbox"></i>
+        <p>Aucun entrepôt disponible</p>
+      </div>
+
+      <ul *ngIf="warehouses.length > 0" class="mobile-list__items">
+        <li *ngFor="let warehouse of paginatedWarehousesNonAdmin" class="mobile-card">
+          <div class="mobile-card__top">
+            <div class="mobile-card__main">
+              <span class="mobile-card__title">{{ warehouse.name }}</span>
+              <span class="mobile-card__subtitle">{{ warehouse.region }}</span>
+            </div>
+            <div class="mobile-card__stat mobile-card__stat--tag">
+              <p-tag
+                [value]="warehouse.statusLabel || warehouse.status || 'N/A'"
+                [severity]="getSeverity(warehouse.statusLabel || warehouse.status)">
+              </p-tag>
+            </div>
+          </div>
+          <p *ngIf="warehouse.description" class="mobile-card__subtitle">{{ warehouse.description }}</p>
+          <div class="mobile-card__actions">
+            <button
+              pButton
+              label="Voir détails"
+              icon="pi pi-eye"
+              class="p-button-outlined"
+              (click)="viewWarehouseDetails(warehouse)">
+            </button>
+          </div>
+        </li>
+      </ul>
+
+      <p-paginator
+        *ngIf="warehouses.length > mobileRows"
+        class="mobile-list__paginator"
+        [rows]="mobileRows"
+        [totalRecords]="warehouses.length"
+        [first]="mobileFirst"
+        (onPageChange)="onMobilePageChange($event)"
+        [showCurrentPageReport]="false">
+      </p-paginator>
+    </div>
+  </div>
+
+  <button
+    *ngIf="authService.isAdminEntreprise()"
+    type="button"
+    class="mobile-fab show-mobile-only"
+    (click)="openNew()"
+    aria-label="Nouvel entrepôt">
+    <i class="pi pi-plus"></i>
+  </button>
+
   <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
 
   <!-- Dialog pour créer/modifier un entrepôt (uniquement pour Admin Entreprise) -->
   <p-dialog 
     *ngIf="authService.isAdminEntreprise()"
+    styleClass="app-mobile-dialog"
     [(visible)]="displayDialog" 
-    [style]="{width: '700px'}"
+    [style]="dialogStyle"
+    [breakpoints]="dialogBreakpoints"
     [header]="warehouse.id ? 'Modifier l\'entrepôt' : 'Nouvel entrepôt'"
     [modal]="true"
     [draggable]="false"
@@ -191,8 +309,10 @@
 
   <!-- Dialog pour voir les détails d'un entrepôt avec ses produits -->
   <p-dialog 
+    styleClass="app-mobile-dialog"
     [(visible)]="displayDetailsDialog" 
-    [style]="{width: '900px', maxWidth: '90vw'}"
+    [style]="dialogStyle"
+    [breakpoints]="dialogBreakpoints"
     [header]="'Détails de l\'entrepôt: ' + (selectedWarehouseDetails?.name || '')"
     [modal]="true"
     [draggable]="false"

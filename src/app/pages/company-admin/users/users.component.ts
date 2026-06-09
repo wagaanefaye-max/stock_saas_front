@@ -14,6 +14,8 @@ import { MenuModule } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
+import { PaginatorModule } from 'primeng/paginator';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { Menu } from 'primeng/menu';
 import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
@@ -60,7 +62,9 @@ interface PageResponse {
     MultiSelectModule,
     MenuModule,
     ToastModule,
-    TooltipModule
+    TooltipModule,
+    PaginatorModule,
+    ProgressSpinnerModule
   ],
   providers: [MessageService],
   templateUrl: './users.component.html',
@@ -69,6 +73,7 @@ interface PageResponse {
 export class CompanyUsersComponent implements OnInit {
   users: User[] = [];
   selectedUsers: User[] = [];
+  loading = false;
   displayDialog = false;
   user: any = {};
   globalFilter = '';
@@ -107,7 +112,8 @@ export class CompanyUsersComponent implements OnInit {
 
   loadUsers() {
     const search = this.globalFilter && this.globalFilter.trim() ? this.globalFilter.trim() : undefined;
-    
+
+    this.loading = true;
     // Filtrer uniquement les utilisateurs de l'entreprise de l'utilisateur connecté
     this.apiService.get<PageResponse>(`/users?page=${this.page}&size=${this.size}${search ? `&search=${encodeURIComponent(search)}` : ''}`)
       .pipe(
@@ -132,6 +138,7 @@ export class CompanyUsersComponent implements OnInit {
       .subscribe(response => {
         this.users = response.content ?? [];
         this.totalRecords = response.totalElements ?? 0;
+        this.loading = false;
       });
   }
 

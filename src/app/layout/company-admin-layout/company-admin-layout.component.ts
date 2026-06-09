@@ -22,15 +22,15 @@ export class CompanyAdminLayoutComponent implements OnInit {
 
   ngOnInit() {
     this.menuItems = [
-      { label: 'Accueil', icon: 'pi pi-home', routerLink: '/company-admin/dashboard' },
-      { label: 'Factures', icon: 'pi pi-file-edit', routerLink: '/company-admin/invoices' },
-      { label: 'Stock', icon: 'pi pi-box', routerLink: '/company-admin/products' },
-      { label: 'Partenaires', icon: 'pi pi-users', routerLink: '/company-admin/partners' },
-      { label: 'Entrepôts', icon: 'pi pi-warehouse', routerLink: '/company-admin/warehouses' },
-      { label: 'Mouvements', icon: 'pi pi-sync', routerLink: '/company-admin/movements' },
-      { label: 'Inventaires', icon: 'pi pi-clipboard', routerLink: '/company-admin/inventories' },
-      { label: 'Abonnement', icon: 'pi pi-credit-card', routerLink: '/company-admin/subscriptions' },
-      { label: 'Paramètres', icon: 'pi pi-cog', routerLink: '/company-admin/settings' }
+      { label: 'Accueil', mobileLabel: 'Accueil', icon: 'pi pi-home', routerLink: '/company-admin/dashboard' },
+      { label: 'Factures', mobileLabel: 'Factures', icon: 'pi pi-file-edit', routerLink: '/company-admin/invoices' },
+      { label: 'Stock', mobileLabel: 'Stock', icon: 'pi pi-box', routerLink: '/company-admin/products' },
+      { label: 'Partenaires', mobileLabel: 'Partenaires', icon: 'pi pi-users', routerLink: '/company-admin/partners' },
+      { label: 'Entrepôts', mobileLabel: 'Entrepôts', icon: 'pi pi-warehouse', routerLink: '/company-admin/warehouses' },
+      { label: 'Mouvements', mobileLabel: 'Mouvements', icon: 'pi pi-sync', routerLink: '/company-admin/movements' },
+      { label: 'Inventaires', mobileLabel: 'Inventaires', icon: 'pi pi-clipboard', routerLink: '/company-admin/inventories' },
+      { label: 'Abonnement', mobileLabel: 'Offre', icon: 'pi pi-credit-card', routerLink: '/company-admin/subscriptions' },
+      { label: 'Paramètres', mobileLabel: 'Réglages', icon: 'pi pi-cog', routerLink: '/company-admin/settings' }
     ];
     this.bottomNavItems = [
       this.menuItems[0],

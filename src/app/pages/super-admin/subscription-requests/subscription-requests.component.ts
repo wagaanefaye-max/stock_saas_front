@@ -9,6 +9,7 @@ import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { finalize } from 'rxjs';
 import { SubscriptionRecord, SubscriptionService } from '../../../services/subscription.service';
@@ -29,7 +30,8 @@ type StatusFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';
     ToastModule,
     DialogModule,
     InputTextarea,
-    SelectButtonModule
+    SelectButtonModule,
+    ProgressSpinnerModule
   ],
   providers: [MessageService],
   templateUrl: './subscription-requests.component.html',

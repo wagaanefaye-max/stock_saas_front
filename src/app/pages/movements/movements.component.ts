@@ -14,6 +14,8 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { CalendarModule } from 'primeng/calendar';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
+import { PaginatorModule } from 'primeng/paginator';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
@@ -35,7 +37,9 @@ import { ApiService } from '../../services/api.service';
     SelectButtonModule,
     CalendarModule,
     TextareaModule,
-    ToastModule
+    ToastModule,
+    PaginatorModule,
+    ProgressSpinnerModule
   ],
   providers: [MessageService],
   templateUrl: './movements.component.html',
@@ -46,7 +50,7 @@ export class MovementsComponent implements OnInit {
   totalMovements = 0;
   rows = 10;
   loading = false;
-  private first = 0;
+  first = 0;
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
   selectedMovements: any[] = [];
   globalFilter = '';
@@ -203,12 +207,16 @@ export class MovementsComponent implements OnInit {
   }
 
   onTypeFilterChange() {
+    this.first = 0;
     this.loadMovements({ first: 0, rows: this.rows });
   }
 
   onSearchInput() {
     if (this.searchDebounce) clearTimeout(this.searchDebounce);
-    this.searchDebounce = setTimeout(() => this.loadMovements({ first: 0, rows: this.rows }), 400);
+    this.searchDebounce = setTimeout(() => {
+      this.first = 0;
+      this.loadMovements({ first: 0, rows: this.rows });
+    }, 400);
   }
 
   trackByMovementId(_index: number, movement: { id?: number }): number {

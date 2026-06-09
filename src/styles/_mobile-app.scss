@@ -3,6 +3,10 @@
 :root {
   --app-bottom-nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
   --app-touch-min: 44px;
+  --app-mobile-pad: 0.75rem;
+  --app-mobile-text: 0.8125rem;
+  --app-mobile-text-sm: 0.75rem;
+  --app-mobile-title: 1.125rem;
 }
 
 html {
@@ -41,53 +45,339 @@ body {
   padding: 1.25rem;
 
   @media (max-width: 768px) {
-    padding: 1rem;
-    padding-top: calc(1rem + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(var(--app-bottom-nav-height) + 0.75rem);
+    padding: var(--app-mobile-pad);
+    padding-top: calc(0.65rem + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(var(--app-bottom-nav-height) + 0.5rem);
+    font-size: var(--app-mobile-text);
+  }
+
+  @media (max-width: 480px) {
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
   }
 }
 
-/* Pages : en-têtes et tableaux sur mobile */
+/* ——— En-têtes de pages ——— */
 @media (max-width: 768px) {
-  .page-header {
-    margin-bottom: 1rem !important;
+  .page-header,
+  .dashboard-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+
+    > div:first-child {
+      min-width: 0;
+    }
 
     h1 {
-      font-size: 1.25rem !important;
+      font-size: var(--app-mobile-title) !important;
+      font-weight: 700 !important;
+      line-height: 1.25 !important;
+      margin-bottom: 0.15rem !important;
     }
 
     .text-muted,
-    p.text-muted {
-      font-size: 0.8rem !important;
+    p.text-muted,
+    &__subtitle,
+    .dashboard-header__subtitle {
+      font-size: var(--app-mobile-text-sm) !important;
+      line-height: 1.35 !important;
+      margin: 0 !important;
     }
 
     .header-actions {
       width: 100%;
       margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
 
       .p-button {
         width: 100%;
         justify-content: center;
+        min-height: 42px;
+        font-size: var(--app-mobile-text);
       }
+    }
+  }
+
+  /* Grilles d'actions page */
+  .header-row,
+  .page-actions,
+  .toolbar-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.4rem !important;
+
+    .p-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --app-mobile-title: 1.05rem;
+    --app-mobile-text: 0.75rem;
+    --app-mobile-text-sm: 0.6875rem;
+  }
+
+  .page-header .header-actions .p-button .p-button-label,
+  .page-header > .p-button .p-button-label {
+    display: none;
+  }
+}
+
+/* ——— Cartes & conteneurs ——— */
+@media (max-width: 768px) {
+  .p-card {
+    border-radius: 10px;
+
+    .p-card-body {
+      padding: 0.7rem !important;
+    }
+
+    .p-card-title {
+      font-size: 0.9375rem !important;
+      margin-bottom: 0.35rem !important;
+    }
+
+    .p-card-subtitle {
+      font-size: var(--app-mobile-text-sm) !important;
+    }
+  }
+
+  .p-panel {
+    .p-panel-header {
+      padding: 0.65rem 0.75rem;
+      font-size: var(--app-mobile-text);
+    }
+
+    .p-panel-content {
+      padding: 0.65rem 0.75rem;
+      font-size: var(--app-mobile-text);
     }
   }
 
   .p-datatable-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    margin: 0 calc(-1 * var(--app-mobile-pad));
+    padding: 0 var(--app-mobile-pad);
   }
 
   .p-toolbar {
     flex-wrap: wrap;
-    gap: 0.5rem;
-  }
+    gap: 0.4rem;
+    padding: 0.5rem !important;
+    font-size: var(--app-mobile-text);
 
-  .p-card .p-card-body {
-    padding: 0.85rem !important;
+    .p-toolbar-group-start,
+    .p-toolbar-group-end,
+    .p-toolbar-group-center {
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
   }
 }
 
-/* FAB optionnel */
+/* ——— Tableaux compacts ——— */
+@media (max-width: 768px) {
+  .p-datatable {
+    font-size: var(--app-mobile-text);
+
+    .p-datatable-thead > tr > th {
+      font-size: var(--app-mobile-text-sm) !important;
+      padding: 0.5rem 0.4rem !important;
+      white-space: nowrap;
+    }
+
+    .p-datatable-tbody > tr > td {
+      padding: 0.45rem 0.4rem !important;
+      font-size: var(--app-mobile-text) !important;
+    }
+
+    .p-button.p-button-icon-only {
+      width: 2rem;
+      height: 2rem;
+      min-height: 2rem;
+      padding: 0;
+
+      .p-button-icon {
+        font-size: 0.85rem;
+      }
+    }
+  }
+
+  .p-paginator {
+    padding: 0.35rem 0.25rem !important;
+    font-size: var(--app-mobile-text-sm) !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.15rem;
+
+    .p-paginator-pages .p-paginator-page,
+    .p-paginator-first,
+    .p-paginator-prev,
+    .p-paginator-next,
+    .p-paginator-last {
+      min-width: 1.75rem;
+      height: 1.75rem;
+      font-size: var(--app-mobile-text-sm);
+    }
+  }
+}
+
+/* ——— Formulaires ——— */
+@media (max-width: 768px) {
+  .p-fluid .field,
+  .form-field,
+  .field {
+    margin-bottom: 0.65rem !important;
+
+    > label,
+    label {
+      font-size: var(--app-mobile-text-sm) !important;
+      margin-bottom: 0.25rem !important;
+    }
+  }
+
+  .form-grid,
+  .p-formgrid {
+    gap: 0.5rem !important;
+  }
+
+  .p-inputgroup {
+    flex-wrap: wrap;
+
+    .p-button {
+      flex: 1 1 auto;
+    }
+  }
+
+  /* iOS : 16px min sur champs éditables pour éviter le zoom */
+  .p-inputtext,
+  .p-select-label,
+  .p-datepicker-input {
+    font-size: 16px !important;
+  }
+
+  .p-select,
+  .p-datepicker,
+  .p-inputnumber-input {
+    min-height: 42px;
+  }
+}
+
+/* ——— Badges, tags, messages ——— */
+@media (max-width: 768px) {
+  .p-tag,
+  .p-badge {
+    font-size: 0.65rem !important;
+    padding: 0.15rem 0.4rem !important;
+  }
+
+  .p-message {
+    font-size: var(--app-mobile-text);
+    padding: 0.5rem 0.65rem;
+
+    .p-message-text {
+      font-size: var(--app-mobile-text);
+    }
+  }
+
+  .p-toast {
+    width: calc(100vw - 1.5rem) !important;
+    max-width: 22rem;
+
+    .p-toast-message {
+      font-size: var(--app-mobile-text);
+
+      .p-toast-summary {
+        font-size: 0.8125rem;
+      }
+
+      .p-toast-detail {
+        font-size: var(--app-mobile-text-sm);
+      }
+    }
+  }
+}
+
+/* ——— Onglets ——— */
+@media (max-width: 768px) {
+  .p-tabs,
+  .p-tabview {
+    .p-tablist-tab,
+    .p-tabview-nav li .p-tabview-nav-link {
+      padding: 0.5rem 0.65rem;
+      font-size: var(--app-mobile-text-sm);
+    }
+  }
+}
+
+/* ——— Dashboards (classes communes) ——— */
+@media (max-width: 768px) {
+  .company-admin-dashboard,
+  .super-admin-dashboard,
+  .dashboard,
+  .gestionnaire-dashboard {
+    .kpi-grid,
+    .stats-grid {
+      gap: 0.4rem !important;
+    }
+
+    .stat-card,
+    .kpi-card {
+      .p-card-body {
+        padding: 0.6rem 0.65rem !important;
+      }
+    }
+  }
+}
+
+/* ——— Listes & formulaires multi-colonnes ——— */
+@media (max-width: 768px) {
+  .form-row,
+  .invoices-page .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+  }
+
+  .list-toolbar,
+  .list-toolbar__filters-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.4rem !important;
+  }
+
+  .list-toolbar__search {
+    width: 100% !important;
+  }
+
+  .page-header .header-actions .p-button .p-button-icon,
+  .page-header > .p-button .p-button-icon {
+    margin: 0;
+  }
+
+  .empty-state {
+    padding: 1.25rem 0.75rem !important;
+
+    .empty-state-icon {
+      font-size: 1.75rem !important;
+    }
+
+    .empty-state-text,
+    p {
+      font-size: var(--app-mobile-text) !important;
+    }
+  }
+}
+
+/* ——— Utilitaires responsive ——— */
 @media (max-width: 768px) {
   .hide-mobile {
     display: none !important;
@@ -99,6 +389,30 @@ body {
 
   .full-width-mobile {
     width: 100% !important;
+  }
+
+  .stack-mobile {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .gap-mobile-sm {
+    gap: 0.4rem !important;
+  }
+
+  .text-mobile-sm {
+    font-size: var(--app-mobile-text-sm) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .show-mobile-only {
+    display: block !important;
+  }
+
+  ul.show-mobile-only,
+  ol.show-mobile-only {
+    display: flex !important;
   }
 }
 

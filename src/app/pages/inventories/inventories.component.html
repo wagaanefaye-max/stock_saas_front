@@ -1,14 +1,95 @@
-<div class="inventories-page">
+<div class="inventories-page mobile-page">
   <p-toast></p-toast>
+
   <div class="page-header">
     <div>
       <h1>Inventaires</h1>
-      <p class="text-muted">Comptage physique et ajustement des stocks par entrepôt</p>
+      <p class="text-muted mobile-page__subtitle">Comptage physique et ajustement des stocks par entrepôt</p>
     </div>
-    <button pButton label="Nouvel inventaire" icon="pi pi-plus" (click)="openCreate()"></button>
+    <button
+      pButton
+      label="Nouvel inventaire"
+      icon="pi pi-plus"
+      class="hide-mobile"
+      (click)="openCreate()">
+    </button>
   </div>
 
-  <p-card>
+  <!-- Barre outils mobile -->
+  <div class="show-mobile-only">
+    <div class="mobile-toolbar">
+      <div class="mobile-toolbar__search">
+        <p-select
+          inputId="inventory-warehouse-filter-mobile"
+          [options]="warehouseFilterOptions"
+          [(ngModel)]="warehouseFilter"
+          (onChange)="loadInventories()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Tous les entrepôts"
+          [showClear]="false"
+          [appendTo]="'body'"
+          styleClass="w-full">
+        </p-select>
+      </div>
+    </div>
+    <div class="mobile-toolbar__chips">
+      <p-selectButton
+        [options]="statusFilterOptions"
+        [(ngModel)]="statusFilter"
+        optionLabel="label"
+        optionValue="value"
+        (ngModelChange)="loadInventories()">
+      </p-selectButton>
+    </div>
+  </div>
+
+  <!-- Vue mobile -->
+  <div class="mobile-list show-mobile-only">
+    <div *ngIf="loading" class="mobile-list__loading">
+      <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
+    </div>
+
+    <div *ngIf="!loading && filteredInventories.length === 0" class="mobile-list__empty">
+      <i class="pi pi-clipboard"></i>
+      <p>Aucun inventaire</p>
+      <p class="text-muted small">Créez un inventaire pour un entrepôt pour lancer un comptage.</p>
+    </div>
+
+    <ul *ngIf="!loading && filteredInventories.length > 0" class="mobile-list__items">
+      <li *ngFor="let inv of filteredInventories" class="mobile-card">
+        <div class="mobile-card__top">
+          <div class="mobile-card__main">
+            <span class="mobile-card__title">{{ inv.warehouseName }}</span>
+            <span class="mobile-card__subtitle">{{ inv.inventoryDate }}</span>
+          </div>
+          <p-tag [value]="inv.statusLabel" [severity]="getStatusSeverity(inv.status)"></p-tag>
+        </div>
+        <div class="mobile-card__stats mobile-card__stats--2">
+          <div class="mobile-card__stat">
+            <span class="mobile-card__stat-label">Créé par</span>
+            <span class="mobile-card__stat-value">{{ inv.createdByName || '–' }}</span>
+          </div>
+          <div class="mobile-card__stat">
+            <span class="mobile-card__stat-label">Clôturé le</span>
+            <span class="mobile-card__stat-value">{{ inv.closedAt ? (inv.closedAt | date:'short') : '–' }}</span>
+          </div>
+        </div>
+        <div class="mobile-card__actions">
+          <button
+            pButton
+            label="Voir"
+            icon="pi pi-eye"
+            class="p-button-outlined"
+            (click)="openDetail(inv)">
+          </button>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Vue desktop -->
+  <p-card class="table-card hide-mobile">
     <div class="list-toolbar">
       <div class="list-toolbar__filters">
         <div class="list-toolbar__filter-field">
@@ -41,6 +122,7 @@
       [value]="filteredInventories"
       [paginator]="true"
       [rows]="10"
+      [loading]="loading"
       [tableStyle]="{'min-width': '50rem'}">
       <ng-template pTemplate="header">
         <tr>
@@ -80,11 +162,20 @@
     </p-table>
   </p-card>
 
+  <button
+    type="button"
+    class="mobile-fab show-mobile-only"
+    (click)="openCreate()"
+    aria-label="Nouvel inventaire">
+    <i class="pi pi-plus"></i>
+  </button>
+
   <!-- Dialog création -->
   <p-dialog
     [(visible)]="displayCreateDialog"
     header="Nouvel inventaire"
-    [style]="{width: '480px'}"
+    styleClass="app-mobile-dialog"
+    [style]="{width: '480px', maxWidth: '95vw'}"
     [modal]="true"
     [draggable]="false"
     [resizable]="false"
@@ -125,6 +216,7 @@
   <p-dialog
     [(visible)]="displayDetailDialog"
     [header]="selectedInventory ? 'Inventaire – ' + selectedInventory.warehouseName + ' (' + selectedInventory.inventoryDate + ')' : 'Détail inventaire'"
+    styleClass="app-mobile-dialog"
     [style]="{width: '90vw', maxWidth: '960px'}"
     [modal]="true"
     [draggable]="false"
@@ -137,7 +229,6 @@
         <span class="text-muted" *ngIf="selectedInventory.createdByName">Créé par {{ selectedInventory.createdByName }}</span>
         <span class="text-muted" *ngIf="selectedInventory.closedAt">Clôturé le {{ selectedInventory.closedAt | date:'short' }}</span>
       </div>
-      <!-- Boutons d'action visibles au-dessus du tableau -->
       <div class="detail-actions" *ngIf="canEdit(selectedInventory)">
         <button pButton label="Enregistrer les quantités" icon="pi pi-save" class="p-button-outlined" (click)="saveLines()" [loading]="savingLines"></button>
         <button pButton label="Clôturer l'inventaire" icon="pi pi-lock" (click)="confirmCloseInventory()" [loading]="closing" severity="success"></button>

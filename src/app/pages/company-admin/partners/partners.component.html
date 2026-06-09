@@ -1,16 +1,45 @@
-<div class="partners-page">
+<div class="partners-page mobile-page">
   <p-toast></p-toast>
+
   <div class="page-header">
     <div>
       <h1>Partenaires</h1>
-      <p class="text-muted">Gérer vos clients et fournisseurs</p>
+      <p class="text-muted mobile-page__subtitle">Gérer vos clients et fournisseurs</p>
     </div>
     <div class="header-actions">
-      <button pButton label="Nouveau partenaire" icon="pi pi-plus" class="p-button-sm partners-create-btn" (click)="openNew()"></button>
+      <button
+        pButton
+        label="Nouveau partenaire"
+        icon="pi pi-plus"
+        class="p-button-sm partners-create-btn hide-mobile"
+        (click)="openNew()">
+      </button>
     </div>
   </div>
 
-  <p-card>
+  <div class="mobile-toolbar show-mobile-only">
+    <span class="p-input-icon-left mobile-toolbar__search">
+      <i class="pi pi-search"></i>
+      <input
+        type="text"
+        pInputText
+        [(ngModel)]="globalFilter"
+        (ngModelChange)="onSearchInput()"
+        placeholder="Nom ou email…">
+    </span>
+  </div>
+
+  <div class="mobile-toolbar__chips show-mobile-only">
+    <p-selectButton
+      [options]="roleFilterOptions"
+      [(ngModel)]="selectedRoleFilter"
+      optionLabel="label"
+      optionValue="value"
+      (ngModelChange)="onRoleFilterChange()">
+    </p-selectButton>
+  </div>
+
+  <p-card class="table-card hide-mobile">
     <div class="list-toolbar">
       <div class="list-toolbar__primary">
         <span class="p-input-icon-left list-toolbar__search">
@@ -83,13 +112,70 @@
     </p-table>
   </p-card>
 
+  <div class="mobile-list show-mobile-only">
+    <div *ngIf="loading" class="mobile-list__loading">
+      <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
+    </div>
+
+    <div *ngIf="!loading && partners.length === 0" class="mobile-list__empty">
+      <i class="pi pi-users"></i>
+      <p>Aucun partenaire (client ou fournisseur)</p>
+      <button pButton label="Nouveau partenaire" icon="pi pi-plus" class="p-button-sm" (click)="openNew()"></button>
+    </div>
+
+    <ul *ngIf="!loading && partners.length > 0" class="mobile-list__items">
+      <li *ngFor="let p of partners; trackBy: trackByPartnerId" class="mobile-card">
+        <div class="mobile-card__top">
+          <div class="mobile-card__main">
+            <div class="mobile-card__row">
+              <p-tag [value]="getRoleLabel(p.role)" [severity]="getRoleSeverity(p.role)"></p-tag>
+            </div>
+            <span class="mobile-card__title">{{ p.name }}</span>
+            <span class="mobile-card__subtitle">{{ p.email || '-' }}</span>
+          </div>
+          <button
+            pButton
+            icon="pi pi-ellipsis-v"
+            class="p-button-text p-button-rounded p-button-sm mobile-card__menu"
+            (click)="showMenu($event, p)"
+            aria-label="Actions">
+          </button>
+        </div>
+        <div class="mobile-card__footer">
+          <span>{{ p.phone | phoneFormat }}</span>
+          <span [title]="p.address">{{ (p.address | slice:0:30) || '-' }}{{ (p.address && p.address.length > 30) ? '…' : '' }}</span>
+        </div>
+      </li>
+    </ul>
+
+    <p-paginator
+      *ngIf="totalPartners > rows"
+      class="mobile-list__paginator"
+      [rows]="rows"
+      [totalRecords]="totalPartners"
+      [first]="first"
+      (onPageChange)="onPartnersLazyLoad($event)"
+      [showCurrentPageReport]="false"
+      [rowsPerPageOptions]="[10, 20]">
+    </p-paginator>
+  </div>
+
+  <button
+    type="button"
+    class="mobile-fab show-mobile-only"
+    (click)="openNew()"
+    aria-label="Nouveau partenaire">
+    <i class="pi pi-plus"></i>
+  </button>
+
   <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
 
   <p-dialog
     [(visible)]="displayDialog"
+    styleClass="app-mobile-dialog"
     [header]="partner.id ? 'Modifier le partenaire' : 'Nouveau partenaire'"
     [modal]="true"
-    [style]="{ width: '500px' }"
+    [style]="{ width: '500px', maxWidth: '95vw' }"
     [draggable]="false"
     [resizable]="false"
     (onHide)="partner = {}">

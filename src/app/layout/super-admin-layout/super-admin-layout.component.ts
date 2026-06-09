@@ -22,11 +22,11 @@ export class SuperAdminLayoutComponent implements OnInit {
 
   ngOnInit() {
     this.menuItems = [
-      { label: 'Accueil', icon: 'pi pi-th-large', routerLink: '/super-admin/dashboard' },
-      { label: 'Entreprises', icon: 'pi pi-briefcase', routerLink: '/super-admin/companies' },
-      { label: 'Souscriptions', icon: 'pi pi-credit-card', routerLink: '/super-admin/subscription-requests' },
-      { label: 'Utilisateurs', icon: 'pi pi-user', routerLink: '/super-admin/platform-users' },
-      { label: 'Paramètres', icon: 'pi pi-sliders-h', routerLink: '/super-admin/platform-settings' }
+      { label: 'Accueil', mobileLabel: 'Accueil', icon: 'pi pi-th-large', routerLink: '/super-admin/dashboard' },
+      { label: 'Entreprises', mobileLabel: 'Sociétés', icon: 'pi pi-briefcase', routerLink: '/super-admin/companies' },
+      { label: 'Souscriptions', mobileLabel: 'Demandes', icon: 'pi pi-credit-card', routerLink: '/super-admin/subscription-requests' },
+      { label: 'Utilisateurs', mobileLabel: 'Utilisateurs', icon: 'pi pi-user', routerLink: '/super-admin/platform-users' },
+      { label: 'Paramètres', mobileLabel: 'Réglages', icon: 'pi pi-sliders-h', routerLink: '/super-admin/platform-settings' }
     ];
     this.bottomNavItems = [this.menuItems[0], this.menuItems[1], this.menuItems[2]];
     this.moreMenuItems = [this.menuItems[3], this.menuItems[4]];

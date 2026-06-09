@@ -15,6 +15,8 @@ import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { TabsModule } from 'primeng/tabs';
 import { TagModule } from 'primeng/tag';
+import { PaginatorModule } from 'primeng/paginator';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
@@ -37,6 +39,8 @@ import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
     ToastModule,
     TabsModule,
     TagModule,
+    PaginatorModule,
+    ProgressSpinnerModule,
     PhoneFormatDirective,
     PhoneFormatPipe
   ],
@@ -49,7 +53,7 @@ export class PartnersComponent implements OnInit {
   totalPartners = 0;
   rows = 10;
   loading = false;
-  private first = 0;
+  first = 0;
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
   displayDialog = false;
@@ -107,8 +111,9 @@ export class PartnersComponent implements OnInit {
   }
 
   onPartnersLazyLoad(event: any) {
-    this.first = event.first;
-    this.loadPartners(event);
+    this.first = event.first ?? 0;
+    this.rows = event.rows ?? this.rows;
+    this.loadPartners({ first: this.first, rows: this.rows });
   }
 
   private refreshPartners() {
@@ -116,12 +121,16 @@ export class PartnersComponent implements OnInit {
   }
 
   onRoleFilterChange() {
+    this.first = 0;
     this.loadPartners({ first: 0, rows: this.rows });
   }
 
   onSearchInput() {
     if (this.searchDebounce) clearTimeout(this.searchDebounce);
-    this.searchDebounce = setTimeout(() => this.loadPartners({ first: 0, rows: this.rows }), 400);
+    this.searchDebounce = setTimeout(() => {
+      this.first = 0;
+      this.loadPartners({ first: 0, rows: this.rows });
+    }, 400);
   }
 
   openNew() {

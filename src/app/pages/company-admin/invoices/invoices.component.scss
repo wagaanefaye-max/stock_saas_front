@@ -1,4 +1,10 @@
 .invoices-page {
+  @media (max-width: 768px) {
+    .mobile-toolbar {
+      flex-direction: column;
+    }
+  }
+
   &.simple-ux .page-header {
     .main-cta {
       font-size: 1rem;

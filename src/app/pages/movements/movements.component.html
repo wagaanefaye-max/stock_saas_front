@@ -1,15 +1,51 @@
-<div class="movements-page">
+<div class="movements-page mobile-page">
   <p-toast></p-toast>
-  
+
   <div class="page-header">
     <div>
       <h1>Mouvements de stock</h1>
-      <p class="text-muted">Suivez tous les mouvements d'entrée, sortie, transfert et ajustement</p>
+      <p class="text-muted mobile-page__subtitle">Suivez tous les mouvements d'entrée, sortie, transfert et ajustement</p>
     </div>
-    <button pButton label="Nouveau mouvement" icon="pi pi-plus" (click)="openNew()"></button>
+    <button
+      pButton
+      label="Nouveau mouvement"
+      icon="pi pi-plus"
+      class="hide-mobile"
+      (click)="openNew()">
+    </button>
   </div>
 
-  <p-card>
+  <div class="mobile-toolbar show-mobile-only">
+    <span class="p-input-icon-left mobile-toolbar__search">
+      <i class="pi pi-search"></i>
+      <input
+        type="text"
+        pInputText
+        [(ngModel)]="globalFilter"
+        (ngModelChange)="onSearchInput()"
+        placeholder="Produit, entrepôt…">
+    </span>
+    <div class="mobile-toolbar__actions">
+      <button
+        pButton
+        icon="pi pi-file-export"
+        label="Exporter"
+        class="p-button-secondary hide-mobile">
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-toolbar__chips show-mobile-only">
+    <p-selectButton
+      [options]="typeFilterChipOptions"
+      [(ngModel)]="typeFilter"
+      optionLabel="label"
+      optionValue="value"
+      (ngModelChange)="onTypeFilterChange()">
+    </p-selectButton>
+  </div>
+
+  <p-card class="table-card hide-mobile">
     <div class="list-toolbar">
       <div class="list-toolbar__primary">
         <span class="p-input-icon-left list-toolbar__search">
@@ -43,10 +79,10 @@
       </div>
     </div>
 
-    <p-table 
+    <p-table
       [value]="movements"
       [lazy]="true"
-      [paginator]="true" 
+      [paginator]="true"
       [rows]="rows"
       [totalRecords]="totalMovements"
       [loading]="loading"
@@ -56,7 +92,7 @@
       selectionMode="multiple"
       [(selection)]="selectedMovements"
       [rowHover]="true">
-      
+
       <ng-template pTemplate="header">
         <tr>
           <th style="width: 3rem">
@@ -118,23 +154,79 @@
     </p-table>
   </p-card>
 
-  <p-dialog 
-    [(visible)]="displayDialog" 
-    [style]="{width: '700px'}"
+  <div class="mobile-list show-mobile-only">
+    <div *ngIf="loading" class="mobile-list__loading">
+      <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
+    </div>
+
+    <div *ngIf="!loading && movements.length === 0" class="mobile-list__empty">
+      <i class="pi pi-inbox"></i>
+      <p>Aucun mouvement trouvé</p>
+      <button pButton label="Nouveau mouvement" icon="pi pi-plus" class="p-button-sm" (click)="openNew()"></button>
+    </div>
+
+    <ul *ngIf="!loading && movements.length > 0" class="mobile-list__items">
+      <li *ngFor="let movement of movements; trackBy: trackByMovementId" class="mobile-card">
+        <div class="mobile-card__top">
+          <div class="mobile-card__main">
+            <span class="mobile-card__subtitle">{{ movement.date }}</span>
+            <span class="mobile-card__title">{{ movement.product }}</span>
+          </div>
+        </div>
+        <div class="mobile-card__row">
+          <p-tag [value]="movement.type" [severity]="getSeverity(movement.type)"></p-tag>
+          <span
+            class="mobile-card__stat-value"
+            [class.mobile-card__stat-value--danger]="movement.quantity < 0"
+            [class.mobile-card__stat-value--success]="movement.quantity > 0">
+            {{ movement.quantity > 0 ? '+' : '' }}{{ movement.quantity }}
+          </span>
+        </div>
+        <div class="mobile-card__footer">
+          <span>{{ movement.warehouse }}</span>
+          <span>{{ movement.user }}</span>
+        </div>
+      </li>
+    </ul>
+
+    <p-paginator
+      *ngIf="totalMovements > rows"
+      class="mobile-list__paginator"
+      [rows]="rows"
+      [totalRecords]="totalMovements"
+      [first]="first"
+      (onPageChange)="onMovementsLazyLoad($event)"
+      [showCurrentPageReport]="false"
+      [rowsPerPageOptions]="[10, 20]">
+    </p-paginator>
+  </div>
+
+  <button
+    type="button"
+    class="mobile-fab show-mobile-only"
+    (click)="openNew()"
+    aria-label="Nouveau mouvement">
+    <i class="pi pi-plus"></i>
+  </button>
+
+  <p-dialog
+    [(visible)]="displayDialog"
+    styleClass="app-mobile-dialog"
+    [style]="{width: '700px', maxWidth: '95vw'}"
     [header]="movement.id ? 'Modifier le mouvement' : 'Nouveau mouvement'"
     [modal]="true"
     [draggable]="false"
     [resizable]="false"
     [dismissableMask]="false">
-    
+
     <div class="form-group">
       <label>
         <i class="pi pi-arrows-h" style="margin-right: 0.5rem;"></i>
         Type de mouvement *
       </label>
-      <p-select 
-        [(ngModel)]="movement.typeCode" 
-        [options]="types" 
+      <p-select
+        [(ngModel)]="movement.typeCode"
+        [options]="types"
         optionLabel="label"
         optionValue="value"
         placeholder="Choisir le type de mouvement"
@@ -142,12 +234,6 @@
         [appendTo]="'body'"
         required>
       </p-select>
-<!--      <small class="text-muted">-->
-<!--        <i class="pi pi-info-circle" style="font-size: 0.75rem;"></i>-->
-<!--        <span *ngFor="let type of types; let last = last">-->
-<!--          <strong>{{ type.label }}</strong> : {{ type.description }}<span *ngIf="!last"> | </span>-->
-<!--        </span>-->
-<!--      </small>-->
     </div>
 
     <div class="form-row">
@@ -156,8 +242,8 @@
           <i class="pi pi-calendar" style="margin-right: 0.5rem;"></i>
           Date du mouvement *
         </label>
-        <p-calendar 
-          [(ngModel)]="movement.date" 
+        <p-calendar
+          [(ngModel)]="movement.date"
           [showIcon]="true"
           dateFormat="dd/mm/yy"
           [appendTo]="'body'"
@@ -172,9 +258,9 @@
           <i class="pi pi-shopping-bag" style="margin-right: 0.5rem;"></i>
           Produit concerné *
         </label>
-        <p-select 
-          [(ngModel)]="movement.productId" 
-          [options]="products" 
+        <p-select
+          [(ngModel)]="movement.productId"
+          [options]="products"
           optionLabel="name"
           optionValue="id"
           placeholder="Choisir le produit"
@@ -193,8 +279,8 @@
           <i class="pi pi-hashtag" style="margin-right: 0.5rem;"></i>
           Quantité *
         </label>
-        <p-inputNumber 
-          [(ngModel)]="movement.quantity" 
+        <p-inputNumber
+          [(ngModel)]="movement.quantity"
           [min]="getMinQuantity()"
           [showButtons]="true"
           placeholder="0"
@@ -217,9 +303,9 @@
           </div>
         </ng-container>
         <ng-template #editableWarehouse>
-          <p-select 
-            [(ngModel)]="movement.warehouseId" 
-            [options]="accessibleWarehouses" 
+          <p-select
+            [(ngModel)]="movement.warehouseId"
+            [options]="accessibleWarehouses"
             optionLabel="name"
             optionValue="id"
             placeholder="Choisir l'entrepôt"
@@ -237,9 +323,9 @@
         <i class="pi pi-map-marker" style="margin-right: 0.5rem;"></i>
         Entrepôt de destination *
       </label>
-      <p-select 
-        [(ngModel)]="movement.destinationWarehouseId" 
-        [options]="getAvailableDestinationWarehouses()" 
+      <p-select
+        [(ngModel)]="movement.destinationWarehouseId"
+        [options]="getAvailableDestinationWarehouses()"
         optionLabel="name"
         optionValue="id"
         placeholder="Choisir où envoyer les produits"
@@ -256,8 +342,8 @@
         Notes ou raison du mouvement
       </label>
       <textarea
-        pTextarea 
-        [(ngModel)]="movement.justification" 
+        pTextarea
+        [(ngModel)]="movement.justification"
         [rows]="3"
         placeholder="Ex: Réception de commande fournisseur, Vente client, Correction d'inventaire..."
         class="w-full">
@@ -265,18 +351,18 @@
     </div>
 
     <ng-template pTemplate="footer">
-      <button 
-        pButton 
-        label="Annuler" 
-        icon="pi pi-times" 
-        class="p-button-text" 
+      <button
+        pButton
+        label="Annuler"
+        icon="pi pi-times"
+        class="p-button-text"
         (click)="displayDialog = false">
       </button>
-      <button 
-        pButton 
-        label="Enregistrer le mouvement" 
-        icon="pi pi-check" 
-        (click)="saveMovement()" 
+      <button
+        pButton
+        label="Enregistrer le mouvement"
+        icon="pi pi-check"
+        (click)="saveMovement()"
         [disabled]="!isFormValid()"
         [title]="!isFormValid() ? 'Veuillez remplir tous les champs obligatoires' : 'Cliquez pour enregistrer'">
       </button>

@@ -24,12 +24,12 @@ export class LayoutComponent implements OnInit {
 
   ngOnInit() {
     this.menuItems = [
-      { label: 'Accueil', icon: 'pi pi-th-large', routerLink: '/gestion/dashboard' },
-      { label: 'Produits', icon: 'pi pi-shopping-bag', routerLink: '/gestion/products' },
-      { label: 'Entrepôts', icon: 'pi pi-warehouse', routerLink: '/gestion/warehouses' },
-      { label: 'Mouvements', icon: 'pi pi-sync', routerLink: '/gestion/movements' },
-      { label: 'Inventaires', icon: 'pi pi-clipboard', routerLink: '/gestion/inventories' },
-      { label: 'Paramètres', icon: 'pi pi-sliders-h', routerLink: '/gestion/settings' }
+      { label: 'Accueil', mobileLabel: 'Accueil', icon: 'pi pi-th-large', routerLink: '/gestion/dashboard' },
+      { label: 'Produits', mobileLabel: 'Produits', icon: 'pi pi-shopping-bag', routerLink: '/gestion/products' },
+      { label: 'Entrepôts', mobileLabel: 'Dépôts', icon: 'pi pi-warehouse', routerLink: '/gestion/warehouses' },
+      { label: 'Mouvements', mobileLabel: 'Mvts', icon: 'pi pi-sync', routerLink: '/gestion/movements' },
+      { label: 'Inventaires', mobileLabel: 'Invent.', icon: 'pi pi-clipboard', routerLink: '/gestion/inventories' },
+      { label: 'Paramètres', mobileLabel: 'Réglages', icon: 'pi pi-sliders-h', routerLink: '/gestion/settings' }
     ];
     this.bottomNavItems = [
       this.menuItems[0],

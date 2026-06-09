@@ -16,10 +16,13 @@ import { Menu } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { CheckboxModule } from 'primeng/checkbox';
+import { PaginatorModule } from 'primeng/paginator';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
 import { Invoice } from '../../../models';
+import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
 
 interface InvoiceLineRow {
   productId: number | null;
@@ -58,7 +61,9 @@ interface ProductForInvoice {
     SelectButtonModule,
     MenuModule,
     CheckboxModule,
-    PhoneFormatPipe
+    PhoneFormatPipe,
+    PaginatorModule,
+    ProgressSpinnerModule
   ],
   providers: [MessageService],
   templateUrl: './invoices.component.html',
@@ -66,6 +71,11 @@ interface ProductForInvoice {
 })
 export class InvoicesComponent implements OnInit {
   invoices: Invoice[] = [];
+  invoicesLoading = false;
+  readonly dialogStyle = APP_DIALOG_STYLE;
+  readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
+  readonly mobileRows = 10;
+  mobileFirst = 0;
   displayCreateDialog = false;
   displayEditDialog = false;
   displayDetailDialog = false;
@@ -146,11 +156,15 @@ export class InvoicesComponent implements OnInit {
       clientName: this.clientNameFilter?.trim() || null
     };
 
+    this.invoicesLoading = true;
     this.apiService.get<Invoice[]>('/invoices', params).subscribe({
       next: (data) => {
         this.invoices = data || [];
+        this.mobileFirst = 0;
+        this.invoicesLoading = false;
       },
       error: () => {
+        this.invoicesLoading = false;
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les factures', life: 5000 });
       }
     });
@@ -159,6 +173,14 @@ export class InvoicesComponent implements OnInit {
   /** La liste est déjà filtrée par le backend. */
   get filteredInvoices(): Invoice[] {
     return this.invoices;
+  }
+
+  get paginatedInvoices(): Invoice[] {
+    return this.filteredInvoices.slice(this.mobileFirst, this.mobileFirst + this.mobileRows);
+  }
+
+  onMobilePageChange(event: { first?: number }): void {
+    this.mobileFirst = event.first ?? 0;
   }
 
   openCreateDialog() {
