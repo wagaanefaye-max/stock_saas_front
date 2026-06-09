@@ -8,7 +8,7 @@ import { TagModule } from 'primeng/tag';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -29,7 +29,7 @@ import { ApiService } from '../../services/api.service';
     DialogModule,
     SelectModule,
     InputNumberModule,
-    CalendarModule,
+    DatePickerModule,
     TextareaModule,
     ToastModule,
     SelectButtonModule,

@@ -79,23 +79,27 @@
         </div>
         <div class="filter-field">
           <label>Créé du</label>
-          <p-calendar
+          <p-datepicker
             [(ngModel)]="filterDateFrom"
             dateFormat="dd/mm/yy"
             placeholder="jj/mm/aaaa"
             [showIcon]="true"
-            class="w-full">
-          </p-calendar>
+            [appendTo]="'body'"
+            class="w-full"
+            [style]="{ width: '100%' }">
+          </p-datepicker>
         </div>
         <div class="filter-field">
           <label>Créé au</label>
-          <p-calendar
+          <p-datepicker
             [(ngModel)]="filterDateTo"
             dateFormat="dd/mm/yy"
             placeholder="jj/mm/aaaa"
             [showIcon]="true"
-            class="w-full">
-          </p-calendar>
+            [appendTo]="'body'"
+            class="w-full"
+            [style]="{ width: '100%' }">
+          </p-datepicker>
         </div>
       </div>
       <div class="filter-actions">

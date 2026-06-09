@@ -52,8 +52,7 @@ $modal-radius: 20px;
 
     /* Les listes déroulantes doivent utiliser appendTo="body" ; évite le clipping */
     .p-select,
-    .p-select,
-    .p-calendar {
+    .p-datepicker {
       position: relative;
       z-index: 1;
     }

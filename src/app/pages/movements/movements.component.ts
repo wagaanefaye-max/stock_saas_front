@@ -11,7 +11,7 @@ import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
@@ -35,7 +35,7 @@ import { ApiService } from '../../services/api.service';
     InputNumberModule,
     InputTextModule,
     SelectButtonModule,
-    CalendarModule,
+    DatePickerModule,
     TextareaModule,
     ToastModule,
     PaginatorModule,

@@ -15,7 +15,7 @@ import { Menu } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { PaginatorModule } from 'primeng/paginator';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AuthService } from '../../services/auth.service';
@@ -38,7 +38,7 @@ import { ApiService } from '../../services/api.service';
     MenuModule,
     ToastModule,
     TooltipModule,
-    CalendarModule,
+    DatePickerModule,
     PaginatorModule,
     ProgressSpinnerModule
   ],
