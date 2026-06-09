@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -12,10 +12,7 @@ import { SelectModule } from 'primeng/select';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { TooltipModule } from 'primeng/tooltip';
 import { DividerModule } from 'primeng/divider';
-import { MenuModule } from 'primeng/menu';
 import { PaginatorModule } from 'primeng/paginator';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { Menu } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
@@ -68,10 +65,8 @@ interface PageResponse {
     ToggleButtonModule,
     TooltipModule,
     DividerModule,
-    MenuModule,
     ToastModule,
     PaginatorModule,
-    ProgressSpinnerModule,
     PhoneFormatDirective
   ],
   providers: [MessageService],
@@ -122,9 +117,6 @@ export class CompaniesComponent implements OnInit, OnDestroy {
   
   companyLogo: File | null = null;
   companyLogoPreview: string | null = null;
-  menuItems: any[] = [];
-  selectedCompany: Company | null = null;
-  @ViewChild('actionMenu') actionMenu!: Menu;
   displayDetailDialog = false;
   companyDetail: Company | null = null;
 
@@ -450,37 +442,5 @@ export class CompaniesComponent implements OnInit, OnDestroy {
     });
   }
 
-  showMenu(event: Event, company: Company) {
-    this.selectedCompany = company;
-    const isActive = company.statusCode === 'ACTIF';
-    this.menuItems = [
-      {
-        label: 'Voir le détail',
-        icon: 'pi pi-eye',
-        command: () => {
-          this.showDetail(company);
-        }
-      },
-      {
-        label: isActive ? 'Désactiver' : 'Activer',
-        icon: isActive ? 'pi pi-ban' : 'pi pi-check-circle',
-        command: () => {
-          this.toggleCompanyStatus(company);
-        }
-      },
-      {
-        separator: true
-      },
-      {
-        label: 'Supprimer',
-        icon: 'pi pi-trash',
-        styleClass: 'text-red-500',
-        command: () => {
-          this.deleteCompany(company);
-        }
-      }
-    ];
-    this.actionMenu.toggle(event);
-  }
 }
 
