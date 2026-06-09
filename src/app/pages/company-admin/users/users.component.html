@@ -35,10 +35,7 @@
     </div>
   </div>
 
-  <app-list-skeleton *ngIf="loading" [count]="6"></app-list-skeleton>
-
-  <!-- Vue mobile -->
-  <div *ngIf="!loading" class="mobile-list show-mobile-only">
+  <div class="mobile-list show-mobile-only">
     <div *ngIf="users.length === 0" class="mobile-list__empty">
       <i class="pi pi-users"></i>
       <p>Aucun utilisateur trouvé</p>
@@ -71,7 +68,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="totalRecords > size"
+      *ngIf="totalRecords > 0"
       class="mobile-list__paginator entity-paginator"
       [rows]="size"
       [totalRecords]="totalRecords"
@@ -81,71 +78,6 @@
       [rowsPerPageOptions]="[10, 20]">
     </p-paginator>
   </div>
-
-  <!-- Vue desktop -->
-  <p-card *ngIf="!loading" class="table-card hide-mobile">
-    <p-table
-      [value]="users"
-      [paginator]="true"
-      [rows]="size"
-      [totalRecords]="totalRecords"
-      [lazy]="true"
-      (onLazyLoad)="onPageChange($event)"
-      [first]="page * size"
-      [globalFilterFields]="['name','email']"
-      [tableStyle]="{'min-width': '50rem'}"
-      selectionMode="multiple"
-      [(selection)]="selectedUsers"
-      [rowHover]="true">
-
-      <ng-template pTemplate="header">
-        <tr>
-          <th style="width: 3rem">
-            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-          </th>
-          <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
-          <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
-          <th>Rôle</th>
-          <th pSortableColumn="status">Statut <p-sortIcon field="status"></p-sortIcon></th>
-          <th>Dernière connexion</th>
-          <th style="width: 3rem">Actions</th>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="body" let-user>
-        <tr>
-          <td>
-            <p-tableCheckbox [value]="user"></p-tableCheckbox>
-          </td>
-          <td>{{ user.name }}</td>
-          <td>{{ user.email }}</td>
-          <td>
-            <p-tag [value]="getRoleLabel(user.roleCode)" [severity]="getRoleSeverity(user.roleCode)"></p-tag>
-          </td>
-          <td>
-            <p-tag [value]="user.status" [severity]="getSeverity(user.status)"></p-tag>
-          </td>
-          <td>{{ formatDate(user.lastLogin) }}</td>
-          <td>
-            <button
-              pButton
-              icon="pi pi-ellipsis-v"
-              class="p-button-text p-button-sm p-button-rounded action-menu-btn"
-              (click)="showMenu($event, user)">
-            </button>
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="7" class="text-center">
-            <p>Aucun utilisateur trouvé</p>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
 
   <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
 

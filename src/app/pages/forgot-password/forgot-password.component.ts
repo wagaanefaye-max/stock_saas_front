@@ -18,7 +18,6 @@ import { AuthService } from '../../services/auth.service';
 })
 export class ForgotPasswordComponent {
   email = '';
-  loading = false;
 
   constructor(
     private authService: AuthService,
@@ -29,10 +28,8 @@ export class ForgotPasswordComponent {
     if (!this.email) {
       return;
     }
-    this.loading = true;
     this.authService.forgotPassword(this.email).subscribe({
       next: (res) => {
-        this.loading = false;
         this.messageService.add({
           severity: 'success',
           summary: 'Email envoyé',
@@ -41,7 +38,6 @@ export class ForgotPasswordComponent {
         });
       },
       error: () => {
-        this.loading = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',

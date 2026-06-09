@@ -8,13 +8,7 @@
     </div>
   </header>
 
-  <div *ngIf="isLoading" class="settings-loading" aria-busy="true" aria-label="Chargement">
-    <div class="settings-skeleton settings-skeleton--wide"></div>
-    <div class="settings-skeleton settings-skeleton--wide"></div>
-    <div class="settings-skeleton"></div>
-  </div>
-
-  <div *ngIf="!isLoading" class="settings-grid">
+  <div class="settings-grid">
     <!-- Entreprise -->
     <section class="settings-card settings-card--company">
       <div class="settings-card__head">

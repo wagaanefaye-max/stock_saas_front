@@ -49,7 +49,6 @@ interface NotificationSettings {
 })
 export class SettingsComponent implements OnInit {
   companyId: number | null = null;
-  isLoading = false;
   isSaving = false;
   isSavingNotifications = false;
   company = {
@@ -92,7 +91,6 @@ export class SettingsComponent implements OnInit {
 
   private loadCompanySettings(): void {
     if (!this.companyId) return;
-    this.isLoading = true;
     this.apiService.get<CompanySettingsResponse>(`/companies/${this.companyId}`)
       .pipe(
         catchError(error => {
@@ -103,9 +101,6 @@ export class SettingsComponent implements OnInit {
             detail: 'Impossible de charger les paramètres de l’entreprise.'
           });
           return of(null);
-        }),
-        finalize(() => {
-          this.isLoading = false;
         })
       )
       .subscribe(data => {

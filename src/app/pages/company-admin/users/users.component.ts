@@ -21,7 +21,6 @@ import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
 import { UserRole } from '../../../models/user.model';
 import { catchError, of, throwError } from 'rxjs';
-import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 
 interface User {
   id: number;
@@ -65,8 +64,7 @@ interface PageResponse {
     ToastModule,
     TooltipModule,
     PaginatorModule,
-    ProgressSpinnerModule,
-    ListSkeletonComponent
+    ProgressSpinnerModule
   ],
   providers: [MessageService],
   templateUrl: './users.component.html',
@@ -75,7 +73,6 @@ interface PageResponse {
 export class CompanyUsersComponent implements OnInit {
   users: User[] = [];
   selectedUsers: User[] = [];
-  loading = false;
   displayDialog = false;
   user: any = {};
   globalFilter = '';
@@ -115,8 +112,6 @@ export class CompanyUsersComponent implements OnInit {
   loadUsers() {
     const search = this.globalFilter && this.globalFilter.trim() ? this.globalFilter.trim() : undefined;
 
-    this.loading = true;
-    // Filtrer uniquement les utilisateurs de l'entreprise de l'utilisateur connecté
     this.apiService.get<PageResponse>(`/users?page=${this.page}&size=${this.size}${search ? `&search=${encodeURIComponent(search)}` : ''}`)
       .pipe(
         catchError(error => {
@@ -140,7 +135,6 @@ export class CompanyUsersComponent implements OnInit {
       .subscribe(response => {
         this.users = response.content ?? [];
         this.totalRecords = response.totalElements ?? 0;
-        this.loading = false;
       });
   }
 

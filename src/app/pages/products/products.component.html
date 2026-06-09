@@ -108,10 +108,7 @@
       </div>
     </div>
 
-  <app-list-skeleton *ngIf="loading" [count]="6"></app-list-skeleton>
-
-  <!-- Vue mobile : cartes -->
-  <div *ngIf="!loading" class="products-mobile show-mobile-only">
+  <div class="products-mobile show-mobile-only">
     <div *ngIf="products.length === 0" class="products-mobile__empty">
       <i class="pi pi-box"></i>
       <p>Aucun produit</p>
@@ -170,7 +167,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="totalProducts > rows"
+      *ngIf="totalProducts > 0"
       class="products-mobile__paginator entity-paginator"
       [rows]="rows"
       [totalRecords]="totalProducts"
@@ -180,114 +177,6 @@
       [rowsPerPageOptions]="[10, 20]">
     </p-paginator>
   </div>
-
-  <!-- Vue desktop : tableau -->
-  <p-card *ngIf="!loading" class="products-table-card hide-mobile">
-    <p-table
-      [value]="products"
-      [lazy]="true"
-      [paginator]="true"
-      [rows]="rows"
-      [totalRecords]="totalProducts"
-      (onLazyLoad)="onProductsLazyLoad($event)"
-      [rowTrackBy]="trackByProductId"
-      [tableStyle]="{'min-width': '50rem'}"
-      selectionMode="multiple"
-      [(selection)]="selectedProducts"
-      [rowHover]="true">
-
-      <ng-template pTemplate="header">
-        <tr>
-          <th style="width: 3rem">
-            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-          </th>
-          <th pSortableColumn="reference">
-            <i class="pi pi-hashtag" style="margin-right: 0.5rem;"></i>
-            Référence
-            <p-sortIcon field="reference"></p-sortIcon>
-          </th>
-          <th pSortableColumn="name">
-            <i class="pi pi-tag" style="margin-right: 0.5rem;"></i>
-            Nom du produit
-            <p-sortIcon field="name"></p-sortIcon>
-          </th>
-          <th pSortableColumn="sku">
-            <i class="pi pi-barcode" style="margin-right: 0.5rem;"></i>
-            Code produit
-            <p-sortIcon field="sku"></p-sortIcon>
-          </th>
-          <th>
-            <i class="pi pi-folder" style="margin-right: 0.5rem;"></i>
-            Catégorie
-          </th>
-          <th pSortableColumn="stock">
-            <i class="pi pi-box" style="margin-right: 0.5rem;"></i>
-            Stock disponible
-            <p-sortIcon field="stock"></p-sortIcon>
-          </th>
-          <th pSortableColumn="price">
-            <i class="pi pi-money-bill" style="margin-right: 0.5rem;"></i>
-            Prix
-            <p-sortIcon field="price"></p-sortIcon>
-          </th>
-          <th>
-            <i class="pi pi-info-circle" style="margin-right: 0.5rem;"></i>
-            Statut
-          </th>
-          <th pSortableColumn="createdAt">
-            <i class="pi pi-calendar" style="margin-right: 0.5rem;"></i>
-            Date de création
-            <p-sortIcon field="createdAt"></p-sortIcon>
-          </th>
-          <th *ngIf="authService.isAdminEntreprise()" style="width: 3rem">
-            <i class="pi pi-cog" style="margin-right: 0.5rem;"></i>
-            Actions
-          </th>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="body" let-product>
-        <tr>
-          <td>
-            <p-tableCheckbox [value]="product"></p-tableCheckbox>
-          </td>
-          <td><code class="product-reference">{{ product.reference || '-' }}</code></td>
-          <td>{{ product.name }}</td>
-          <td>{{ product.sku }}</td>
-          <td>{{ product.category || '-' }}</td>
-          <td>{{ product.stock || 0 }}</td>
-          <td>{{ product.price | number:'1.0-0' }} FCFA</td>
-          <td>
-            <p-tag [value]="product.statusLabel || product.status || 'N/A'" [severity]="getSeverity(product.statusLabel || product.status)"></p-tag>
-          </td>
-          <td>{{ product.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td *ngIf="authService.isAdminEntreprise()">
-            <button
-              pButton
-              icon="pi pi-ellipsis-v"
-              class="p-button-text p-button-sm p-button-rounded action-menu-btn"
-              (click)="showMenu($event, product)"
-              [title]="'Actions'">
-            </button>
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td [attr.colspan]="authService.isAdminEntreprise() ? 11 : 10" class="empty-state-cell">
-            <div class="empty-state">
-              <i class="pi pi-box empty-state-icon"></i>
-              <p class="empty-state-text">Aucun produit</p>
-              @if (authService.isAdminEntreprise()) {
-                <button pButton label="Nouveau produit" icon="pi pi-plus" class="p-button-sm" (click)="openNew()"></button>
-              }
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
 
   <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
   </div>

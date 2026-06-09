@@ -18,9 +18,7 @@
     </div>
   </div>
 
-  <app-list-skeleton *ngIf="loading" [count]="6"></app-list-skeleton>
-
-  <div *ngIf="!loading" class="mobile-list show-mobile-only">
+  <div class="mobile-list show-mobile-only">
     <div *ngIf="requests.length === 0" class="mobile-list__empty">
       <i class="pi pi-inbox"></i>
       <p>Aucune souscription pour ce filtre.</p>
@@ -108,7 +106,7 @@
     </p-paginator>
   </div>
 
-  <p-card *ngIf="!loading" class="table-card hide-mobile">
+  <p-card class="table-card hide-mobile">
     <div class="list-toolbar list-toolbar--chips-only">
       <div class="list-filter-chips list-filter-chips--scroll">
         <p-selectButton
@@ -125,94 +123,9 @@
           icon="pi pi-refresh"
           class="p-button-text list-toolbar__btn-icon"
           title="Actualiser"
-          (click)="loadRequests()"
-          [disabled]="loading"></button>
+          (click)="loadRequests()"></button>
       </div>
     </div>
-
-    <p-table
-      [value]="requests"
-      [paginator]="true"
-      [rows]="rows"
-      [totalRecords]="totalRecords"
-      [first]="first"
-      (onPage)="onPageChange($event)"
-      [rowsPerPageOptions]="[10, 20, 50]"
-      [showCurrentPageReport]="true"
-      currentPageReportTemplate="{first} – {last} sur {totalRecords}"
-      [rowHover]="true"
-      styleClass="p-datatable-sm"
-      [tableStyle]="{ 'min-width': '64rem' }">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Date</th>
-          <th>Entreprise</th>
-          <th>Plan</th>
-          <th>Durée</th>
-          <th>Paiement</th>
-          <th>Montant</th>
-          <th>Statut</th>
-          <th>Période / Détail</th>
-          <th>Actions</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-row>
-        <tr [class.row-pending]="row.requestStatus === 'PENDING'">
-          <td>{{ formatDate(row.createdAt) }}</td>
-          <td>{{ row.companyName }}</td>
-          <td>{{ row.planLabel }}</td>
-          <td>{{ row.durationLabel }}</td>
-          <td>{{ row.paymentProviderLabel }}</td>
-          <td>{{ formatAmount(row.amountPaid) }}</td>
-          <td>
-            <p-tag [value]="row.requestStatusLabel" [severity]="statusSeverity(row.requestStatus)"></p-tag>
-          </td>
-          <td class="detail-cell">
-            <span *ngIf="row.requestStatus === 'APPROVED' && row.periodStart">
-              {{ formatDate(row.periodStart) }} → {{ formatDate(row.periodEnd) }}
-            </span>
-            <span *ngIf="row.requestStatus === 'REJECTED' && row.rejectionReason" class="reject-text">
-              {{ row.rejectionReason }}
-            </span>
-            <span *ngIf="row.requestStatus === 'PENDING'" class="text-muted">—</span>
-            <small *ngIf="row.validatedByEmail && row.requestStatus !== 'PENDING'" class="validated-by">
-              par {{ row.validatedByEmail }}
-            </small>
-          </td>
-          <td class="actions-cell">
-            <button
-              pButton
-              icon="pi pi-image"
-              class="p-button-text p-button-sm"
-              title="Voir capture"
-              [disabled]="!row.proofUrl"
-              (click)="viewProof(row)"></button>
-            <ng-container *ngIf="isPending(row)">
-              <button
-                pButton
-                icon="pi pi-check"
-                class="p-button-text p-button-success p-button-sm"
-                title="Valider"
-                [loading]="processingId === row.id"
-                (click)="approve(row)"></button>
-              <button
-                pButton
-                icon="pi pi-times"
-                class="p-button-text p-button-danger p-button-sm"
-                title="Refuser"
-                (click)="openReject(row)"></button>
-            </ng-container>
-          </td>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="9" class="empty-message">
-            Aucune souscription pour ce filtre.
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
   </p-card>
 
   <p-dialog

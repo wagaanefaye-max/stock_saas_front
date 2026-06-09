@@ -13,7 +13,6 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { finalize } from 'rxjs';
-import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 import { SubscriptionRecord, SubscriptionService } from '../../../services/subscription.service';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
 
@@ -34,15 +33,13 @@ type StatusFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';
     InputTextarea,
     SelectButtonModule,
     ProgressSpinnerModule,
-    PaginatorModule,
-    ListSkeletonComponent
+    PaginatorModule
   ],
   providers: [MessageService],
   templateUrl: './subscription-requests.component.html',
   styleUrl: './subscription-requests.component.scss'
 })
 export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
-  loading = true;
   requests: SubscriptionRecord[] = [];
   totalRecords = 0;
   statusFilter: StatusFilter = 'ALL';
@@ -100,11 +97,9 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
   }
 
   loadRequests(): void {
-    this.loading = true;
     const status = this.statusFilter === 'ALL' ? undefined : this.statusFilter;
     this.subscriptionService
       .getAllRequests(this.page, this.rows, status)
-      .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: (response) => {
           this.requests = response.content;

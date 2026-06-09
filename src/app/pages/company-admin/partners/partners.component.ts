@@ -21,8 +21,6 @@ import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
 import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
-import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
-
 @Component({
   selector: 'app-partners',
   standalone: true,
@@ -43,8 +41,7 @@ import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.
     PaginatorModule,
     ProgressSpinnerModule,
     PhoneFormatDirective,
-    PhoneFormatPipe,
-    ListSkeletonComponent
+    PhoneFormatPipe
   ],
   providers: [MessageService],
   templateUrl: './partners.component.html',
@@ -54,7 +51,6 @@ export class PartnersComponent implements OnInit {
   partners: any[] = [];
   totalPartners = 0;
   rows = 10;
-  loading = false;
   first = 0;
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
@@ -98,16 +94,13 @@ export class PartnersComponent implements OnInit {
     };
     if (this.selectedRoleFilter) params['role'] = this.selectedRoleFilter;
     if (this.globalFilter?.trim()) params['search'] = this.globalFilter.trim();
-    this.loading = true;
     this.apiService.get<{ content: any[]; totalElements: number }>('/partners', params).subscribe({
       next: (data) => {
         this.partners = data?.content ?? [];
         this.totalPartners = data?.totalElements ?? 0;
-        this.loading = false;
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les partenaires', life: 5000 });
-        this.loading = false;
       }
     });
   }

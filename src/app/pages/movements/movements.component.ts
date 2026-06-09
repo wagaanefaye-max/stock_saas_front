@@ -19,8 +19,6 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
-import { ListSkeletonComponent } from '../../components/shared/list-skeleton.component';
-
 @Component({
   selector: 'app-movements',
   standalone: true,
@@ -40,8 +38,7 @@ import { ListSkeletonComponent } from '../../components/shared/list-skeleton.com
     TextareaModule,
     ToastModule,
     PaginatorModule,
-    ProgressSpinnerModule,
-    ListSkeletonComponent
+    ProgressSpinnerModule
   ],
   providers: [MessageService],
   templateUrl: './movements.component.html',
@@ -51,7 +48,6 @@ export class MovementsComponent implements OnInit {
   movements: any[] = [];
   totalMovements = 0;
   rows = 10;
-  loading = false;
   first = 0;
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
   selectedMovements: any[] = [];
@@ -161,7 +157,6 @@ export class MovementsComponent implements OnInit {
     if (this.globalFilter?.trim()) {
       params['search'] = this.globalFilter.trim();
     }
-    this.loading = true;
     this.apiService.get<{ content: any[]; totalElements: number }>('/movements', params).subscribe({
       next: (data) => {
         this.movements = (data?.content ?? []).map(m => ({
@@ -183,11 +178,9 @@ export class MovementsComponent implements OnInit {
           createdAt: m.createdAt
         }));
         this.totalMovements = data?.totalElements ?? 0;
-        this.loading = false;
       },
       error: (error) => {
         console.error('Erreur lors du chargement des mouvements', error);
-        this.loading = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',

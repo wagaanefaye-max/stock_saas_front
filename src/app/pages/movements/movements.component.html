@@ -45,9 +45,7 @@
     </p-selectButton>
   </div>
 
-  <app-list-skeleton *ngIf="loading" [count]="6"></app-list-skeleton>
-
-  <p-card *ngIf="!loading" class="table-card hide-mobile">
+  <p-card class="table-card hide-mobile">
     <div class="list-toolbar">
       <div class="list-toolbar__primary">
         <span class="p-input-icon-left list-toolbar__search">
@@ -80,82 +78,9 @@
         </button>
       </div>
     </div>
-
-    <p-table
-      [value]="movements"
-      [lazy]="true"
-      [paginator]="true"
-      [rows]="rows"
-      [totalRecords]="totalMovements"
-      (onLazyLoad)="onMovementsLazyLoad($event)"
-      [rowTrackBy]="trackByMovementId"
-      [tableStyle]="{'min-width': '50rem'}"
-      selectionMode="multiple"
-      [(selection)]="selectedMovements"
-      [rowHover]="true">
-
-      <ng-template pTemplate="header">
-        <tr>
-          <th style="width: 3rem">
-            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-          </th>
-          <th pSortableColumn="date">Date <p-sortIcon field="date"></p-sortIcon></th>
-          <th pSortableColumn="product">Produit <p-sortIcon field="product"></p-sortIcon></th>
-          <th>Type</th>
-          <th pSortableColumn="quantity">Quantité <p-sortIcon field="quantity"></p-sortIcon></th>
-          <th>Entrepôt</th>
-          <th *ngIf="authService.isAdminEntreprise()">Destination</th>
-          <th>Utilisateur</th>
-          <th *ngIf="authService.isAdminEntreprise()">Justification</th>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="body" let-movement>
-        <tr>
-          <td>
-            <p-tableCheckbox [value]="movement"></p-tableCheckbox>
-          </td>
-          <td>{{ movement.date }}</td>
-          <td>
-            <strong>{{ movement.product }}</strong>
-          </td>
-          <td>
-            <p-tag [value]="movement.type" [severity]="getSeverity(movement.type)"></p-tag>
-          </td>
-          <td>
-            <span [class.text-danger]="movement.quantity < 0" [class.text-success]="movement.quantity > 0">
-              {{ movement.quantity > 0 ? '+' : '' }}{{ movement.quantity }}
-            </span>
-          </td>
-          <td>{{ movement.warehouse }}</td>
-          <td *ngIf="authService.isAdminEntreprise()">
-            <span *ngIf="movement.warehouseDestination">{{ movement.warehouseDestination }}</span>
-            <span *ngIf="!movement.warehouseDestination" class="text-muted">-</span>
-          </td>
-          <td>{{ movement.user }}</td>
-          <td *ngIf="authService.isAdminEntreprise()">
-            <span *ngIf="movement.justification" [title]="movement.justification" class="justification-text">
-              {{ movement.justification.length > 50 ? (movement.justification | slice:0:50) + '...' : movement.justification }}
-            </span>
-            <span *ngIf="!movement.justification" class="text-muted">-</span>
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td [attr.colspan]="authService.isAdminEntreprise() ? 9 : 7" class="text-center">
-            <div class="empty-state">
-              <i class="pi pi-inbox" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-              <p>Aucun mouvement trouvé</p>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
   </p-card>
 
-  <div *ngIf="!loading" class="mobile-list show-mobile-only">
+  <div class="mobile-list show-mobile-only">
     <div *ngIf="movements.length === 0" class="mobile-list__empty">
       <i class="pi pi-inbox"></i>
       <p>Aucun mouvement trouvé</p>
@@ -187,7 +112,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="totalMovements > rows"
+      *ngIf="totalMovements > 0"
       class="mobile-list__paginator entity-paginator"
       [rows]="rows"
       [totalRecords]="totalMovements"

@@ -15,8 +15,6 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ApiService } from '../../services/api.service';
-import { ListSkeletonComponent } from '../../components/shared/list-skeleton.component';
-
 @Component({
   selector: 'app-inventories',
   standalone: true,
@@ -35,7 +33,6 @@ import { ListSkeletonComponent } from '../../components/shared/list-skeleton.com
     ToastModule,
     SelectButtonModule,
     ProgressSpinnerModule,
-    ListSkeletonComponent,
   ],
   providers: [MessageService],
   templateUrl: './inventories.component.html',
@@ -43,7 +40,6 @@ import { ListSkeletonComponent } from '../../components/shared/list-skeleton.com
 })
 export class InventoriesComponent implements OnInit {
   inventories: any[] = [];
-  loading = false;
   warehouses: any[] = [];
   /** Options pour le filtre entrepôt (Tous + liste des entrepôts) */
   warehouseFilterOptions: { label: string; value: number | null }[] = [];
@@ -106,7 +102,6 @@ export class InventoriesComponent implements OnInit {
     const params: Record<string, string | number | null> = {};
     if (this.warehouseFilter != null) params['warehouseId'] = this.warehouseFilter;
     if (this.statusFilter !== 'ALL') params['status'] = this.statusFilter;
-    this.loading = true;
     this.apiService.get<any[]>('/inventories', params).subscribe({
       next: (data) => {
         this.inventories = (data || []).map(inv => ({
@@ -122,10 +117,8 @@ export class InventoriesComponent implements OnInit {
           createdAt: inv.createdAt,
           lines: inv.lines || []
         }));
-        this.loading = false;
       },
       error: () => {
-        this.loading = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',

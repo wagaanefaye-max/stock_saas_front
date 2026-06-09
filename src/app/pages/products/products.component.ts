@@ -20,8 +20,6 @@ import { PaginatorModule } from 'primeng/paginator';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
-import { ListSkeletonComponent } from '../../components/shared/list-skeleton.component';
-
 @Component({
   selector: 'app-products',
   standalone: true,
@@ -41,8 +39,7 @@ import { ListSkeletonComponent } from '../../components/shared/list-skeleton.com
     TooltipModule,
     DatePickerModule,
     PaginatorModule,
-    ProgressSpinnerModule,
-    ListSkeletonComponent
+    ProgressSpinnerModule
   ],
   providers: [MessageService],
   templateUrl: './products.component.html',
@@ -52,7 +49,6 @@ export class ProductsComponent implements OnInit {
   products: any[] = [];
   totalProducts = 0;
   rows = 10;
-  loading = false;
   first = 0;
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
@@ -106,7 +102,6 @@ export class ProductsComponent implements OnInit {
     if (this.filterDateFrom) params['dateFrom'] = this.formatDateForApi(this.filterDateFrom);
     if (this.filterDateTo) params['dateTo'] = this.formatDateForApi(this.filterDateTo);
 
-    this.loading = true;
     this.apiService.get<{ content: any[]; totalElements: number }>('/products', params).subscribe({
       next: (data) => {
         this.products = (data?.content ?? []).map(p => ({
@@ -116,11 +111,9 @@ export class ProductsComponent implements OnInit {
           price: p.price || 0
         }));
         this.totalProducts = data?.totalElements ?? 0;
-        this.loading = false;
       },
       error: (error) => {
         console.error('Erreur lors du chargement des produits', error);
-        this.loading = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',

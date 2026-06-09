@@ -41,10 +41,8 @@
     </div>
   </div>
 
-  <app-list-skeleton *ngIf="loading" [count]="6"></app-list-skeleton>
-
-  <!-- Vue mobile -->
-  <div *ngIf="!loading" class="mobile-list show-mobile-only">
+  <!-- Vue cartes -->
+  <div class="mobile-list show-mobile-only">
     <div *ngIf="companies.length === 0" class="mobile-list__empty">
       <i class="pi pi-building"></i>
       <p>Aucune entreprise trouvée</p>
@@ -96,7 +94,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="totalRecords > size"
+      *ngIf="totalRecords > 0"
       class="mobile-list__paginator entity-paginator"
       [rows]="size"
       [totalRecords]="totalRecords"
@@ -106,87 +104,6 @@
       [rowsPerPageOptions]="[10, 20]">
     </p-paginator>
   </div>
-
-  <!-- Vue desktop -->
-  <p-card *ngIf="!loading" class="table-card hide-mobile">
-    <p-table
-      [value]="companies"
-      [paginator]="true"
-      [rows]="size"
-      [totalRecords]="totalRecords"
-      [lazy]="true"
-      (onLazyLoad)="onPageChange($event)"
-      [first]="page * size"
-      [tableStyle]="{'min-width': '50rem'}"
-      selectionMode="multiple"
-      [(selection)]="selectedCompanies"
-      [rowHover]="true">
-
-      <ng-template pTemplate="header">
-        <tr>
-          <th style="width: 3rem">
-            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-          </th>
-          <th style="width: 4rem">Logo</th>
-          <th>Nom</th>
-          <th>Email</th>
-          <th>Plan</th>
-          <th>Utilisateurs</th>
-          <th>Statut</th>
-          <th>Date création</th>
-          <th style="width: 3rem">Actions</th>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="body" let-company>
-        <tr>
-          <td>
-            <p-tableCheckbox [value]="company"></p-tableCheckbox>
-          </td>
-          <td>
-            <div class="company-logo-cell">
-              <img
-                *ngIf="company.logoUrl"
-                [src]="company.logoUrl"
-                [alt]="company.name + ' logo'"
-                class="company-logo">
-              <div *ngIf="!company.logoUrl" class="company-logo-placeholder">
-                <i class="pi pi-building"></i>
-              </div>
-            </div>
-          </td>
-          <td>{{ company.name }}</td>
-          <td>{{ company.email }}</td>
-          <td>
-            <p-tag [value]="getPlanLabel(company.planCode)" [severity]="getPlanSeverity(company.planCode)"></p-tag>
-          </td>
-          <td>{{ company.userCount }}</td>
-          <td>
-            <p-tag [value]="getStatusLabel(company.statusCode)" [severity]="getSeverity(company.statusCode)"></p-tag>
-          </td>
-          <td>{{ formatDate(company.createdAt) }}</td>
-          <td>
-            <button
-              pButton
-              icon="pi pi-ellipsis-v"
-              class="p-button-text p-button-sm p-button-rounded action-menu-btn"
-              (click)="showMenu($event, company)"
-              [title]="'Actions'">
-            </button>
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="9" class="text-center">
-            <p>Aucune entreprise trouvée</p>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-
-  </p-card>
 
   <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
 

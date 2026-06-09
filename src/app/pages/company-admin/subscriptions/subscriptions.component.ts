@@ -30,7 +30,6 @@ const ACCEPTED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
   @ViewChild('proofInput') proofInput?: ElementRef<HTMLInputElement>;
 
-  loading = true;
   subscribing = false;
   showHistory = false;
   status: SubscriptionStatus | null = null;
@@ -68,14 +67,12 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
   }
 
   loadAll(): void {
-    this.loading = true;
     forkJoin({
       status: this.subscriptionService.getStatus(),
       plans: this.subscriptionService.getPlans(),
       durations: this.subscriptionService.getDurations(),
       history: this.subscriptionService.getHistory().pipe(catchError(() => of([])))
     })
-      .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: ({ status, plans, durations, history }) => {
           this.status = status;

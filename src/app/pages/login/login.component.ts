@@ -33,7 +33,6 @@ export class LoginComponent {
   rememberMe = false;
 
   errorMessage = '';
-  loading = false;
 
   constructor(
     private router: Router,
@@ -98,7 +97,6 @@ export class LoginComponent {
     }
 
     this.errorMessage = '';
-    this.loading = true;
 
     this.authService.login(this.email, this.password).subscribe({
       next: () => {
@@ -110,7 +108,6 @@ export class LoginComponent {
         }
       },
       error: (error) => {
-        this.loading = false;
         console.error('Erreur de connexion:', error);
         
         let errorDetail = 'Une erreur est survenue lors de la connexion';

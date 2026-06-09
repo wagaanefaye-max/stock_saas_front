@@ -1,11 +1,7 @@
 <div class="subscriptions-page">
   <p-toast></p-toast>
 
-  <div *ngIf="loading" class="loading-state">
-    <i class="pi pi-spin pi-spinner"></i>
-  </div>
-
-  <ng-container *ngIf="!loading && status">
+  <ng-container *ngIf="status">
     <!-- Alerte courte uniquement si nécessaire -->
     <div class="alert alert--pending" *ngIf="status.hasPendingRequest">
       <i class="pi pi-clock"></i> Demande en cours de validation

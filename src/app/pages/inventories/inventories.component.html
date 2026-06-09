@@ -44,10 +44,7 @@
     </div>
   </div>
 
-  <app-list-skeleton *ngIf="loading" [count]="6"></app-list-skeleton>
-
-  <!-- Vue mobile -->
-  <div *ngIf="!loading" class="mobile-list show-mobile-only">
+  <div class="mobile-list show-mobile-only">
     <div *ngIf="filteredInventories.length === 0" class="mobile-list__empty">
       <i class="pi pi-clipboard"></i>
       <p>Aucun inventaire</p>
@@ -86,8 +83,7 @@
     </ul>
   </div>
 
-  <!-- Vue desktop -->
-  <p-card *ngIf="!loading" class="table-card hide-mobile">
+  <p-card class="table-card hide-mobile">
     <div class="list-toolbar">
       <div class="list-toolbar__filters">
         <div class="list-toolbar__filter-field">
@@ -115,48 +111,6 @@
         </div>
       </div>
     </div>
-
-    <p-table
-      [value]="filteredInventories"
-      [paginator]="true"
-      [rows]="10"
-      [tableStyle]="{'min-width': '50rem'}">
-      <ng-template pTemplate="header">
-        <tr>
-          <th pSortableColumn="inventoryDate">Date <p-sortIcon field="inventoryDate"></p-sortIcon></th>
-          <th pSortableColumn="warehouseName">Entrepôt <p-sortIcon field="warehouseName"></p-sortIcon></th>
-          <th>Statut</th>
-          <th>Créé par</th>
-          <th>Clôturé le</th>
-          <th style="width: 12rem">Actions</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-inv>
-        <tr>
-          <td>{{ inv.inventoryDate }}</td>
-          <td><strong>{{ inv.warehouseName }}</strong></td>
-          <td>
-            <p-tag [value]="inv.statusLabel" [severity]="getStatusSeverity(inv.status)"></p-tag>
-          </td>
-          <td>{{ inv.createdByName || '–' }}</td>
-          <td>{{ inv.closedAt ? (inv.closedAt | date:'short') : '–' }}</td>
-          <td>
-            <button pButton icon="pi pi-eye" title="Voir / Saisir les quantités" class="p-button-rounded p-button-text" (click)="openDetail(inv)"></button>
-          </td>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="6" class="text-center">
-            <div class="empty-state">
-              <i class="pi pi-clipboard" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-              <p>Aucun inventaire</p>
-              <p class="text-muted small">Créez un inventaire pour un entrepôt pour lancer un comptage.</p>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
   </p-card>
 
   <button

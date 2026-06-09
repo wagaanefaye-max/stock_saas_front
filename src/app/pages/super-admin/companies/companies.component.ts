@@ -21,7 +21,6 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
 import { ApiService } from '../../../services/api.service';
 import { Subject, catchError, debounceTime, of, takeUntil, throwError } from 'rxjs';
-import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 
 interface Company {
   id: number;
@@ -73,8 +72,7 @@ interface PageResponse {
     ToastModule,
     PaginatorModule,
     ProgressSpinnerModule,
-    PhoneFormatDirective,
-    ListSkeletonComponent
+    PhoneFormatDirective
   ],
   providers: [MessageService],
   templateUrl: './companies.component.html',
@@ -83,7 +81,6 @@ interface PageResponse {
 export class CompaniesComponent implements OnInit, OnDestroy {
   companies: Company[] = [];
   selectedCompanies: Company[] = [];
-  loading = false;
   displayDialog = false;
   company: any = {};
   globalFilter = '';
@@ -150,7 +147,6 @@ export class CompaniesComponent implements OnInit, OnDestroy {
   loadCompanies() {
     const search = this.globalFilter && this.globalFilter.trim() ? this.globalFilter.trim() : undefined;
 
-    this.loading = true;
     this.apiService.get<PageResponse>(`/companies?page=${this.page}&size=${this.size}${search ? `&search=${encodeURIComponent(search)}` : ''}`)
       .pipe(
         catchError(error => {
@@ -174,7 +170,6 @@ export class CompaniesComponent implements OnInit, OnDestroy {
       .subscribe(response => {
         this.companies = response.content;
         this.totalRecords = response.totalElements;
-        this.loading = false;
       });
   }
 

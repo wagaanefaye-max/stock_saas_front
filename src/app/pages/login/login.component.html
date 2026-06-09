@@ -90,8 +90,7 @@
           type="submit" 
           label="Se connecter"
           class="p-button-primary w-full login-button"
-          [loading]="loading"
-          [disabled]="loading || !email || !password">
+          [disabled]="!email || !password">
         </button>
       </form>
 

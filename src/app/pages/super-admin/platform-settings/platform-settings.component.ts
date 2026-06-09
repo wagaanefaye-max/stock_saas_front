@@ -35,7 +35,6 @@ interface PlatformSettings {
   styleUrl: './platform-settings.component.scss'
 })
 export class PlatformSettingsComponent implements OnInit {
-  loading = false;
   saving = false;
 
   platformSettings: PlatformSettings = {
@@ -54,7 +53,6 @@ export class PlatformSettingsComponent implements OnInit {
   }
 
   loadSettings(): void {
-    this.loading = true;
     this.apiService.get<PlatformSettings>('/platform-settings')
       .pipe(
         catchError(error => {
@@ -64,9 +62,6 @@ export class PlatformSettingsComponent implements OnInit {
             detail: error?.error?.message || 'Impossible de charger les paramètres'
           });
           return of(null);
-        }),
-        finalize(() => {
-          this.loading = false;
         })
       )
       .subscribe(data => {

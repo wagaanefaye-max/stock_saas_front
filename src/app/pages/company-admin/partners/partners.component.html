@@ -39,9 +39,7 @@
     </p-selectButton>
   </div>
 
-  <app-list-skeleton *ngIf="loading" [count]="6"></app-list-skeleton>
-
-  <p-card *ngIf="!loading" class="table-card hide-mobile">
+  <p-card class="table-card hide-mobile">
     <div class="list-toolbar">
       <div class="list-toolbar__primary">
         <span class="p-input-icon-left list-toolbar__search">
@@ -66,54 +64,9 @@
         </div>
       </div>
     </div>
-
-    <p-table
-      [value]="partners"
-      [lazy]="true"
-      [paginator]="true"
-      [rows]="rows"
-      [totalRecords]="totalPartners"
-      (onLazyLoad)="onPartnersLazyLoad($event)"
-      [rowTrackBy]="trackByPartnerId"
-      [tableStyle]="{'min-width': '50rem'}"
-      [rowHover]="true">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Rôle</th>
-          <th pSortableColumn="name">Nom <p-sortIcon field="name"></p-sortIcon></th>
-          <th>Email</th>
-          <th>Téléphone</th>
-          <th>Adresse</th>
-          <th style="width: 7rem">Actions</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-p>
-        <tr>
-          <td><p-tag [value]="getRoleLabel(p.role)" [severity]="getRoleSeverity(p.role)"></p-tag></td>
-          <td>{{ p.name }}</td>
-          <td>{{ p.email || '-' }}</td>
-          <td>{{ p.phone | phoneFormat }}</td>
-          <td><span [title]="p.address">{{ (p.address | slice:0:30) || '-' }}{{ (p.address && p.address.length > 30) ? '…' : '' }}</span></td>
-          <td>
-            <button pButton icon="pi pi-ellipsis-v" class="p-button-text p-button-sm p-button-rounded" (click)="showMenu($event, p)" title="Actions"></button>
-          </td>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="6" class="empty-state-cell">
-            <div class="empty-state">
-              <i class="pi pi-users empty-state-icon"></i>
-              <p class="empty-state-text">Aucun partenaire (client ou fournisseur)</p>
-              <button pButton label="Nouveau partenaire" icon="pi pi-plus" class="p-button-sm partners-create-btn" (click)="openNew()"></button>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
   </p-card>
 
-  <div *ngIf="!loading" class="mobile-list show-mobile-only">
+  <div class="mobile-list show-mobile-only">
     <div *ngIf="partners.length === 0" class="mobile-list__empty">
       <i class="pi pi-users"></i>
       <p>Aucun partenaire (client ou fournisseur)</p>
@@ -146,7 +99,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="totalPartners > rows"
+      *ngIf="totalPartners > 0"
       class="mobile-list__paginator entity-paginator"
       [rows]="rows"
       [totalRecords]="totalPartners"

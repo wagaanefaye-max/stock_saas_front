@@ -19,8 +19,7 @@ import { ToastModule } from 'primeng/toast';
 import { UserRole } from '../../../models/user.model';
 import { ApiService } from '../../../services/api.service';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
-import { catchError, finalize, of } from 'rxjs';
-import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
+import { catchError, of } from 'rxjs';
 
 interface User {
   id: number;
@@ -64,7 +63,6 @@ interface PageResponse {
     PaginatorModule,
     ProgressSpinnerModule,
     ToastModule,
-    ListSkeletonComponent,
   ],
   providers: [MessageService],
   templateUrl: './platform-users.component.html',
@@ -73,7 +71,6 @@ interface PageResponse {
 export class PlatformUsersComponent implements OnInit {
   users: User[] = [];
   selectedUsers: User[] = [];
-  loading = false;
   displayDialog = false;
   user: any = {};
   globalFilter = '';
@@ -126,10 +123,8 @@ export class PlatformUsersComponent implements OnInit {
   loadUsers() {
     const search = this.globalFilter && this.globalFilter.trim() ? this.globalFilter.trim() : undefined;
 
-    this.loading = true;
     this.apiService.get<PageResponse>(`/users?page=${this.page}&size=${this.size}${search ? `&search=${encodeURIComponent(search)}` : ''}`)
       .pipe(
-        finalize(() => (this.loading = false)),
         catchError(error => {
           console.error('Erreur lors du chargement des utilisateurs:', error);
           this.messageService.add({

@@ -87,7 +87,6 @@ export class InvoicesComponent implements OnInit {
   clients: any[] = [];
   /** Total nombre de clients (pour pagination lazy) */
   clientsTotal = 0;
-  clientsLoading = false;
   /** Recherche serveur : nom, prénom ou email */
   clientSearchTerm = '';
   readonly clientsPageSize = 10;
@@ -243,10 +242,8 @@ export class InvoicesComponent implements OnInit {
           this.clients = [...this.clients, ...list];
         }
         this.clientsTotal = total;
-        this.clientsLoading = false;
       },
       error: () => {
-        this.clientsLoading = false;
         if (page === 0) this.clients = [];
       }
     });
@@ -261,7 +258,7 @@ export class InvoicesComponent implements OnInit {
   /** Lazy load : charger la page suivante quand l'utilisateur scrolle en bas. */
   onClientsLazyLoad(event: { first: number; last: number }) {
     const last = event.last ?? 0;
-    if (last >= this.clients.length - 1 && this.clients.length < this.clientsTotal && !this.clientsLoading) {
+    if (last >= this.clients.length - 1 && this.clients.length < this.clientsTotal) {
       const nextPage = Math.floor(this.clients.length / this.clientsPageSize);
       this.loadClientsPage(nextPage);
     }
