@@ -10,6 +10,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { finalize } from 'rxjs';
 import { SubscriptionRecord, SubscriptionService } from '../../../services/subscription.service';
@@ -31,7 +32,8 @@ type StatusFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';
     DialogModule,
     InputTextarea,
     SelectButtonModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    PaginatorModule
   ],
   providers: [MessageService],
   templateUrl: './subscription-requests.component.html',
@@ -39,8 +41,8 @@ type StatusFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';
 })
 export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
   loading = true;
-  allRequests: SubscriptionRecord[] = [];
-  filteredRequests: SubscriptionRecord[] = [];
+  requests: SubscriptionRecord[] = [];
+  totalRecords = 0;
   statusFilter: StatusFilter = 'ALL';
   statusFilterOptions: { label: string; value: StatusFilter }[] = [];
   proofPreviewUrl: string | null = null;
@@ -51,6 +53,10 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
   rejectPresetKey: string | null = null;
   rejectSubmitting = false;
   processingId: number | null = null;
+  page = 0;
+  rows = 10;
+  first = 0;
+  private statusCounts = { all: 0, pending: 0, approved: 0, rejected: 0 };
   readonly dialogStyle = APP_DIALOG_STYLE;
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
 
@@ -84,23 +90,31 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.loadAll();
+    this.loadRequests();
   }
 
   ngOnDestroy(): void {
     this.revokeProofUrl();
   }
 
-  loadAll(): void {
+  loadRequests(): void {
     this.loading = true;
+    const status = this.statusFilter === 'ALL' ? undefined : this.statusFilter;
     this.subscriptionService
-      .getAllRequests()
+      .getAllRequests(this.page, this.rows, status)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe({
-        next: (list) => {
-          this.allRequests = list;
+        next: (response) => {
+          this.requests = response.content;
+          this.totalRecords = response.totalElements;
+          this.first = response.page * response.size;
+          this.statusCounts = {
+            all: response.totalAll,
+            pending: response.totalPending,
+            approved: response.totalApproved,
+            rejected: response.totalRejected
+          };
           this.updateFilterOptions();
-          this.applyFilter();
         },
         error: (err) =>
           this.messageService.add({
@@ -112,29 +126,28 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
   }
 
   onFilterChange(): void {
-    this.applyFilter();
+    this.page = 0;
+    this.first = 0;
+    this.loadRequests();
+  }
+
+  onPageChange(event: { first?: number; rows?: number; page?: number }): void {
+    const nextRows = event.rows ?? this.rows;
+    this.rows = nextRows;
+    this.page = event.first !== undefined
+      ? Math.floor(event.first / nextRows)
+      : (event.page ?? 0);
+    this.first = this.page * this.rows;
+    this.loadRequests();
   }
 
   updateFilterOptions(): void {
     this.statusFilterOptions = [
-      { label: `Toutes (${this.countByStatus('ALL')})`, value: 'ALL' },
-      { label: `En attente (${this.countByStatus('PENDING')})`, value: 'PENDING' },
-      { label: `Validées (${this.countByStatus('APPROVED')})`, value: 'APPROVED' },
-      { label: `Refusées (${this.countByStatus('REJECTED')})`, value: 'REJECTED' }
+      { label: `Toutes (${this.statusCounts.all})`, value: 'ALL' },
+      { label: `En attente (${this.statusCounts.pending})`, value: 'PENDING' },
+      { label: `Validées (${this.statusCounts.approved})`, value: 'APPROVED' },
+      { label: `Refusées (${this.statusCounts.rejected})`, value: 'REJECTED' }
     ];
-  }
-
-  applyFilter(): void {
-    if (this.statusFilter === 'ALL') {
-      this.filteredRequests = [...this.allRequests];
-    } else {
-      this.filteredRequests = this.allRequests.filter((r) => r.requestStatus === this.statusFilter);
-    }
-  }
-
-  countByStatus(status: StatusFilter): number {
-    if (status === 'ALL') return this.allRequests.length;
-    return this.allRequests.filter((r) => r.requestStatus === status).length;
   }
 
   isPending(row: SubscriptionRecord): boolean {
@@ -189,7 +202,7 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
                 detail: 'L\'abonnement est maintenant actif'
               });
               this.closeProof();
-              this.loadAll();
+              this.loadRequests();
             },
             error: (err) =>
               this.messageService.add({
@@ -277,7 +290,7 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
             detail: 'L\'entreprise peut soumettre une nouvelle demande avec un justificatif valide.'
           });
           this.closeProof();
-          this.loadAll();
+          this.loadRequests();
         },
         error: (err) =>
           this.messageService.add({

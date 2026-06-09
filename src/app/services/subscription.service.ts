@@ -37,6 +37,20 @@ export interface SubscriptionDuration {
   totalPrice?: number;
 }
 
+export interface SubscriptionRequestsPage {
+  content: SubscriptionRecord[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+  totalAll: number;
+  totalPending: number;
+  totalApproved: number;
+  totalRejected: number;
+}
+
 export interface SubscriptionRecord {
   id: number;
   companyId?: number;
@@ -112,8 +126,12 @@ export class SubscriptionService {
     return this.api.get<SubscriptionRecord[]>('/subscriptions/requests/pending');
   }
 
-  getAllRequests(status?: string): Observable<SubscriptionRecord[]> {
-    return this.api.get<SubscriptionRecord[]>('/subscriptions/requests', status ? { status } : undefined);
+  getAllRequests(page = 0, size = 10, status?: string): Observable<SubscriptionRequestsPage> {
+    const params: Record<string, string | number> = { page, size };
+    if (status) {
+      params['status'] = status;
+    }
+    return this.api.get<SubscriptionRequestsPage>('/subscriptions/requests', params);
   }
 
   getQuote(planCode: string, durationCode: string): Observable<SubscriptionQuote> {

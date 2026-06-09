@@ -19,14 +19,14 @@
   </div>
 
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="filteredRequests.length === 0" class="mobile-list__empty">
+    <div *ngIf="!loading && requests.length === 0" class="mobile-list__empty">
       <i class="pi pi-inbox"></i>
       <p>Aucune souscription pour ce filtre.</p>
     </div>
 
-    <ul *ngIf="filteredRequests.length > 0" class="mobile-list__items">
+    <ul *ngIf="requests.length > 0" class="mobile-list__items">
       <li
-        *ngFor="let row of filteredRequests"
+        *ngFor="let row of requests"
         class="mobile-card"
         [class.mobile-card--pending]="row.requestStatus === 'PENDING'">
         <div class="mobile-card__top">
@@ -92,6 +92,18 @@
         </div>
       </li>
     </ul>
+
+    <p-paginator
+      *ngIf="totalRecords > 0"
+      class="mobile-list__paginator"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      [first]="first"
+      (onPageChange)="onPageChange($event)"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} sur {totalRecords}"
+      [rowsPerPageOptions]="[10, 20, 50]">
+    </p-paginator>
   </div>
 
   <p-card class="table-card hide-mobile">
@@ -111,13 +123,21 @@
           icon="pi pi-refresh"
           class="p-button-text list-toolbar__btn-icon"
           title="Actualiser"
-          (click)="loadAll()"
+          (click)="loadRequests()"
           [disabled]="loading"></button>
       </div>
     </div>
 
     <p-table
-      [value]="filteredRequests"
+      [value]="requests"
+      [paginator]="true"
+      [rows]="rows"
+      [totalRecords]="totalRecords"
+      [first]="first"
+      (onPage)="onPageChange($event)"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} sur {totalRecords}"
       [rowHover]="true"
       styleClass="p-datatable-sm"
       [tableStyle]="{ 'min-width': '64rem' }">
