@@ -20,6 +20,7 @@ import { UserRole } from '../../../models/user.model';
 import { ApiService } from '../../../services/api.service';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
 import { catchError, finalize, of } from 'rxjs';
+import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 
 interface User {
   id: number;
@@ -63,6 +64,7 @@ interface PageResponse {
     PaginatorModule,
     ProgressSpinnerModule,
     ToastModule,
+    ListSkeletonComponent,
   ],
   providers: [MessageService],
   templateUrl: './platform-users.component.html',

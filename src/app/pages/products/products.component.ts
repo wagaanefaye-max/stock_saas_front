@@ -20,6 +20,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
+import { ListSkeletonComponent } from '../../components/shared/list-skeleton.component';
 
 @Component({
   selector: 'app-products',
@@ -40,7 +41,8 @@ import { ApiService } from '../../services/api.service';
     TooltipModule,
     DatePickerModule,
     PaginatorModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    ListSkeletonComponent
   ],
   providers: [MessageService],
   templateUrl: './products.component.html',

@@ -1,4 +1,4 @@
-<div class="invoices-page mobile-page">
+<div class="invoices-page mobile-page entity-page">
   <p-toast></p-toast>
   <div class="page-header">
     <div>
@@ -168,7 +168,7 @@
 
       <p-paginator
         *ngIf="filteredInvoices.length > mobileRows"
-        class="mobile-list__paginator"
+        class="mobile-list__paginator entity-paginator"
         [rows]="mobileRows"
         [totalRecords]="filteredInvoices.length"
         [first]="mobileFirst"

@@ -21,6 +21,7 @@ import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
 import { UserRole } from '../../../models/user.model';
 import { catchError, of, throwError } from 'rxjs';
+import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 
 interface User {
   id: number;
@@ -64,7 +65,8 @@ interface PageResponse {
     ToastModule,
     TooltipModule,
     PaginatorModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    ListSkeletonComponent
   ],
   providers: [MessageService],
   templateUrl: './users.component.html',

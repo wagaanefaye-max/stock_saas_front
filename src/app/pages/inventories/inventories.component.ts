@@ -15,6 +15,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ApiService } from '../../services/api.service';
+import { ListSkeletonComponent } from '../../components/shared/list-skeleton.component';
 
 @Component({
   selector: 'app-inventories',
@@ -34,6 +35,7 @@ import { ApiService } from '../../services/api.service';
     ToastModule,
     SelectButtonModule,
     ProgressSpinnerModule,
+    ListSkeletonComponent,
   ],
   providers: [MessageService],
   templateUrl: './inventories.component.html',

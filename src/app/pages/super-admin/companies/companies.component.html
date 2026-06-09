@@ -1,4 +1,4 @@
-<div class="companies-page mobile-page">
+<div class="companies-page mobile-page entity-page">
   <p-toast></p-toast>
 
   <div class="page-header">
@@ -41,8 +41,10 @@
     </div>
   </div>
 
+  <app-list-skeleton *ngIf="loading" [count]="6"></app-list-skeleton>
+
   <!-- Vue mobile -->
-  <div class="mobile-list show-mobile-only">
+  <div *ngIf="!loading" class="mobile-list show-mobile-only">
     <div *ngIf="companies.length === 0" class="mobile-list__empty">
       <i class="pi pi-building"></i>
       <p>Aucune entreprise trouvée</p>
@@ -95,7 +97,7 @@
 
     <p-paginator
       *ngIf="totalRecords > size"
-      class="mobile-list__paginator"
+      class="mobile-list__paginator entity-paginator"
       [rows]="size"
       [totalRecords]="totalRecords"
       [first]="page * size"
@@ -106,7 +108,7 @@
   </div>
 
   <!-- Vue desktop -->
-  <p-card class="table-card hide-mobile">
+  <p-card *ngIf="!loading" class="table-card hide-mobile">
     <p-table
       [value]="companies"
       [paginator]="true"

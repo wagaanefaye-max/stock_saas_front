@@ -1,4 +1,4 @@
-<div class="subscription-requests-page mobile-page">
+<div class="subscription-requests-page mobile-page entity-page">
   <p-toast></p-toast>
 
   <div class="page-header">
@@ -18,8 +18,10 @@
     </div>
   </div>
 
-  <div class="mobile-list show-mobile-only">
-    <div *ngIf="!loading && requests.length === 0" class="mobile-list__empty">
+  <app-list-skeleton *ngIf="loading" [count]="6"></app-list-skeleton>
+
+  <div *ngIf="!loading" class="mobile-list show-mobile-only">
+    <div *ngIf="requests.length === 0" class="mobile-list__empty">
       <i class="pi pi-inbox"></i>
       <p>Aucune souscription pour ce filtre.</p>
     </div>
@@ -95,7 +97,7 @@
 
     <p-paginator
       *ngIf="totalRecords > 0"
-      class="mobile-list__paginator"
+      class="mobile-list__paginator entity-paginator"
       [rows]="rows"
       [totalRecords]="totalRecords"
       [first]="first"
@@ -106,7 +108,7 @@
     </p-paginator>
   </div>
 
-  <p-card class="table-card hide-mobile">
+  <p-card *ngIf="!loading" class="table-card hide-mobile">
     <div class="list-toolbar list-toolbar--chips-only">
       <div class="list-filter-chips list-filter-chips--scroll">
         <p-selectButton

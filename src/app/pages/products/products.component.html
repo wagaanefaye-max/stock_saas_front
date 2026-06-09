@@ -1,4 +1,4 @@
-<div class="products-page mobile-page">
+<div class="products-page mobile-page entity-page">
   <p-toast></p-toast>
 
   <header class="page-header products-page__header">
@@ -108,8 +108,10 @@
       </div>
     </div>
 
+  <app-list-skeleton *ngIf="loading" [count]="6"></app-list-skeleton>
+
   <!-- Vue mobile : cartes -->
-  <div class="products-mobile show-mobile-only">
+  <div *ngIf="!loading" class="products-mobile show-mobile-only">
     <div *ngIf="products.length === 0" class="products-mobile__empty">
       <i class="pi pi-box"></i>
       <p>Aucun produit</p>
@@ -169,7 +171,7 @@
 
     <p-paginator
       *ngIf="totalProducts > rows"
-      class="products-mobile__paginator"
+      class="products-mobile__paginator entity-paginator"
       [rows]="rows"
       [totalRecords]="totalProducts"
       [first]="first"
@@ -180,7 +182,7 @@
   </div>
 
   <!-- Vue desktop : tableau -->
-  <p-card class="products-table-card hide-mobile">
+  <p-card *ngIf="!loading" class="products-table-card hide-mobile">
     <p-table
       [value]="products"
       [lazy]="true"

@@ -1,4 +1,4 @@
-<div class="movements-page mobile-page">
+<div class="movements-page mobile-page entity-page">
   <p-toast></p-toast>
 
   <div class="page-header">
@@ -45,7 +45,9 @@
     </p-selectButton>
   </div>
 
-  <p-card class="table-card hide-mobile">
+  <app-list-skeleton *ngIf="loading" [count]="6"></app-list-skeleton>
+
+  <p-card *ngIf="!loading" class="table-card hide-mobile">
     <div class="list-toolbar">
       <div class="list-toolbar__primary">
         <span class="p-input-icon-left list-toolbar__search">
@@ -153,7 +155,7 @@
     </p-table>
   </p-card>
 
-  <div class="mobile-list show-mobile-only">
+  <div *ngIf="!loading" class="mobile-list show-mobile-only">
     <div *ngIf="movements.length === 0" class="mobile-list__empty">
       <i class="pi pi-inbox"></i>
       <p>Aucun mouvement trouvé</p>
@@ -186,7 +188,7 @@
 
     <p-paginator
       *ngIf="totalMovements > rows"
-      class="mobile-list__paginator"
+      class="mobile-list__paginator entity-paginator"
       [rows]="rows"
       [totalRecords]="totalMovements"
       [first]="first"

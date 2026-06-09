@@ -19,6 +19,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
+import { ListSkeletonComponent } from '../../components/shared/list-skeleton.component';
 
 @Component({
   selector: 'app-movements',
@@ -39,7 +40,8 @@ import { ApiService } from '../../services/api.service';
     TextareaModule,
     ToastModule,
     PaginatorModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    ListSkeletonComponent
   ],
   providers: [MessageService],
   templateUrl: './movements.component.html',

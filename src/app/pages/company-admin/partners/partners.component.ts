@@ -21,6 +21,7 @@ import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
 import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
+import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 
 @Component({
   selector: 'app-partners',
@@ -42,7 +43,8 @@ import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
     PaginatorModule,
     ProgressSpinnerModule,
     PhoneFormatDirective,
-    PhoneFormatPipe
+    PhoneFormatPipe,
+    ListSkeletonComponent
   ],
   providers: [MessageService],
   templateUrl: './partners.component.html',

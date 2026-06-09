@@ -1,4 +1,4 @@
-<div class="platform-users-page mobile-page">
+<div class="platform-users-page mobile-page entity-page">
   <p-toast></p-toast>
 
   <div class="page-header">
@@ -21,7 +21,9 @@
     </div>
   </div>
 
-  <div class="mobile-list show-mobile-only">
+  <app-list-skeleton *ngIf="loading" [count]="6"></app-list-skeleton>
+
+  <div *ngIf="!loading" class="mobile-list show-mobile-only">
     <div *ngIf="users.length === 0" class="mobile-list__empty">
       <i class="pi pi-users"></i>
       <p>Aucun utilisateur trouvé</p>
@@ -58,7 +60,7 @@
 
     <p-paginator
       *ngIf="totalRecords > size"
-      class="mobile-list__paginator"
+      class="mobile-list__paginator entity-paginator"
       [rows]="size"
       [totalRecords]="totalRecords"
       [first]="page * size"
@@ -75,7 +77,7 @@
     <i class="pi pi-plus"></i>
   </button>
 
-  <p-card class="table-card hide-mobile">
+  <p-card *ngIf="!loading" class="table-card hide-mobile">
     <div class="list-toolbar">
       <div class="list-toolbar__primary">
         <span class="p-input-icon-left list-toolbar__search">

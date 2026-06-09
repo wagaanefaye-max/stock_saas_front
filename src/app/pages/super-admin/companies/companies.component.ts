@@ -21,6 +21,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
 import { ApiService } from '../../../services/api.service';
 import { Subject, catchError, debounceTime, of, takeUntil, throwError } from 'rxjs';
+import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 
 interface Company {
   id: number;
@@ -72,7 +73,8 @@ interface PageResponse {
     ToastModule,
     PaginatorModule,
     ProgressSpinnerModule,
-    PhoneFormatDirective
+    PhoneFormatDirective,
+    ListSkeletonComponent
   ],
   providers: [MessageService],
   templateUrl: './companies.component.html',

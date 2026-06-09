@@ -13,6 +13,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { finalize } from 'rxjs';
+import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 import { SubscriptionRecord, SubscriptionService } from '../../../services/subscription.service';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
 
@@ -33,7 +34,8 @@ type StatusFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';
     InputTextarea,
     SelectButtonModule,
     ProgressSpinnerModule,
-    PaginatorModule
+    PaginatorModule,
+    ListSkeletonComponent
   ],
   providers: [MessageService],
   templateUrl: './subscription-requests.component.html',
