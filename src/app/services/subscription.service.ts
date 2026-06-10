@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { catchError, from, mergeMap, Observable, throwError } from 'rxjs';
 import { ApiService } from './api.service';
+import { getErrorMessage } from '../utils/error-message.util';
 
 function readBlobErrorMessage(error: unknown, fallback: string): Observable<never> {
-  const httpError = error as { error?: unknown; message?: string };
+  const httpError = error as { error?: unknown; userMessage?: string };
   const blob = httpError?.error;
   if (blob instanceof Blob) {
     return from(blob.text()).pipe(
@@ -21,10 +22,9 @@ function readBlobErrorMessage(error: unknown, fallback: string): Observable<neve
       })
     );
   }
-  const jsonMessage = (httpError?.error as { message?: string } | undefined)?.message;
   return throwError(() => ({
     ...(httpError as object),
-    userMessage: jsonMessage || httpError?.message || fallback
+    userMessage: getErrorMessage(error, fallback)
   }));
 }
 

@@ -185,8 +185,10 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
   approve(req: SubscriptionRecord): void {
     this.confirmationService.confirm({
       message: `Valider la souscription ${req.durationLabel} pour ${req.companyName} ?`,
-      header: 'Confirmation',
+      header: 'Confirmer la validation',
       icon: 'pi pi-check-circle',
+      acceptLabel: 'Oui, valider',
+      rejectLabel: 'Annuler',
       accept: () => {
         this.processingId = req.id;
         this.subscriptionService

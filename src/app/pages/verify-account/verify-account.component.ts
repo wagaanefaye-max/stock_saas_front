@@ -10,6 +10,7 @@ import { ToastModule } from 'primeng/toast';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
+import { getErrorMessage } from '../../utils/error-message.util';
 
 @Component({
   selector: 'app-verify-account',
@@ -145,16 +146,10 @@ export class VerifyAccountComponent implements OnInit {
       error: (error) => {
         console.error('Erreur de validation:', error);
 
-        let errorDetail = 'Une erreur est survenue lors de la validation du compte';
-        if (error.status === 400) {
-          if (error.error?.message) {
-            errorDetail = error.error.message;
-          } else {
-            errorDetail = 'Token de validation invalide ou expiré';
-          }
-        } else if (error.status === 0) {
-          errorDetail = 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
-        }
+        const errorDetail = getErrorMessage(
+          error,
+          'Une erreur est survenue lors de la validation du compte'
+        );
 
         this.errorMessage = errorDetail;
         this.messageService.add({

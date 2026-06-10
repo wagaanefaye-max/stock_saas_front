@@ -150,11 +150,19 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
 
   setProofFile(file: File): void {
     if (!ACCEPTED_TYPES.includes(file.type.toLowerCase())) {
-      this.messageService.add({ severity: 'warn', summary: 'Image JPEG, PNG ou WebP uniquement' });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Format non accepté',
+        detail: 'Utilisez une image JPEG, PNG ou WebP.'
+      });
       return;
     }
     if (file.size > MAX_PROOF_BYTES) {
-      this.messageService.add({ severity: 'warn', summary: 'Max. 5 Mo' });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Fichier trop volumineux',
+        detail: 'La capture ne doit pas dépasser 5 Mo.'
+      });
       return;
     }
 

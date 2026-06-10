@@ -183,13 +183,20 @@ export class PartnersComponent implements OnInit {
 
   deletePartner(p: any) {
     this.confirmationService.confirm({
-      message: `Supprimer « ${p.name } » ?`,
+      message: `Supprimer le partenaire « ${p.name } » ?`,
       header: 'Confirmer la suppression',
       icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Oui, supprimer',
+      rejectLabel: 'Annuler',
       accept: () => {
         this.apiService.delete(`/partners/${p.id}`).subscribe({
           next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Supprimé', life: 4000 });
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Supprimé',
+              detail: 'Le partenaire a été supprimé.',
+              life: 4000
+            });
             this.refreshPartners();
           },
           error: () => {

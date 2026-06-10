@@ -13,6 +13,7 @@ import { MessageService } from 'primeng/api';
 import { PhoneFormatDirective } from '../../directives/phone-format.directive';
 import { AuthService } from '../../services/auth.service';
 import { RegisterRequest } from '../../models/auth.model';
+import { getErrorMessage } from '../../utils/error-message.util';
 
 @Component({
   selector: 'app-register',
@@ -143,24 +144,7 @@ export class RegisterComponent {
       error: (error) => {
         console.error('Erreur d\'inscription:', error);
         
-        let errorDetail = 'Une erreur est survenue lors de l\'inscription';
-        if (error.status === 0) {
-          errorDetail = 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
-        } else if (error.error?.message) {
-          errorDetail = error.error.message;
-          // Ajouter le détail des champs en erreur si présent (validation backend)
-          const errors = error.error?.errors;
-          if (errors && typeof errors === 'object') {
-            const messages = Object.values(errors) as string[];
-            if (messages.length) {
-              errorDetail += ' : ' + messages.join('. ');
-            }
-          }
-        } else if (error.status === 400) {
-          errorDetail = 'Les données fournies sont invalides';
-        } else if (error.status === 409) {
-          errorDetail = 'Un compte existe déjà avec cet email';
-        }
+        const errorDetail = getErrorMessage(error, 'Une erreur est survenue lors de l\'inscription');
         
         this.errorMessage = errorDetail;
         this.messageService.add({

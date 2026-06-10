@@ -374,7 +374,7 @@ export class MovementsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erreur lors de la création du mouvement', error);
-        const errorMessage = error.error?.message || error.message || 'Une erreur est survenue lors de la création du mouvement';
+        const errorMessage = error.userMessage || error.error?.message || 'Une erreur est survenue lors de la création du mouvement';
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',

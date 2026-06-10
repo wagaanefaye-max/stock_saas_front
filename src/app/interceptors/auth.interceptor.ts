@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { catchError, finalize, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { LoadingService } from '../services/loading.service';
+import { getErrorMessage } from '../utils/error-message.util';
 
 /**
  * Intercepteur HTTP pour gérer les erreurs d'authentification.
@@ -39,8 +40,17 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         }
       }
 
-      // Propager l'erreur pour qu'elle soit gérée par les composants
-      return throwError(() => error);
+      const userMessage = getErrorMessage(error);
+      const apiError =
+        error.error && typeof error.error === 'object'
+          ? { ...error.error, message: userMessage }
+          : { message: userMessage };
+
+      return throwError(() => ({
+        ...error,
+        error: apiError,
+        userMessage
+      }));
     }),
     finalize(() => {
       // Masquer l'indicateur de chargement après la requête (succès ou erreur)

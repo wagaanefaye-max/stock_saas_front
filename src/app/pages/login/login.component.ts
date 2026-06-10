@@ -9,6 +9,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
+import { getErrorMessage } from '../../utils/error-message.util';
 
 @Component({
   selector: 'app-login',
@@ -110,27 +111,7 @@ export class LoginComponent {
       error: (error) => {
         console.error('Erreur de connexion:', error);
         
-        let errorDetail = 'Une erreur est survenue lors de la connexion';
-        
-        if (error.status === 401) {
-          errorDetail = 'Email ou mot de passe incorrect';
-        } else if (error.status === 0) {
-          errorDetail = 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
-        } else if (error.status === 400) {
-          // Gérer les erreurs de validation
-          if (error.error?.errors) {
-            // Erreurs de validation détaillées
-            const validationErrors = error.error.errors;
-            const errorMessages = Object.values(validationErrors).join(', ');
-            errorDetail = `Erreur de validation: ${errorMessages}`;
-          } else if (error.error?.message) {
-            errorDetail = error.error.message;
-          } else {
-            errorDetail = 'Les données fournies sont invalides';
-          }
-        } else if (error.error?.message) {
-          errorDetail = error.error.message;
-        }
+        const errorDetail = getErrorMessage(error, 'Une erreur est survenue lors de la connexion');
         
         this.errorMessage = errorDetail;
         this.messageService.add({

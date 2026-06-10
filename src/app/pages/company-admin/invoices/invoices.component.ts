@@ -418,7 +418,12 @@ export class InvoicesComponent implements OnInit {
     };
     this.apiService.put<any>(`/invoices/${this.editingInvoiceId}`, payload).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Facture modifiée', life: 4000 });
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Facture modifiée',
+          detail: 'Les modifications ont été enregistrées.',
+          life: 4000
+        });
         this.displayEditDialog = false;
         this.editingInvoiceId = null;
         this.loadInvoices();
@@ -457,7 +462,12 @@ export class InvoicesComponent implements OnInit {
     };
     this.apiService.post<Invoice>('/invoices', payload).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Facture créée', life: 4000 });
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Facture créée',
+          detail: 'La facture a été enregistrée avec succès.',
+          life: 4000
+        });
         this.displayCreateDialog = false;
         this.statusFilter = 'ALL';
         this.invoiceNumberFilter = '';
@@ -509,7 +519,12 @@ export class InvoicesComponent implements OnInit {
         a.download = `facture-${(inv.invoiceNumber || inv.id).replace(/\s/g, '-')}.pdf`;
         a.click();
         URL.revokeObjectURL(url);
-        this.messageService.add({ severity: 'success', summary: 'PDF téléchargé', life: 3000 });
+        this.messageService.add({
+          severity: 'success',
+          summary: 'PDF téléchargé',
+          detail: 'Le fichier a été enregistré sur votre appareil.',
+          life: 3000
+        });
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de générer le PDF', life: 5000 });
@@ -571,10 +586,17 @@ export class InvoicesComponent implements OnInit {
       message: `Marquer la facture « ${inv.invoiceNumber } » comme payée ?`,
       header: 'Confirmer le paiement',
       icon: 'pi pi-check-circle',
+      acceptLabel: 'Oui, marquer payée',
+      rejectLabel: 'Annuler',
       accept: () => {
         this.apiService.put<Invoice>(`/invoices/${inv.id}`, payload).subscribe({
           next: (updated) => {
-            this.messageService.add({ severity: 'success', summary: 'Facture marquée comme payée', life: 4000 });
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Facture marquée comme payée',
+              detail: 'Le statut de la facture a été mis à jour.',
+              life: 4000
+            });
             this.loadInvoices();
             if (updated?.clientPhone && updated.publicDownloadUrl) {
               this.openWhatsAppWithInvoiceLink(updated.clientPhone, updated.publicDownloadUrl, updated.invoiceNumber);
@@ -623,10 +645,17 @@ export class InvoicesComponent implements OnInit {
       message: `Supprimer la facture « ${inv.invoiceNumber } » ?`,
       header: 'Confirmer la suppression',
       icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Oui, supprimer',
+      rejectLabel: 'Annuler',
       accept: () => {
         this.apiService.delete(`/invoices/${inv.id}`).subscribe({
           next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Facture supprimée', life: 4000 });
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Facture supprimée',
+              detail: 'La facture a été retirée de la liste.',
+              life: 4000
+            });
             this.loadInvoices();
           },
           error: () => {
