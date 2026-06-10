@@ -19,6 +19,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
+import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_XL } from '../../utils/dialog-mobile.util';
 @Component({
   selector: 'app-movements',
   standalone: true,
@@ -45,6 +46,9 @@ import { ApiService } from '../../services/api.service';
   styleUrl: './movements.component.scss'
 })
 export class MovementsComponent implements OnInit {
+  readonly dialogStyle = APP_DIALOG_STYLE_XL;
+  readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
+
   movements: any[] = [];
   totalMovements = 0;
   rows = 10;

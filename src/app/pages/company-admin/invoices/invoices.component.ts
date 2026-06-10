@@ -17,7 +17,11 @@ import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
 import { Invoice } from '../../../models';
-import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
+import {
+  APP_DIALOG_BREAKPOINTS,
+  APP_DIALOG_STYLE_LG,
+  APP_DIALOG_STYLE_DETAIL
+} from '../../../utils/dialog-mobile.util';
 
 interface InvoiceLineRow {
   productId: number | null;
@@ -63,7 +67,8 @@ interface ProductForInvoice {
 })
 export class InvoicesComponent implements OnInit {
   invoices: Invoice[] = [];
-  readonly dialogStyle = APP_DIALOG_STYLE;
+  readonly dialogStyle = APP_DIALOG_STYLE_LG;
+  readonly dialogStyleDetail = APP_DIALOG_STYLE_DETAIL;
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
   mobileRows = 10;
   mobileFirst = 0;

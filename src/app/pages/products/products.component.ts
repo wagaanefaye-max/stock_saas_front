@@ -20,6 +20,11 @@ import { PaginatorModule } from 'primeng/paginator';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
+import {
+  APP_DIALOG_BREAKPOINTS,
+  APP_DIALOG_STYLE_LG,
+  APP_DIALOG_STYLE_SM
+} from '../../utils/dialog-mobile.util';
 @Component({
   selector: 'app-products',
   standalone: true,
@@ -46,6 +51,10 @@ import { ApiService } from '../../services/api.service';
   styleUrl: './products.component.scss'
 })
 export class ProductsComponent implements OnInit {
+  readonly dialogStyle = APP_DIALOG_STYLE_LG;
+  readonly dialogStyleSm = APP_DIALOG_STYLE_SM;
+  readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
+
   products: any[] = [];
   totalProducts = 0;
   rows = 10;

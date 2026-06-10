@@ -18,6 +18,11 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
 import { ApiService } from '../../../services/api.service';
 import { Subject, catchError, debounceTime, of, takeUntil, throwError } from 'rxjs';
+import {
+  APP_DIALOG_BREAKPOINTS,
+  APP_DIALOG_STYLE_LG,
+  APP_DIALOG_STYLE_WIDE
+} from '../../../utils/dialog-mobile.util';
 
 interface Company {
   id: number;
@@ -74,6 +79,10 @@ interface PageResponse {
   styleUrl: './companies.component.scss'
 })
 export class CompaniesComponent implements OnInit, OnDestroy {
+  readonly dialogStyle = APP_DIALOG_STYLE_WIDE;
+  readonly dialogStyleDetail = APP_DIALOG_STYLE_LG;
+  readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
+
   companies: Company[] = [];
   selectedCompanies: Company[] = [];
   displayDialog = false;

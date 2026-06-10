@@ -204,6 +204,7 @@
     [draggable]="false"
     [resizable]="false"
     (onHide)="displayCreateDialog = false">
+    <div class="app-dialog-form">
     <div class="form-group">
       <label>Client (optionnel)</label>
       <p-select
@@ -295,6 +296,7 @@
       <label>Notes</label>
       <textarea pInputText [(ngModel)]="createForm.notes" class="w-full" rows="2" placeholder="Notes optionnelles"></textarea>
     </div>
+    </div>
     <ng-template pTemplate="footer">
       <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayCreateDialog = false"></button>
       <button pButton label="Créer la facture" icon="pi pi-check" (click)="saveInvoice()" [disabled]="!createForm.lines.length"></button>
@@ -312,6 +314,7 @@
     [draggable]="false"
     [resizable]="false"
     (onHide)="displayEditDialog = false; editingInvoiceId = null">
+    <div class="app-dialog-form">
     <div class="form-group">
       <label>Client</label>
       <p class="edit-client-readonly">{{ editClientName }}</p>
@@ -385,6 +388,7 @@
       <label>Notes</label>
       <textarea pInputText [(ngModel)]="editForm.notes" class="w-full" rows="2"></textarea>
     </div>
+    </div>
     <ng-template pTemplate="footer">
       <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayEditDialog = false"></button>
       <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveEditInvoice()" [disabled]="!editForm.lines.length"></button>
@@ -393,17 +397,17 @@
 
   <!-- Détail facture -->
   <p-dialog
-    styleClass="app-mobile-dialog invoice-detail-dialog"
+    styleClass="app-mobile-dialog"
     [(visible)]="displayDetailDialog"
     [header]="selectedInvoice ? 'Facture ' + selectedInvoice.invoiceNumber : 'Détail facture'"
     [modal]="true"
-    [style]="dialogStyle"
+    [style]="dialogStyleDetail"
     [breakpoints]="dialogBreakpoints"
     [draggable]="false"
     [resizable]="false"
     [closable]="true"
     (onHide)="selectedInvoice = null">
-    <div *ngIf="selectedInvoice" class="invoice-detail">
+    <div *ngIf="selectedInvoice" class="app-dialog-detail invoice-detail">
       <div class="detail-header">
         <div class="detail-status">
           <p-tag [value]="selectedInvoice.statusLabel" [severity]="getStatusSeverity(selectedInvoice.status)" styleClass="status-badge"></p-tag>
@@ -490,7 +494,7 @@
       </button>
       <button pButton label="Imprimer" icon="pi pi-print" class="p-button-outlined" (click)="selectedInvoice && printInvoice(selectedInvoice)"></button>
       <button pButton label="Télécharger" icon="pi pi-download" class="p-button-outlined" (click)="selectedInvoice && downloadPdf(selectedInvoice)"></button>
-      <button pButton label="Fermer" icon="pi pi-times" (click)="displayDetailDialog = false"></button>
+      <button pButton label="Fermer" icon="pi pi-times" class="p-button-text" (click)="displayDetailDialog = false"></button>
     </ng-template>
   </p-dialog>
 </div>

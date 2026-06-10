@@ -136,11 +136,13 @@
     [(visible)]="displayCreateDialog"
     header="Nouvel inventaire"
     styleClass="app-mobile-dialog"
-    [style]="{width: '480px', maxWidth: '95vw'}"
+    [style]="dialogStyle"
+    [breakpoints]="dialogBreakpoints"
     [modal]="true"
     [draggable]="false"
     [resizable]="false"
     (onHide)="displayCreateDialog = false">
+    <div class="app-dialog-form">
     <div class="form-group">
       <label>Entrepôt *</label>
       <p-select
@@ -168,6 +170,7 @@
       <label>Notes</label>
       <textarea pTextarea [(ngModel)]="createForm.notes" [rows]="2" placeholder="Optionnel" class="w-full"></textarea>
     </div>
+    </div>
     <ng-template pTemplate="footer">
       <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayCreateDialog = false"></button>
       <button pButton label="Créer l'inventaire" icon="pi pi-check" (click)="createInventory()" [disabled]="!createForm.warehouseId || !createForm.inventoryDate"></button>
@@ -179,13 +182,15 @@
     [(visible)]="displayDetailDialog"
     [header]="selectedInventory ? 'Inventaire – ' + selectedInventory.warehouseName + ' (' + selectedInventory.inventoryDate + ')' : 'Détail inventaire'"
     styleClass="app-mobile-dialog"
-    [style]="{width: '90vw', maxWidth: '960px'}"
+    [style]="dialogStyleDetail"
+    [breakpoints]="dialogBreakpoints"
     [modal]="true"
     [draggable]="false"
     [resizable]="false"
     [contentStyle]="{ overflow: 'auto' }"
     (onHide)="selectedInventory = null">
     <ng-container *ngIf="selectedInventory">
+      <div class="app-dialog-detail">
       <div class="detail-meta">
         <p-tag [value]="selectedInventory.statusLabel" [severity]="getStatusSeverity(selectedInventory.status)"></p-tag>
         <span class="text-muted" *ngIf="selectedInventory.createdByName">Créé par {{ selectedInventory.createdByName }}</span>
@@ -236,6 +241,7 @@
           </tr>
         </ng-template>
       </p-table>
+      </div>
       <ng-template pTemplate="footer">
         <button pButton label="Fermer" icon="pi pi-times" class="p-button-text" (click)="displayDetailDialog = false"></button>
       </ng-template>

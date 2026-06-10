@@ -15,6 +15,7 @@ import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
 import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
+import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_LG } from '../../../utils/dialog-mobile.util';
 @Component({
   selector: 'app-partners',
   standalone: true,
@@ -38,6 +39,9 @@ import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
   styleUrl: './partners.component.scss'
 })
 export class PartnersComponent implements OnInit {
+  readonly dialogStyle = APP_DIALOG_STYLE_LG;
+  readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
+
   partners: any[] = [];
   totalPartners = 0;
   rows = 10;

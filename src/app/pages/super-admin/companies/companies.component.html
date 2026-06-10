@@ -136,13 +136,14 @@
 
   <p-dialog
     [(visible)]="displayDialog"
-    styleClass="company-dialog app-mobile-dialog"
-    [style]="{width: '800px', maxHeight: '90vh', maxWidth: '95vw'}"
+    styleClass="app-mobile-dialog"
+    [style]="dialogStyle"
+    [breakpoints]="dialogBreakpoints"
     header="Nouvelle entreprise"
     [modal]="true"
     [draggable]="false"
     [resizable]="false">
-    <div class="dialog-content">
+    <div class="app-dialog-form dialog-content">
       <!-- Informations entreprise -->
       <div class="form-section">
         <h3 class="section-title">
@@ -300,12 +301,13 @@
   <p-dialog
     [(visible)]="displayDetailDialog"
     [header]="companyDetail?.name ?? 'Détail de l\'entreprise'"
-    styleClass="company-detail-dialog app-mobile-dialog"
-    [style]="{width: '560px', maxWidth: '95vw'}"
+    styleClass="app-mobile-dialog"
+    [style]="dialogStyleDetail"
+    [breakpoints]="dialogBreakpoints"
     [modal]="true"
     [draggable]="false"
     [resizable]="false">
-    <div class="detail-content" *ngIf="companyDetail">
+    <div class="app-dialog-detail detail-content" *ngIf="companyDetail">
       <div class="detail-section">
         <div class="detail-logo" *ngIf="companyDetail.logoUrl">
           <img [src]="companyDetail.logoUrl" [alt]="companyDetail.name + ' logo'" class="detail-logo-img">
@@ -336,7 +338,7 @@
       </div>
     </div>
     <ng-template pTemplate="footer">
-      <button pButton label="Fermer" icon="pi pi-times" (click)="displayDetailDialog = false; companyDetail = null"></button>
+      <button pButton label="Fermer" icon="pi pi-times" class="p-button-text" (click)="displayDetailDialog = false; companyDetail = null"></button>
     </ng-template>
   </p-dialog>
 </div>

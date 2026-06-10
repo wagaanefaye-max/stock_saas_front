@@ -141,10 +141,12 @@
     styleClass="app-mobile-dialog"
     [header]="partner.id ? 'Modifier le partenaire' : 'Nouveau partenaire'"
     [modal]="true"
-    [style]="{ width: '500px', maxWidth: '95vw' }"
+    [style]="dialogStyle"
+    [breakpoints]="dialogBreakpoints"
     [draggable]="false"
     [resizable]="false"
     (onHide)="partner = {}">
+    <div class="app-dialog-form">
     <div class="form-group">
       <label>Rôle *</label>
       <p-select [options]="roleOptions" [(ngModel)]="partner.role" optionLabel="label" optionValue="value" class="w-full" [disabled]="!!partner.id"></p-select>
@@ -168,6 +170,7 @@
     <div class="form-group">
       <label>Description / Notes</label>
       <textarea pInputText [(ngModel)]="partner.description" class="w-full" rows="2" placeholder="Notes optionnelles"></textarea>
+    </div>
     </div>
     <ng-template pTemplate="footer">
       <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>

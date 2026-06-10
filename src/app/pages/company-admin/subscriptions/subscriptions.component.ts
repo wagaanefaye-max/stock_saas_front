@@ -5,7 +5,7 @@ import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
-import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
+import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_DETAIL } from '../../../utils/dialog-mobile.util';
 import { compressImageIfNeeded, MAX_IMAGE_BYTES } from '../../../utils/image-compress.util';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 import {
@@ -50,7 +50,7 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
   detailProofUrl: string | null = null;
   detailProofLoading = false;
   detailProofError: string | null = null;
-  readonly dialogStyle = APP_DIALOG_STYLE;
+  readonly dialogStyleDetail = APP_DIALOG_STYLE_DETAIL;
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
 
   constructor(

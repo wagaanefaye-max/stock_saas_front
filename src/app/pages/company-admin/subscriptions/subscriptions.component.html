@@ -139,18 +139,19 @@
   </ng-container>
 
   <p-dialog
-    styleClass="app-mobile-dialog subscription-detail-dialog"
+    styleClass="app-mobile-dialog"
     [(visible)]="detailDialogVisible"
     [modal]="true"
     [draggable]="false"
+    [resizable]="false"
     [breakpoints]="dialogBreakpoints"
-    [style]="dialogStyle"
+    [style]="dialogStyleDetail"
     (onHide)="closeDetail()">
     <ng-template pTemplate="header">
       <span class="detail-dialog-title">Détail de la souscription</span>
     </ng-template>
 
-    <div class="subscription-detail" *ngIf="selectedRecord">
+    <div class="app-dialog-detail subscription-detail" *ngIf="selectedRecord">
       <div class="detail-status-row">
         <span class="badge badge--lg" [class]="'badge--' + selectedRecord.requestStatus">
           {{ selectedRecord.requestStatusLabel }}
@@ -230,7 +231,7 @@
     </div>
 
     <ng-template pTemplate="footer">
-      <button pButton label="Fermer" class="p-button-text dialog-footer-mobile" (click)="closeDetail()"></button>
+      <button pButton label="Fermer" icon="pi pi-times" class="p-button-text" (click)="closeDetail()"></button>
     </ng-template>
   </p-dialog>
 </div>

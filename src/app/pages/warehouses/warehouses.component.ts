@@ -16,7 +16,11 @@ import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
-import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../utils/dialog-mobile.util';
+import {
+  APP_DIALOG_BREAKPOINTS,
+  APP_DIALOG_STYLE,
+  APP_DIALOG_STYLE_DETAIL
+} from '../../utils/dialog-mobile.util';
 
 @Component({
   selector: 'app-warehouses',
@@ -49,6 +53,7 @@ export class WarehousesComponent implements OnInit {
   warehouseProducts: any[] = [];
   globalFilter = '';
   readonly dialogStyle = APP_DIALOG_STYLE;
+  readonly dialogStyleDetail = APP_DIALOG_STYLE_DETAIL;
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
   rows = 10;
   first = 0;

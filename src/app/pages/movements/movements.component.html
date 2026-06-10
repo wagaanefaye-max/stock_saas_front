@@ -136,13 +136,14 @@
   <p-dialog
     [(visible)]="displayDialog"
     styleClass="app-mobile-dialog"
-    [style]="{width: '700px', maxWidth: '95vw'}"
+    [style]="dialogStyle"
+    [breakpoints]="dialogBreakpoints"
     [header]="movement.id ? 'Modifier le mouvement' : 'Nouveau mouvement'"
     [modal]="true"
     [draggable]="false"
-    [resizable]="false"
-    [dismissableMask]="false">
+    [resizable]="false">
 
+    <div class="app-dialog-form">
     <div class="form-group">
       <label>
         <i class="pi pi-arrows-h" style="margin-right: 0.5rem;"></i>
@@ -272,6 +273,7 @@
         placeholder="Ex: Réception de commande fournisseur, Vente client, Correction d'inventaire..."
         class="w-full">
       </textarea>
+    </div>
     </div>
 
     <ng-template pTemplate="footer">

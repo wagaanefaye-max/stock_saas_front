@@ -138,7 +138,7 @@
     [breakpoints]="dialogBreakpoints"
     [style]="dialogStyle"
     (onHide)="closeProof()">
-    <div class="proof-dialog" *ngIf="selectedRequest">
+    <div class="app-dialog-detail proof-dialog" *ngIf="selectedRequest">
       <p>
         <strong>{{ selectedRequest.companyName }}</strong> —
         {{ selectedRequest.paymentProviderLabel }}
@@ -237,6 +237,7 @@
         <button
           pButton
           label="Annuler"
+          icon="pi pi-times"
           class="p-button-text reject-footer-cancel"
           [disabled]="rejectSubmitting"
           (click)="closeRejectDialog()"></button>

@@ -226,9 +226,9 @@
     [header]="warehouse.id ? 'Modifier l\'entrepôt' : 'Nouvel entrepôt'"
     [modal]="true"
     [draggable]="false"
-    [resizable]="false"
-    [dismissableMask]="false">
-    
+    [resizable]="false">
+
+    <div class="app-dialog-form">
     <div class="form-group">
       <label>Nom de l'entrepôt *</label>
       <input type="text" pInputText [(ngModel)]="warehouse.name" class="w-full" placeholder="Ex: Entrepôt Central" required>
@@ -270,6 +270,7 @@
         required>
       </p-select>
     </div>
+    </div>
 
     <ng-template pTemplate="footer">
       <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
@@ -281,16 +282,14 @@
   <p-dialog 
     styleClass="app-mobile-dialog"
     [(visible)]="displayDetailsDialog" 
-    [style]="dialogStyle"
+    [style]="dialogStyleDetail"
     [breakpoints]="dialogBreakpoints"
     [header]="'Détails de l\'entrepôt: ' + (selectedWarehouseDetails?.name || '')"
     [modal]="true"
     [draggable]="false"
-    [resizable]="true"
-    [dismissableMask]="true"
-    [maximizable]="true">
-    
-    <div *ngIf="selectedWarehouseDetails" class="warehouse-details">
+    [resizable]="false">
+
+    <div *ngIf="selectedWarehouseDetails" class="app-dialog-detail warehouse-details">
       <!-- Informations de l'entrepôt -->
       <p-card class="details-card">
         <div class="details-section">

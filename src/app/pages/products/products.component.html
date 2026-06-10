@@ -194,14 +194,14 @@
 
   <p-dialog
     [(visible)]="displayDialog"
-    styleClass="product-form-dialog app-mobile-dialog"
-    [style]="{ width: '520px', maxWidth: '95vw' }"
+    styleClass="app-mobile-dialog"
+    [style]="dialogStyle"
+    [breakpoints]="dialogBreakpoints"
     [header]="product.id ? 'Modifier le produit' : 'Nouveau produit'"
     [modal]="true"
     [draggable]="false"
-    [resizable]="false"
-    [dismissableMask]="true">
-    <div class="product-form">
+    [resizable]="false">
+    <div class="app-dialog-form product-form">
       <div class="product-form__field" *ngIf="product.id && product.reference">
         <label for="product-reference">Référence</label>
         <input
@@ -296,29 +296,21 @@
     </div>
 
     <ng-template pTemplate="footer">
-      <button
-        pButton
-        label="Annuler"
-        class="p-button-text"
-        (click)="displayDialog = false">
-      </button>
-      <button
-        pButton
-        label="Enregistrer"
-        (click)="saveProduct()"
-        [disabled]="!isFormValid()">
-      </button>
+      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
+      <button pButton label="Enregistrer" icon="pi pi-check" (click)="saveProduct()" [disabled]="!isFormValid()"></button>
     </ng-template>
   </p-dialog>
 
   <p-dialog
     [(visible)]="displayCategoryDialog"
     styleClass="app-mobile-dialog"
-    [style]="{width: '450px'}"
+    [style]="dialogStyleSm"
+    [breakpoints]="dialogBreakpoints"
     header="Nouvelle catégorie"
     [modal]="true"
     [draggable]="false"
     [resizable]="false">
+    <div class="app-dialog-form">
     <div class="form-group">
       <label>Libellé *</label>
       <input type="text" pInputText [(ngModel)]="newCategory.label" class="w-full" placeholder="Ex: Pharmacie">
@@ -327,6 +319,7 @@
       <label>Code *</label>
       <input type="text" pInputText [(ngModel)]="newCategory.code" class="w-full" placeholder="Ex: PHARMACIE">
       <small class="text-muted">Le code doit etre unique (ex: PHARMACIE).</small>
+    </div>
     </div>
     <ng-template pTemplate="footer">
       <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayCategoryDialog = false"></button>

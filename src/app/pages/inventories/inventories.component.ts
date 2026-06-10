@@ -16,6 +16,11 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ApiService } from '../../services/api.service';
+import {
+  APP_DIALOG_BREAKPOINTS,
+  APP_DIALOG_STYLE,
+  APP_DIALOG_STYLE_DETAIL
+} from '../../utils/dialog-mobile.util';
 
 interface InventoriesPageResponse {
   content: any[];
@@ -51,6 +56,10 @@ interface InventoriesPageResponse {
   styleUrl: './inventories.component.scss'
 })
 export class InventoriesComponent implements OnInit {
+  readonly dialogStyle = APP_DIALOG_STYLE;
+  readonly dialogStyleDetail = APP_DIALOG_STYLE_DETAIL;
+  readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
+
   inventories: any[] = [];
   warehouses: any[] = [];
   /** Options pour le filtre entrepôt (Tous + liste des entrepôts) */

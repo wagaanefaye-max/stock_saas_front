@@ -94,12 +94,13 @@
   <p-dialog
     [(visible)]="displayDialog"
     styleClass="app-mobile-dialog"
-    [style]="{width: '600px', maxWidth: '95vw'}"
+    [style]="dialogStyle"
+    [breakpoints]="dialogBreakpoints"
     [header]="user.id ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'"
     [modal]="true"
     [draggable]="false"
-    [resizable]="false"
-    [dismissableMask]="false">
+    [resizable]="false">
+    <div class="app-dialog-form">
     <div class="form-group">
       <label>Nom complet *</label>
       <input type="text" pInputText [(ngModel)]="user.name" class="w-full" required>
@@ -130,6 +131,7 @@
         class="w-full"
         required>
       </p-select>
+    </div>
     </div>
     <ng-template pTemplate="footer">
       <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
