@@ -138,8 +138,9 @@
               pButton
               icon="pi pi-whatsapp"
               class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
-              title="Envoyer sur WhatsApp"
-              aria-label="Envoyer sur WhatsApp"
+              [title]="hasClientPhone(inv) ? 'Envoyer sur WhatsApp' : 'Téléphone client requis'"
+              [attr.aria-label]="hasClientPhone(inv) ? 'Envoyer sur WhatsApp' : 'Téléphone client requis'"
+              [disabled]="!hasClientPhone(inv)"
               (click)="sendInvoiceToWhatsApp(inv)">
             </button>
             <button
@@ -479,7 +480,14 @@
       </div>
     </div>
     <ng-template pTemplate="footer">
-      <button pButton label="Envoyer WhatsApp" icon="pi pi-whatsapp" class="p-button-success p-button-outlined" (click)="selectedInvoice && sendInvoiceToWhatsApp(selectedInvoice)"></button>
+      <button
+        pButton
+        label="Envoyer WhatsApp"
+        icon="pi pi-whatsapp"
+        class="p-button-success p-button-outlined"
+        [disabled]="!selectedInvoice || !hasClientPhone(selectedInvoice)"
+        (click)="selectedInvoice && sendInvoiceToWhatsApp(selectedInvoice)">
+      </button>
       <button pButton label="Imprimer" icon="pi pi-print" class="p-button-outlined" (click)="selectedInvoice && printInvoice(selectedInvoice)"></button>
       <button pButton label="Télécharger" icon="pi pi-download" class="p-button-outlined" (click)="selectedInvoice && downloadPdf(selectedInvoice)"></button>
       <button pButton label="Fermer" icon="pi pi-times" (click)="displayDetailDialog = false"></button>

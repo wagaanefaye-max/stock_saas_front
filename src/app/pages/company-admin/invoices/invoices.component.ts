@@ -512,17 +512,30 @@ export class InvoicesComponent implements OnInit {
     });
   }
 
+  hasClientPhone(inv: { clientPhone?: string | null }): boolean {
+    return !!(inv?.clientPhone && String(inv.clientPhone).replace(/\D/g, '').length >= 8);
+  }
+
   sendInvoiceToWhatsApp(inv: any) {
     if (!inv?.id) return;
     this.apiService.get<any>(`/invoices/${inv.id}`).subscribe({
       next: (fullInvoice) => {
         const phone = fullInvoice?.clientPhone;
         const url = fullInvoice?.publicDownloadUrl;
-        if (!phone || !url) {
+        if (!this.hasClientPhone(fullInvoice)) {
           this.messageService.add({
             severity: 'warn',
-            summary: 'Envoi impossible',
-            detail: 'Le client n’a pas de téléphone ou le lien de téléchargement est indisponible.',
+            summary: 'Téléphone manquant',
+            detail: 'Renseignez le numéro du client dans la fiche partenaire (Clients) puis réessayez.',
+            life: 6000
+          });
+          return;
+        }
+        if (!url) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Lien indisponible',
+            detail: 'Impossible de générer le lien de téléchargement. Réessayez dans quelques instants.',
             life: 5000
           });
           return;
