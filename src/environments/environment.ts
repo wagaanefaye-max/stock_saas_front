@@ -2,7 +2,7 @@
  * Environnement de développement
  */
 export const environment = {
-  production: true,
+  production: false,
   apiUrl: 'http://localhost:8080/api',
   appName: 'Stock SaaS',
   appVersion: '1.0.0',

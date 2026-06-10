@@ -267,7 +267,7 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Refuser',
       rejectLabel: 'Retour',
-      acceptButtonStyleClass: 'p-button-danger',
+      acceptButtonStyleClass: 'p-button-danger subscription-reject-btn',
       accept: () => this.executeReject(id, reason)
     });
   }

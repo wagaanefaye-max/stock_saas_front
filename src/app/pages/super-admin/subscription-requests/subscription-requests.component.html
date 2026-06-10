@@ -109,7 +109,7 @@
               pButton
               label="Refuser"
               icon="pi pi-times"
-              class="p-button-danger p-button-outlined p-button-sm"
+              class="p-button-danger p-button-sm subscription-reject-btn"
               (click)="openReject(row)"></button>
           </ng-container>
         </div>
@@ -151,7 +151,7 @@
       <p *ngIf="proofError && !proofPreviewUrl" class="proof-error">{{ proofError }}</p>
       <div class="proof-actions dialog-footer-mobile" *ngIf="isPending(selectedRequest)">
         <button pButton label="Valider" icon="pi pi-check" class="p-button-success" (click)="approve(selectedRequest!)"></button>
-        <button pButton label="Refuser" icon="pi pi-times" class="p-button-danger p-button-outlined" (click)="openReject(selectedRequest!)"></button>
+        <button pButton label="Refuser" icon="pi pi-times" class="p-button-danger subscription-reject-btn" (click)="openReject(selectedRequest!)"></button>
       </div>
     </div>
   </p-dialog>
@@ -244,7 +244,7 @@
           pButton
           label="Confirmer le refus"
           icon="pi pi-times"
-          class="p-button-danger reject-footer-confirm"
+          class="p-button-danger reject-footer-confirm subscription-reject-btn"
           [loading]="rejectSubmitting"
           (click)="confirmReject()"></button>
       </div>

@@ -474,3 +474,27 @@ label {
   }
 }
 
+/* Bouton refus souscription — rouge plein, sans effet hover */
+.subscription-reject-btn.p-button.p-button-danger {
+  background: var(--danger, #dc2626) !important;
+  border-color: var(--danger, #dc2626) !important;
+  color: #fff !important;
+
+  &:enabled:hover,
+  &:not(:disabled):hover,
+  &:enabled:active,
+  &:not(:disabled):active,
+  &:focus,
+  &:focus-visible {
+    background: var(--danger, #dc2626) !important;
+    border-color: var(--danger, #dc2626) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+  }
+
+  .p-button-icon,
+  .p-button-label {
+    color: #fff !important;
+  }
+}
+
