@@ -1,3 +1,16 @@
+.warehouse-product-row--low {
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.warehouse-product-row__tag {
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.text-danger {
+  color: var(--danger);
+}
+
 .warehouses-page {
   .page-header {
     display: flex;

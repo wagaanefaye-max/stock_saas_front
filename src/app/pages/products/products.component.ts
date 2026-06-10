@@ -110,7 +110,9 @@ export class ProductsComponent implements OnInit {
           ...p,
           status: p.statusLabel || (p.stock && p.stock > 0 ? 'En stock' : 'Rupture'),
           stock: p.stock || 0,
-          price: p.price || 0
+          price: p.price || 0,
+          minThreshold: p.minThreshold ?? 0,
+          lowStock: !!p.lowStock
         }));
         this.totalProducts = data?.totalElements ?? 0;
       },
@@ -231,6 +233,15 @@ export class ProductsComponent implements OnInit {
   /** Liste des entrepôts disponibles (chargée depuis l'API) */
   warehouses: any[] = [];
 
+  isLowStock(product: { lowStock?: boolean; stock?: number; minThreshold?: number }): boolean {
+    if (product.lowStock) {
+      return true;
+    }
+    const min = Number(product.minThreshold) || 0;
+    const stock = Number(product.stock) || 0;
+    return min > 0 && stock <= min;
+  }
+
   getSeverity(status: string): 'success' | 'danger' | undefined {
     if (!status) return undefined;
     const statusLower = status.toLowerCase();
@@ -245,7 +256,8 @@ export class ProductsComponent implements OnInit {
 
   openNew() {
     this.product = {
-      quantity: 0
+      quantity: 0,
+      minThreshold: 0
     };
     // Si les catégories sont déjà chargées, sélectionner GENERAL par défaut.
     if (this.categories.length > 0) {
@@ -319,7 +331,8 @@ export class ProductsComponent implements OnInit {
           price: p.price ?? 0,
            purchasePrice: p.purchasePrice ?? 0,
           quantity: p.stock ?? p.quantity ?? 0,
-          warehouseId: p.warehouseId ?? null
+          warehouseId: p.warehouseId ?? null,
+          minThreshold: p.minThreshold ?? 0
         };
         this.displayDialog = true;
       },
@@ -352,7 +365,8 @@ export class ProductsComponent implements OnInit {
       price: this.product.price || 0,
       purchasePrice: this.product.purchasePrice || 0,
       warehouseId: this.product.warehouseId || null,
-      quantity: this.product.quantity != null ? this.product.quantity : 0
+      quantity: this.product.quantity != null ? this.product.quantity : 0,
+      minThreshold: this.product.minThreshold != null ? this.product.minThreshold : 0
     };
 
     if (this.isLossPricing()) {

@@ -153,17 +153,24 @@
               <span *ngIf="product.sku">{{ product.reference ? ' · ' : '' }}{{ product.sku }}</span>
             </span>
           </div>
-          <p-tag
-            [value]="product.statusLabel || product.status || 'N/A'"
-            [severity]="getSeverity(product.statusLabel || product.status)">
-          </p-tag>
+          <div class="mobile-card__tags">
+            <p-tag
+              [value]="product.statusLabel || product.status || 'N/A'"
+              [severity]="getSeverity(product.statusLabel || product.status)">
+            </p-tag>
+            <p-tag
+              *ngIf="isLowStock(product)"
+              value="Stock bas"
+              severity="warn">
+            </p-tag>
+          </div>
         </div>
         <div class="mobile-card__stats mobile-card__stats--2">
           <div class="mobile-card__stat">
             <span class="mobile-card__stat-label">Stock</span>
             <span
               class="mobile-card__stat-value"
-              [class.mobile-card__stat-value--danger]="!product.stock">
+              [class.mobile-card__stat-value--danger]="isLowStock(product) || !product.stock">
               {{ product.stock || 0 }}
             </span>
           </div>
@@ -288,6 +295,20 @@
           class="w-full"
           [style]="{ width: '100%' }">
         </p-inputNumber>
+      </div>
+
+      <div class="product-form__field">
+        <label for="product-min-threshold">Seuil minimum (alerte stock bas)</label>
+        <p-inputNumber
+          inputId="product-min-threshold"
+          [(ngModel)]="product.minThreshold"
+          [min]="0"
+          [showButtons]="true"
+          placeholder="0"
+          class="w-full"
+          [style]="{ width: '100%' }">
+        </p-inputNumber>
+        <p class="product-form__hint">0 = pas d'alerte. Ex. : 10 pour être alerté quand le stock atteint 10 ou moins.</p>
       </div>
 
       <div class="product-form__field">

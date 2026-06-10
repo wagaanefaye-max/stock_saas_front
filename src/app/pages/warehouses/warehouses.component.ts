@@ -13,6 +13,7 @@ import { SelectModule } from 'primeng/select';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
+import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
@@ -39,6 +40,7 @@ import {
     ToolbarModule,
     ToastModule,
     PaginatorModule,
+    TooltipModule,
   ],
   providers: [MessageService],
   templateUrl: './warehouses.component.html',
@@ -377,11 +379,45 @@ export class WarehousesComponent implements OnInit {
     this.loadWarehouseProducts(warehouse.id);
   }
 
+  saveProductThreshold(product: { productId: number; minThreshold?: number; lowStock?: boolean }) {
+    if (!this.selectedWarehouseDetails?.id) {
+      return;
+    }
+    const warehouseId = this.selectedWarehouseDetails.id;
+    const minThreshold = product.minThreshold != null ? product.minThreshold : 0;
+    this.apiService.put<any>(
+      `/warehouses/${warehouseId}/products/${product.productId}/threshold`,
+      { minThreshold }
+    ).subscribe({
+      next: (updated) => {
+        product.minThreshold = updated.minThreshold ?? minThreshold;
+        product.lowStock = !!updated.lowStock;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Seuil enregistré',
+          detail: 'Le seuil minimum a été mis à jour.',
+          life: 3000
+        });
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: error?.error?.message || 'Impossible de mettre à jour le seuil.',
+          life: 5000
+        });
+      }
+    });
+  }
+
   loadWarehouseProducts(warehouseId: number) {
     this.warehouseProducts = [];
     this.apiService.get<any[]>(`/warehouses/${warehouseId}/products`).subscribe({
       next: (products) => {
-        this.warehouseProducts = products;
+        this.warehouseProducts = (products || []).map(p => ({
+          ...p,
+          lowStock: !!p.lowStock
+        }));
       },
       error: (error) => {
         console.error('Erreur lors du chargement des produits', error);

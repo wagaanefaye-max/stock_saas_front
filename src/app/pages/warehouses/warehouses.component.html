@@ -318,11 +318,12 @@
                 <th>Prix</th>
                 <th pSortableColumn="quantity">Quantité <p-sortIcon field="quantity"></p-sortIcon></th>
                 <th>Seuil min</th>
+                <th *ngIf="authService.isAdminEntreprise()">Actions</th>
               </tr>
             </ng-template>
 
             <ng-template pTemplate="body" let-product>
-              <tr>
+              <tr [class.warehouse-product-row--low]="product.lowStock">
                 <td><code class="product-reference">{{ product.productReference || '-' }}</code></td>
                 <td>
                   <strong>{{ product.productName }}</strong>
@@ -334,11 +335,31 @@
                 </td>
                 <td>{{ product.price | number:'1.0-0' }} FCFA</td>
                 <td>
-                  <span [class]="product.quantity <= (product.minThreshold || 0) ? 'text-danger' : ''">
+                  <span [class.text-danger]="product.lowStock">
                     <strong>{{ product.quantity | number }}</strong>
+                    <p-tag *ngIf="product.lowStock" value="Bas" severity="warn" class="warehouse-product-row__tag"></p-tag>
                   </span>
                 </td>
-                <td>{{ product.minThreshold | number }}</td>
+                <td>
+                  <p-inputNumber
+                    *ngIf="authService.isAdminEntreprise()"
+                    [(ngModel)]="product.minThreshold"
+                    [min]="0"
+                    [showButtons]="true"
+                    buttonLayout="horizontal"
+                    [inputStyle]="{ width: '4.5rem' }">
+                  </p-inputNumber>
+                  <span *ngIf="!authService.isAdminEntreprise()">{{ product.minThreshold | number }}</span>
+                </td>
+                <td *ngIf="authService.isAdminEntreprise()">
+                  <button
+                    pButton
+                    icon="pi pi-save"
+                    class="p-button-text p-button-sm"
+                    pTooltip="Enregistrer le seuil"
+                    (click)="saveProductThreshold(product)">
+                  </button>
+                </td>
               </tr>
             </ng-template>
           </p-table>

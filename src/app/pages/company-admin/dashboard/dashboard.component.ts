@@ -19,6 +19,8 @@ interface DashboardInvoice {
 interface DashboardProduct {
   id: number;
   stock?: number | null;
+  minThreshold?: number | null;
+  lowStock?: boolean;
 }
 
 @Component({
@@ -79,7 +81,9 @@ export class CompanyAdminDashboardComponent implements OnInit {
     this.apiService.get<DashboardProduct[]>('/products').subscribe({
       next: (products) => {
         this.products = products || [];
-        this.lowStockProducts = this.products.filter(p => (Number(p.stock) || 0) <= 5).length;
+        this.lowStockProducts = this.products.filter(p =>
+          p.lowStock || this.isProductLowStock(p)
+        ).length;
       },
       error: () => {
         this.lowStockProducts = 0;
@@ -159,5 +163,11 @@ export class CompanyAdminDashboardComponent implements OnInit {
 
   formatMoney(value: number): string {
     return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(value || 0);
+  }
+
+  private isProductLowStock(product: DashboardProduct): boolean {
+    const min = Number(product.minThreshold) || 0;
+    const stock = Number(product.stock) || 0;
+    return min > 0 && stock <= min;
   }
 }
