@@ -462,9 +462,12 @@ export class InvoicesComponent implements OnInit {
       }))
     };
     this.apiService.post<Invoice>('/invoices', payload).subscribe({
-      next: (created) => {
+      next: () => {
         this.messageService.add({ severity: 'success', summary: 'Facture créée', life: 4000 });
         this.displayCreateDialog = false;
+        this.statusFilter = 'ALL';
+        this.invoiceNumberFilter = '';
+        this.clientNameFilter = '';
         this.loadInvoices();
       },
       error: (err) => {

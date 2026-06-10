@@ -10,91 +10,8 @@
     </div>
   </div>
 
-  <!-- Vue desktop : tableau -->
-  <p-card class="table-card hide-mobile">
-    <div class="list-toolbar">
-      <div class="list-toolbar__primary">
-        <div class="list-toolbar__filters-row">
-          <span class="p-input-icon-left list-toolbar__search">
-            <i class="pi pi-hashtag"></i>
-            <input
-              type="text"
-              pInputText
-              [(ngModel)]="invoiceNumberFilter"
-              (ngModelChange)="loadInvoices()"
-              placeholder="N° facture">
-          </span>
-          <span class="p-input-icon-left list-toolbar__search">
-            <i class="pi pi-user"></i>
-            <input
-              type="text"
-              pInputText
-              [(ngModel)]="clientNameFilter"
-              (ngModelChange)="loadInvoices()"
-              placeholder="Client">
-          </span>
-        </div>
-      </div>
-      <div class="list-toolbar__filters list-toolbar__filters--inline">
-        <div class="list-filter-chips">
-          <p-selectButton
-            [options]="statusFilterOptions"
-            [(ngModel)]="statusFilter"
-            optionLabel="label"
-            optionValue="value"
-            (ngModelChange)="loadInvoices()">
-          </p-selectButton>
-        </div>
-      </div>
-    </div>
-
-    <p-table
-      [value]="filteredInvoices"
-      [paginator]="true"
-      [rows]="10"
-      [tableStyle]="{'min-width': '50rem'}"
-      [rowHover]="true">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>N° Facture</th>
-          <th>Client</th>
-          <th>Date</th>
-          <th>Échéance</th>
-          <th>Total</th>
-          <th>Statut</th>
-          <th style="width: 4rem">Actions</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-inv>
-        <tr>
-          <td><strong>{{ inv.invoiceNumber }}</strong></td>
-          <td>{{ inv.clientName }}</td>
-          <td>{{ formatDate(inv.invoiceDate) }}</td>
-          <td>{{ formatDate(inv.dueDate) }}</td>
-          <td>{{ formatMoney(inv.total) }}</td>
-          <td><p-tag [value]="inv.statusLabel" [severity]="getStatusSeverity(inv.status)"></p-tag></td>
-          <td>
-            <button pButton icon="pi pi-ellipsis-v" class="p-button-text p-button-sm p-button-rounded" (click)="showMenu($event, inv)" title="Actions"></button>
-          </td>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="7" class="empty-state-cell">
-            <div class="empty-state">
-              <i class="pi pi-file empty-state-icon"></i>
-              <p class="empty-state-text">Aucune facture</p>
-              <button pButton label="Créer une facture" icon="pi pi-plus" class="p-button-sm" (click)="openCreateDialog()"></button>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
-
-  <!-- Vue mobile : cartes -->
-  <div class="show-mobile-only">
-    <div class="mobile-toolbar">
+  <div class="entity-filters">
+    <div class="mobile-toolbar show-mobile-only">
       <span class="mobile-toolbar__search p-input-icon-left">
         <i class="pi pi-hashtag"></i>
         <input
@@ -114,7 +31,7 @@
           placeholder="Client">
       </span>
     </div>
-    <div class="mobile-toolbar__chips">
+    <div class="mobile-toolbar__chips show-mobile-only">
       <p-selectButton
         [options]="statusFilterOptions"
         [(ngModel)]="statusFilter"
@@ -123,8 +40,46 @@
         (ngModelChange)="loadInvoices()">
       </p-selectButton>
     </div>
+    <p-card class="table-card hide-mobile">
+      <div class="list-toolbar">
+        <div class="list-toolbar__primary">
+          <div class="list-toolbar__filters-row">
+            <span class="p-input-icon-left list-toolbar__search">
+              <i class="pi pi-hashtag"></i>
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="invoiceNumberFilter"
+                (ngModelChange)="loadInvoices()"
+                placeholder="N° facture">
+            </span>
+            <span class="p-input-icon-left list-toolbar__search">
+              <i class="pi pi-user"></i>
+              <input
+                type="text"
+                pInputText
+                [(ngModel)]="clientNameFilter"
+                (ngModelChange)="loadInvoices()"
+                placeholder="Client">
+            </span>
+          </div>
+        </div>
+        <div class="list-toolbar__filters list-toolbar__filters--inline">
+          <div class="list-filter-chips">
+            <p-selectButton
+              [options]="statusFilterOptions"
+              [(ngModel)]="statusFilter"
+              optionLabel="label"
+              optionValue="value"
+              (ngModelChange)="loadInvoices()">
+            </p-selectButton>
+          </div>
+        </div>
+      </div>
+    </p-card>
+  </div>
 
-    <div class="mobile-list">
+  <div class="mobile-list show-mobile-only">
       <div *ngIf="filteredInvoices.length === 0" class="mobile-list__empty">
         <i class="pi pi-file"></i>
         <p>Aucune facture</p>
@@ -175,7 +130,6 @@
         (onPageChange)="onMobilePageChange($event)"
         [showCurrentPageReport]="false">
       </p-paginator>
-    </div>
   </div>
 
   <button
