@@ -47,14 +47,6 @@ export interface SubscriptionStatus {
   willStackSubscription?: boolean;
 }
 
-export interface SubscriptionPlan {
-  code: string;
-  label: string;
-  monthlyPrice: number;
-  maxUsers: number;
-  maxWarehouses: number;
-}
-
 export interface SubscriptionDuration {
   code: string;
   label: string;
@@ -81,8 +73,6 @@ export interface SubscriptionRecord {
   id: number;
   companyId?: number;
   companyName?: string;
-  planCode: string;
-  planLabel: string;
   durationCode: string;
   durationLabel: string;
   months: number;

@@ -60,7 +60,7 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
     {
       key: 'amount',
       label: 'Montant incorrect',
-      message: 'Le montant payé ne correspond pas au tarif de l\'offre sélectionnée.'
+      message: 'Le montant payé ne correspond pas au tarif de la durée sélectionnée.'
     },
     {
       key: 'proof',

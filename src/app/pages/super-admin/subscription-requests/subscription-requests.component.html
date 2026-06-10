@@ -139,6 +139,7 @@
     <div class="app-dialog-detail proof-dialog" *ngIf="selectedRequest">
       <p>
         <strong>{{ selectedRequest.companyName }}</strong> —
+        {{ selectedRequest.durationLabel }} ({{ selectedRequest.months }} mois) —
         {{ selectedRequest.paymentProviderLabel }}
         <p-tag
           [value]="selectedRequest.requestStatusLabel"
