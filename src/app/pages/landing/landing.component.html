@@ -1,4 +1,49 @@
-<div class="landing">
+<!-- Écran de chargement d'accueil -->
+<div
+  *ngIf="showSplash"
+  class="landing-splash"
+  [class.landing-splash--exit]="splashExiting"
+  role="status"
+  aria-live="polite"
+  aria-label="Chargement de Stock SaaS">
+  <div class="landing-splash__backdrop" aria-hidden="true">
+    <span class="landing-splash__orb landing-splash__orb--1"></span>
+    <span class="landing-splash__orb landing-splash__orb--2"></span>
+    <span class="landing-splash__orb landing-splash__orb--3"></span>
+    <span class="landing-splash__grid"></span>
+  </div>
+
+  <div class="landing-splash__panel">
+    <div class="landing-splash__logo-stage">
+      <span class="landing-splash__ring landing-splash__ring--outer" aria-hidden="true"></span>
+      <span class="landing-splash__ring landing-splash__ring--inner" aria-hidden="true"></span>
+      <span class="landing-splash__glow" aria-hidden="true"></span>
+      <img src="/assets/logo.jpg" alt="" class="landing-splash__logo" />
+    </div>
+
+    <h1 class="landing-splash__title">
+      <span *ngFor="let letter of appName.split(''); let i = index"
+        class="landing-splash__letter"
+        [style.--i]="i"
+        [class.landing-splash__letter--space]="letter === ' '">
+        {{ letter === ' ' ? '\u00a0' : letter }}
+      </span>
+    </h1>
+
+    <p class="landing-splash__tagline">Gestion de stock &amp; facturation</p>
+
+    <div class="landing-splash__loader" aria-hidden="true">
+      <span class="landing-splash__loader-track">
+        <span class="landing-splash__loader-bar"></span>
+      </span>
+      <span class="landing-splash__dots">
+        <span></span><span></span><span></span>
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="landing" [class.landing--revealed]="landingRevealed">
   <!-- Fond animé -->
   <div class="landing__bg" aria-hidden="true">
     <span class="landing__orb landing__orb--1"></span>

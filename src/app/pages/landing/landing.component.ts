@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChildren, QueryList } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -10,9 +10,17 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss'
 })
-export class LandingComponent implements OnInit, AfterViewInit {
+export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChildren('reveal') revealElements!: QueryList<ElementRef<HTMLElement>>;
 
+  showSplash = true;
+  splashExiting = false;
+  landingRevealed = false;
+
+  private splashTimers: ReturnType<typeof setTimeout>[] = [];
+  private scrollObserver?: IntersectionObserver;
+
+  readonly appName = 'Stock SaaS';
   readonly currentYear = new Date().getFullYear();
 
   readonly features = [
@@ -61,33 +69,84 @@ export class LandingComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
+      this.showSplash = false;
+      this.landingRevealed = true;
       this.redirectToDashboard();
+      return;
     }
+
+    this.startSplash();
   }
 
   ngAfterViewInit(): void {
+    if (this.landingRevealed) {
+      this.initScrollReveal();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.splashTimers.forEach(clearTimeout);
+    this.scrollObserver?.disconnect();
+    this.lockBodyScroll(false);
+  }
+
+  private startSplash(): void {
+    this.lockBodyScroll(true);
+
+    const reducedMotion =
+      typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const displayMs = reducedMotion ? 500 : 2400;
+    const exitMs = reducedMotion ? 200 : 700;
+
+    this.splashTimers.push(
+      setTimeout(() => {
+        this.splashExiting = true;
+        this.splashTimers.push(
+          setTimeout(() => {
+            this.showSplash = false;
+            this.landingRevealed = true;
+            this.lockBodyScroll(false);
+            setTimeout(() => this.initScrollReveal(), 50);
+          }, exitMs)
+        );
+      }, displayMs)
+    );
+  }
+
+  private initScrollReveal(): void {
+    if (this.scrollObserver) {
+      return;
+    }
+
     if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       this.revealElements?.forEach((el) => el.nativeElement.classList.add('is-visible'));
       return;
     }
 
-    const observer = new IntersectionObserver(
+    this.scrollObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target);
+            this.scrollObserver?.unobserve(entry.target);
           }
         });
       },
       { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
     );
 
-    this.revealElements?.forEach((el) => observer.observe(el.nativeElement));
+    this.revealElements?.forEach((el) => this.scrollObserver!.observe(el.nativeElement));
   }
 
   scrollTo(id: string): void {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  private lockBodyScroll(lock: boolean): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    document.body.style.overflow = lock ? 'hidden' : '';
   }
 
   private redirectToDashboard(): void {
