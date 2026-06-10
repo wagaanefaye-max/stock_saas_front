@@ -1,50 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
-import { SidebarModule } from 'primeng/sidebar';
-import { MenuItem } from 'primeng/api';
-import { AuthService } from '../services/auth.service';
-import { UserRole } from '../models/user.model';
+import { Component } from '@angular/core';
+import { AppShellComponent } from './app-shell/app-shell.component';
+import { GESTION_NAV_CONFIG } from './app-shell/app-nav.config';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, SidebarModule],
-  templateUrl: './layout.component.html',
-  styleUrl: './layout.component.scss'
+  imports: [AppShellComponent],
+  template: `<app-shell [config]="navConfig" />`
 })
-export class LayoutComponent implements OnInit {
-  menuItems: MenuItem[] = [];
-  bottomNavItems: MenuItem[] = [];
-  moreMenuItems: MenuItem[] = [];
-  mobileMenuOpen = false;
-  UserRole = UserRole;
-
-  constructor(public router: Router, public authService: AuthService) {}
-
-  ngOnInit() {
-    this.menuItems = [
-      { label: 'Accueil', mobileLabel: 'Accueil', icon: 'pi pi-th-large', routerLink: '/gestion/dashboard' },
-      { label: 'Produits', mobileLabel: 'Produits', icon: 'pi pi-shopping-bag', routerLink: '/gestion/products' },
-      { label: 'Entrepôts', mobileLabel: 'Dépôts', icon: 'pi pi-warehouse', routerLink: '/gestion/warehouses' },
-      { label: 'Mouvements', mobileLabel: 'Mvts', icon: 'pi pi-sync', routerLink: '/gestion/movements' },
-      { label: 'Inventaires', mobileLabel: 'Invent.', icon: 'pi pi-clipboard', routerLink: '/gestion/inventories' },
-      { label: 'Paramètres', mobileLabel: 'Réglages', icon: 'pi pi-sliders-h', routerLink: '/gestion/settings' }
-    ];
-    this.bottomNavItems = [
-      this.menuItems[0],
-      this.menuItems[1],
-      this.menuItems[3],
-      this.menuItems[4]
-    ];
-    this.moreMenuItems = [this.menuItems[2], this.menuItems[5]];
-  }
-
-  closeMobileMenu() {
-    this.mobileMenuOpen = false;
-  }
-
-  logout() {
-    this.authService.confirmLogout(() => this.closeMobileMenu());
-  }
+export class LayoutComponent {
+  readonly navConfig = GESTION_NAV_CONFIG;
 }

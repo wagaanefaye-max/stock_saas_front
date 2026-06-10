@@ -1,0 +1,207 @@
+<div
+  class="app-layout"
+  [ngClass]="config.layoutClass"
+  [class.app-layout--sidebar-collapsed]="sidebarCollapsed">
+  <div class="app-body">
+    <aside class="app-sidebar-desktop" [attr.aria-expanded]="!sidebarCollapsed">
+      <div class="app-sidebar__brand">
+        <div class="app-sidebar__brand-mark" aria-hidden="true">
+          <img src="/assets/logo.jpg" alt="Stock SaaS" class="app-sidebar__logo-img" />
+        </div>
+        <div class="app-sidebar__brand-text">
+          <span class="app-sidebar__app-name">Stock SaaS</span>
+          <span class="app-sidebar__role-badge">{{ config.roleBadge }}</span>
+        </div>
+        <button
+          type="button"
+          class="app-sidebar__collapse-btn"
+          (click)="toggleSidebar()"
+          [attr.aria-label]="sidebarCollapsed ? 'Déplier le menu' : 'Replier le menu'"
+          [title]="sidebarCollapsed ? 'Déplier' : 'Replier'">
+          <i [class]="sidebarCollapsed ? 'pi pi-angle-right' : 'pi pi-angle-left'"></i>
+        </button>
+      </div>
+
+      <div class="app-sidebar__command hide-mobile-collapsed">
+        <button type="button" class="app-command-trigger" (click)="openCommandPalette()">
+          <i class="pi pi-search" aria-hidden="true"></i>
+          <span class="app-command-trigger__label">Rechercher une page…</span>
+          <kbd class="app-command-trigger__kbd">{{ commandShortcutLabel }}</kbd>
+        </button>
+      </div>
+
+      <nav class="app-sidebar__nav" [attr.aria-label]="config.navSectionLabel">
+        <p class="app-sidebar__section-label">{{ config.navSectionLabel }}</p>
+        <ul class="app-nav-desktop">
+          <li *ngFor="let navItem of config.items">
+            <a
+              [routerLink]="navItem.routerLink"
+              [queryParams]="navItem.queryParams || null"
+              routerLinkActive="active"
+              class="app-nav-desktop__link"
+              [title]="sidebarCollapsed ? navItem.label : ''">
+              <span class="app-nav-desktop__icon" aria-hidden="true">
+                <i [class]="navItem.icon"></i>
+              </span>
+              <span class="app-nav-desktop__label">{{ navItem.label }}</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="app-sidebar__footer" *ngIf="authService.getCurrentUser() as user">
+        <button
+          type="button"
+          class="app-sidebar__profile"
+          (click)="toggleProfileMenu($event)"
+          [attr.aria-expanded]="profileMenuOpen"
+          aria-haspopup="true"
+          [title]="sidebarCollapsed ? user.name : ''">
+          <span class="app-sidebar__avatar" aria-hidden="true">{{ user.name.charAt(0) || '?' }}</span>
+          <span class="app-sidebar__user-meta">
+            <span class="app-sidebar__user-name">{{ user.name }}</span>
+            <span class="app-sidebar__user-email">{{ user.email }}</span>
+          </span>
+          <i class="pi pi-chevron-up app-sidebar__profile-chevron" aria-hidden="true"></i>
+        </button>
+        <div class="app-sidebar__profile-menu" *ngIf="profileMenuOpen" (click)="$event.stopPropagation()">
+          <button type="button" class="app-sidebar__profile-menu-item app-sidebar__profile-menu-item--danger" (click)="logout()">
+            <i class="pi pi-sign-out"></i>
+            <span>Déconnexion</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <div class="app-main-topbar show-mobile-only">
+        <button type="button" class="app-command-trigger app-command-trigger--mobile" (click)="openCommandPalette()">
+          <i class="pi pi-search" aria-hidden="true"></i>
+          <span>Rechercher une page…</span>
+        </button>
+      </div>
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <nav class="app-bottom-nav" aria-label="Navigation principale">
+    <a
+      *ngFor="let navItem of bottomNavItems"
+      [routerLink]="navItem.routerLink"
+      [queryParams]="navItem.queryParams || null"
+      routerLinkActive="active"
+      class="app-bottom-nav__item"
+      [attr.aria-label]="navItem.label">
+      <span class="app-bottom-nav__icon-wrap" aria-hidden="true">
+        <i [class]="navItem.icon"></i>
+      </span>
+      <span class="app-bottom-nav__label">{{ navItem.mobileLabel || navItem.label }}</span>
+    </a>
+    <button
+      *ngIf="secondaryMobileItems.length > 0"
+      type="button"
+      class="app-bottom-nav__item app-bottom-nav__item--menu"
+      [class.active]="mobileMenuOpen"
+      (click)="openMobileMenu()"
+      aria-label="Ouvrir le menu complet">
+      <span class="app-bottom-nav__icon-wrap" aria-hidden="true">
+        <i class="pi pi-bars"></i>
+      </span>
+      <span class="app-bottom-nav__label">Menu</span>
+    </button>
+  </nav>
+
+  <p-sidebar
+    [(visible)]="mobileMenuOpen"
+    position="bottom"
+    styleClass="mobile-menu-drawer mobile-menu-drawer--full"
+    [modal]="true"
+    [dismissible]="true"
+    [showCloseIcon]="false"
+    (onHide)="mobileMenuQuery = ''">
+    <div class="mobile-menu-drawer__inner">
+      <div class="mobile-menu-drawer__header">
+        <h2 class="mobile-menu-drawer__title">Navigation</h2>
+        <button type="button" class="mobile-menu-drawer__close" (click)="closeMobileMenu()" aria-label="Fermer">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <div class="mobile-menu-drawer__search">
+        <i class="pi pi-search" aria-hidden="true"></i>
+        <input
+          type="search"
+          [(ngModel)]="mobileMenuQuery"
+          placeholder="Filtrer les pages…"
+          autocomplete="off"
+          aria-label="Filtrer le menu">
+      </div>
+
+      <div class="mobile-menu-drawer__profile" *ngIf="authService.getCurrentUser() as user">
+        <span class="app-sidebar__avatar">{{ user.name.charAt(0) || '?' }}</span>
+        <div class="mobile-menu-drawer__profile-text">
+          <strong>{{ user.name }}</strong>
+          <span>{{ user.email }}</span>
+        </div>
+      </div>
+
+      <ul class="mobile-menu-list">
+        <li *ngFor="let navItem of filteredMobileMenuItems">
+          <a
+            [routerLink]="navItem.routerLink"
+            [queryParams]="navItem.queryParams || null"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()">
+            <span class="mobile-menu-list__icon" aria-hidden="true">
+              <i [class]="navItem.icon"></i>
+            </span>
+            <span>{{ navItem.label }}</span>
+          </a>
+        </li>
+      </ul>
+
+      <button type="button" class="mobile-menu-drawer__logout" (click)="logout()">
+        <i class="pi pi-sign-out"></i>
+        <span>Déconnexion</span>
+      </button>
+    </div>
+  </p-sidebar>
+
+  <div
+    class="command-palette"
+    *ngIf="commandPaletteOpen"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Recherche rapide">
+    <div class="command-palette__backdrop" (click)="closeCommandPalette()"></div>
+    <div class="command-palette__panel">
+      <div class="command-palette__search">
+        <i class="pi pi-search" aria-hidden="true"></i>
+        <input
+          #commandInput
+          type="search"
+          [(ngModel)]="commandQuery"
+          (keydown)="onCommandKeydown($event)"
+          placeholder="Aller à…"
+          autocomplete="off"
+          aria-label="Rechercher une page">
+        <kbd class="command-palette__esc">Échap</kbd>
+      </div>
+      <ul class="command-palette__results" *ngIf="filteredCommandItems.length > 0">
+        <li *ngFor="let navItem of filteredCommandItems; let i = index">
+          <button
+            type="button"
+            class="command-palette__item"
+            [class.command-palette__item--active]="i === commandActiveIndex"
+            (click)="navigateFromCommand(navItem)"
+            (mouseenter)="commandActiveIndex = i">
+            <span class="command-palette__item-icon"><i [class]="navItem.icon"></i></span>
+            <span class="command-palette__item-label">{{ navItem.label }}</span>
+            <span class="command-palette__item-hint">{{ navItem.routerLink }}</span>
+          </button>
+        </li>
+      </ul>
+      <p class="command-palette__empty" *ngIf="filteredCommandItems.length === 0">Aucune page trouvée</p>
+    </div>
+  </div>
+</div>
