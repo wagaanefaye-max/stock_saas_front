@@ -6,6 +6,7 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
+import { compressImageIfNeeded, MAX_IMAGE_BYTES } from '../../../utils/image-compress.util';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 import {
   PAYMENT_PROVIDERS,
@@ -165,9 +166,30 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
       this.messageService.add({ severity: 'warn', summary: 'Max. 5 Mo' });
       return;
     }
-    this.revokePreview();
-    this.proofFile = file;
-    this.proofPreviewUrl = URL.createObjectURL(file);
+
+    compressImageIfNeeded(file, MAX_IMAGE_BYTES)
+      .then((processed) => {
+        this.revokePreview();
+        this.proofFile = processed;
+        this.proofPreviewUrl = URL.createObjectURL(processed);
+        if (processed.size < file.size) {
+          const beforeKb = Math.round(file.size / 1024);
+          const afterKb = Math.round(processed.size / 1024);
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Image optimisée',
+            detail: `Taille réduite de ${beforeKb} Ko à ${afterKb} Ko`,
+            life: 3500
+          });
+        }
+      })
+      .catch(() => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de traiter l\'image'
+        });
+      });
   }
 
   clearProof(): void {
