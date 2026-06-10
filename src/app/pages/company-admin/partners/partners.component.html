@@ -17,54 +17,56 @@
     </div>
   </div>
 
-  <div class="mobile-toolbar show-mobile-only">
-    <span class="p-input-icon-left mobile-toolbar__search">
-      <i class="pi pi-search"></i>
-      <input
-        type="text"
-        pInputText
-        [(ngModel)]="globalFilter"
-        (ngModelChange)="onSearchInput()"
-        placeholder="Nom ou email…">
-    </span>
-  </div>
+  <div class="entity-filters">
+    <div class="mobile-toolbar show-mobile-only">
+      <span class="p-input-icon-left mobile-toolbar__search">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          pInputText
+          [(ngModel)]="globalFilter"
+          (ngModelChange)="onSearchInput()"
+          placeholder="Nom ou email…">
+      </span>
+    </div>
 
-  <div class="mobile-toolbar__chips show-mobile-only">
-    <p-selectButton
-      [options]="roleFilterOptions"
-      [(ngModel)]="selectedRoleFilter"
-      optionLabel="label"
-      optionValue="value"
-      (ngModelChange)="onRoleFilterChange()">
-    </p-selectButton>
-  </div>
+    <div class="mobile-toolbar__chips show-mobile-only">
+      <p-selectButton
+        [options]="roleFilterOptions"
+        [(ngModel)]="selectedRoleFilter"
+        optionLabel="label"
+        optionValue="value"
+        (ngModelChange)="onRoleFilterChange()">
+      </p-selectButton>
+    </div>
 
-  <p-card class="table-card hide-mobile">
-    <div class="list-toolbar">
-      <div class="list-toolbar__primary">
-        <span class="p-input-icon-left list-toolbar__search">
-          <i class="pi pi-search"></i>
-          <input
-            type="text"
-            pInputText
-            [(ngModel)]="globalFilter"
-            (ngModelChange)="onSearchInput()"
-            placeholder="Nom ou email…">
-        </span>
-      </div>
-      <div class="list-toolbar__filters list-toolbar__filters--inline">
-        <div class="list-filter-chips">
-          <p-selectButton
-            [options]="roleFilterOptions"
-            [(ngModel)]="selectedRoleFilter"
-            optionLabel="label"
-            optionValue="value"
-            (ngModelChange)="onRoleFilterChange()">
-          </p-selectButton>
+    <p-card class="table-card hide-mobile">
+      <div class="list-toolbar">
+        <div class="list-toolbar__primary">
+          <span class="p-input-icon-left list-toolbar__search">
+            <i class="pi pi-search"></i>
+            <input
+              type="text"
+              pInputText
+              [(ngModel)]="globalFilter"
+              (ngModelChange)="onSearchInput()"
+              placeholder="Nom ou email…">
+          </span>
+        </div>
+        <div class="list-toolbar__filters list-toolbar__filters--inline">
+          <div class="list-filter-chips">
+            <p-selectButton
+              [options]="roleFilterOptions"
+              [(ngModel)]="selectedRoleFilter"
+              optionLabel="label"
+              optionValue="value"
+              (ngModelChange)="onRoleFilterChange()">
+            </p-selectButton>
+          </div>
         </div>
       </div>
-    </div>
-  </p-card>
+    </p-card>
+  </div>
 
   <div class="mobile-list show-mobile-only">
     <div *ngIf="partners.length === 0" class="mobile-list__empty">

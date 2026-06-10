@@ -15,70 +15,72 @@
     </button>
   </div>
 
-  <div class="mobile-toolbar show-mobile-only">
-    <span class="p-input-icon-left mobile-toolbar__search">
-      <i class="pi pi-search"></i>
-      <input
-        type="text"
-        pInputText
-        [(ngModel)]="globalFilter"
-        (ngModelChange)="onSearchInput()"
-        placeholder="Produit, entrepôt…">
-    </span>
-    <div class="mobile-toolbar__actions">
-      <button
-        pButton
-        icon="pi pi-file-export"
-        label="Exporter"
-        class="p-button-secondary hide-mobile">
-      </button>
-    </div>
-  </div>
-
-  <div class="mobile-toolbar__chips show-mobile-only">
-    <p-selectButton
-      [options]="typeFilterChipOptions"
-      [(ngModel)]="typeFilter"
-      optionLabel="label"
-      optionValue="value"
-      (ngModelChange)="onTypeFilterChange()">
-    </p-selectButton>
-  </div>
-
-  <p-card class="table-card hide-mobile">
-    <div class="list-toolbar">
-      <div class="list-toolbar__primary">
-        <span class="p-input-icon-left list-toolbar__search">
-          <i class="pi pi-search"></i>
-          <input
-            type="text"
-            pInputText
-            [(ngModel)]="globalFilter"
-            (ngModelChange)="onSearchInput()"
-            placeholder="Produit, entrepôt…">
-        </span>
-      </div>
-      <div class="list-toolbar__filters list-toolbar__filters--inline">
-        <div class="list-filter-chips">
-          <p-selectButton
-            [options]="typeFilterChipOptions"
-            [(ngModel)]="typeFilter"
-            optionLabel="label"
-            optionValue="value"
-            (ngModelChange)="onTypeFilterChange()">
-          </p-selectButton>
-        </div>
-      </div>
-      <div class="list-toolbar__actions">
+  <div class="entity-filters">
+    <div class="mobile-toolbar show-mobile-only">
+      <span class="p-input-icon-left mobile-toolbar__search">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          pInputText
+          [(ngModel)]="globalFilter"
+          (ngModelChange)="onSearchInput()"
+          placeholder="Produit, entrepôt…">
+      </span>
+      <div class="mobile-toolbar__actions">
         <button
           pButton
           icon="pi pi-file-export"
           label="Exporter"
-          class="p-button-secondary list-toolbar__btn-icon">
+          class="p-button-secondary hide-mobile">
         </button>
       </div>
     </div>
-  </p-card>
+
+    <div class="mobile-toolbar__chips show-mobile-only">
+      <p-selectButton
+        [options]="typeFilterChipOptions"
+        [(ngModel)]="typeFilter"
+        optionLabel="label"
+        optionValue="value"
+        (ngModelChange)="onTypeFilterChange()">
+      </p-selectButton>
+    </div>
+
+    <p-card class="table-card hide-mobile">
+      <div class="list-toolbar">
+        <div class="list-toolbar__primary">
+          <span class="p-input-icon-left list-toolbar__search">
+            <i class="pi pi-search"></i>
+            <input
+              type="text"
+              pInputText
+              [(ngModel)]="globalFilter"
+              (ngModelChange)="onSearchInput()"
+              placeholder="Produit, entrepôt…">
+          </span>
+        </div>
+        <div class="list-toolbar__filters list-toolbar__filters--inline">
+          <div class="list-filter-chips">
+            <p-selectButton
+              [options]="typeFilterChipOptions"
+              [(ngModel)]="typeFilter"
+              optionLabel="label"
+              optionValue="value"
+              (ngModelChange)="onTypeFilterChange()">
+            </p-selectButton>
+          </div>
+        </div>
+        <div class="list-toolbar__actions">
+          <button
+            pButton
+            icon="pi pi-file-export"
+            label="Exporter"
+            class="p-button-secondary list-toolbar__btn-icon">
+          </button>
+        </div>
+      </div>
+    </p-card>
+  </div>
 
   <div class="mobile-list show-mobile-only">
     <div *ngIf="movements.length === 0" class="mobile-list__empty">

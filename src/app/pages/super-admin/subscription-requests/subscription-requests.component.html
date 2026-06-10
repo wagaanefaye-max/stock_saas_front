@@ -6,16 +6,39 @@
     <p class="text-muted mobile-page__subtitle">Toutes les demandes : en attente, validées et refusées</p>
   </div>
 
-  <div class="mobile-toolbar show-mobile-only">
-    <div class="mobile-toolbar__chips list-filter-chips list-filter-chips--scroll">
-      <p-selectButton
-        [options]="statusFilterOptions"
-        [(ngModel)]="statusFilter"
-        optionLabel="label"
-        optionValue="value"
-        (ngModelChange)="onFilterChange()">
-      </p-selectButton>
+  <div class="entity-filters">
+    <div class="mobile-toolbar show-mobile-only">
+      <div class="mobile-toolbar__chips list-filter-chips list-filter-chips--scroll">
+        <p-selectButton
+          [options]="statusFilterOptions"
+          [(ngModel)]="statusFilter"
+          optionLabel="label"
+          optionValue="value"
+          (ngModelChange)="onFilterChange()">
+        </p-selectButton>
+      </div>
     </div>
+    <p-card class="table-card hide-mobile">
+      <div class="list-toolbar list-toolbar--chips-only">
+        <div class="list-filter-chips list-filter-chips--scroll">
+          <p-selectButton
+            [options]="statusFilterOptions"
+            [(ngModel)]="statusFilter"
+            optionLabel="label"
+            optionValue="value"
+            (ngModelChange)="onFilterChange()">
+          </p-selectButton>
+        </div>
+        <div class="list-toolbar__actions">
+          <button
+            pButton
+            icon="pi pi-refresh"
+            class="p-button-text list-toolbar__btn-icon"
+            title="Actualiser"
+            (click)="loadRequests()"></button>
+        </div>
+      </div>
+    </p-card>
   </div>
 
   <div class="mobile-list show-mobile-only">
@@ -105,28 +128,6 @@
       [rowsPerPageOptions]="[10, 20, 50]">
     </p-paginator>
   </div>
-
-  <p-card class="table-card hide-mobile">
-    <div class="list-toolbar list-toolbar--chips-only">
-      <div class="list-filter-chips list-filter-chips--scroll">
-        <p-selectButton
-          [options]="statusFilterOptions"
-          [(ngModel)]="statusFilter"
-          optionLabel="label"
-          optionValue="value"
-          (ngModelChange)="onFilterChange()">
-        </p-selectButton>
-      </div>
-      <div class="list-toolbar__actions">
-        <button
-          pButton
-          icon="pi pi-refresh"
-          class="p-button-text list-toolbar__btn-icon"
-          title="Actualiser"
-          (click)="loadRequests()"></button>
-      </div>
-    </div>
-  </p-card>
 
   <p-dialog
     styleClass="app-mobile-dialog"

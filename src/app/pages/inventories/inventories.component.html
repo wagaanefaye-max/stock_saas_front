@@ -15,9 +15,8 @@
     </button>
   </div>
 
-  <!-- Barre outils mobile -->
-  <div class="show-mobile-only">
-    <div class="mobile-toolbar">
+  <div class="entity-filters">
+    <div class="mobile-toolbar show-mobile-only">
       <div class="mobile-toolbar__search">
         <p-select
           inputId="inventory-warehouse-filter-mobile"
@@ -33,7 +32,7 @@
         </p-select>
       </div>
     </div>
-    <div class="mobile-toolbar__chips">
+    <div class="mobile-toolbar__chips show-mobile-only">
       <p-selectButton
         [options]="statusFilterOptions"
         [(ngModel)]="statusFilter"
@@ -42,6 +41,35 @@
         (ngModelChange)="onFilterChange()">
       </p-selectButton>
     </div>
+    <p-card class="table-card hide-mobile">
+      <div class="list-toolbar">
+        <div class="list-toolbar__filters">
+          <div class="list-toolbar__filter-field">
+            <label for="inventory-warehouse-filter">Entrepôt</label>
+            <p-select
+              inputId="inventory-warehouse-filter"
+              [options]="warehouseFilterOptions"
+              [(ngModel)]="warehouseFilter"
+              (onChange)="onFilterChange()"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Tous les entrepôts"
+              [showClear]="false"
+              styleClass="inventory-filter-dropdown w-full">
+            </p-select>
+          </div>
+          <div class="list-filter-chips">
+            <p-selectButton
+              [options]="statusFilterOptions"
+              [(ngModel)]="statusFilter"
+              optionLabel="label"
+              optionValue="value"
+              (ngModelChange)="onFilterChange()">
+            </p-selectButton>
+          </div>
+        </div>
+      </div>
+    </p-card>
   </div>
 
   <div class="mobile-list show-mobile-only">
@@ -94,36 +122,6 @@
       [rowsPerPageOptions]="[10, 20, 50]">
     </p-paginator>
   </div>
-
-  <p-card class="table-card hide-mobile">
-    <div class="list-toolbar">
-      <div class="list-toolbar__filters">
-        <div class="list-toolbar__filter-field">
-          <label for="inventory-warehouse-filter">Entrepôt</label>
-          <p-select
-            inputId="inventory-warehouse-filter"
-            [options]="warehouseFilterOptions"
-            [(ngModel)]="warehouseFilter"
-            (onChange)="onFilterChange()"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Tous les entrepôts"
-            [showClear]="false"
-            styleClass="inventory-filter-dropdown w-full">
-          </p-select>
-        </div>
-        <div class="list-filter-chips">
-          <p-selectButton
-            [options]="statusFilterOptions"
-            [(ngModel)]="statusFilter"
-            optionLabel="label"
-            optionValue="value"
-            (ngModelChange)="onFilterChange()">
-          </p-selectButton>
-        </div>
-      </div>
-    </div>
-  </p-card>
 
   <button
     type="button"

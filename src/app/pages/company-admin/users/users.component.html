@@ -15,23 +15,25 @@
     </button>
   </div>
 
-  <div class="mobile-toolbar">
-    <span class="mobile-toolbar__search p-input-icon-left">
-      <i class="pi pi-search"></i>
-      <input
-        type="text"
-        pInputText
-        [(ngModel)]="globalFilter"
-        (input)="onGlobalFilter()"
-        placeholder="Nom ou email…">
-    </span>
-    <div class="mobile-toolbar__actions">
-      <button
-        pButton
-        icon="pi pi-file-export"
-        label="Exporter"
-        class="p-button-secondary hide-mobile">
-      </button>
+  <div class="entity-filters">
+    <div class="mobile-toolbar">
+      <span class="mobile-toolbar__search p-input-icon-left">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          pInputText
+          [(ngModel)]="globalFilter"
+          (input)="onGlobalFilter()"
+          placeholder="Nom ou email…">
+      </span>
+      <div class="mobile-toolbar__actions">
+        <button
+          pButton
+          icon="pi pi-file-export"
+          label="Exporter"
+          class="p-button-secondary hide-mobile">
+        </button>
+      </div>
     </div>
   </div>
 

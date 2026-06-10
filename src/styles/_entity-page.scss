@@ -2,6 +2,42 @@
 
 .entity-page {
   position: relative;
+  display: flex;
+  flex-direction: column;
+
+  > .page-header,
+  > header.page-header {
+    order: 1;
+  }
+
+  > .entity-filters,
+  > .mobile-toolbar,
+  > .mobile-toolbar__chips,
+  > .table-card,
+  > p-card.table-card {
+    order: 2;
+  }
+
+  > .mobile-list,
+  > .show-mobile-only.mobile-list,
+  > .products-mobile,
+  > .products-page__content,
+  > .admin-warehouses,
+  > .non-admin-warehouses {
+    order: 3;
+  }
+
+  > .mobile-fab,
+  > .products-fab {
+    order: 4;
+  }
+
+  .entity-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
 
   .page-header {
     display: flex;
@@ -44,8 +80,8 @@
       display: none !important;
     }
 
-    &:has(.table-card .list-toolbar) .mobile-toolbar.show-mobile-only,
-    &:has(.table-card .list-toolbar) .mobile-toolbar__chips.show-mobile-only {
+    &:has(.entity-filters .table-card .list-toolbar) .entity-filters .mobile-toolbar.show-mobile-only,
+    &:has(.entity-filters .table-card .list-toolbar) .entity-filters .mobile-toolbar__chips.show-mobile-only {
       display: none !important;
     }
 
