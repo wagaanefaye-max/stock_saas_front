@@ -79,23 +79,38 @@
       <li *ngFor="let p of partners; trackBy: trackByPartnerId" class="mobile-card">
         <div class="mobile-card__top">
           <div class="mobile-card__main">
-            <div class="mobile-card__row">
-              <p-tag [value]="getRoleLabel(p.role)" [severity]="getRoleSeverity(p.role)"></p-tag>
-            </div>
             <span class="mobile-card__title">{{ p.name }}</span>
-            <span class="mobile-card__subtitle">{{ p.email || '-' }}</span>
+            <span class="mobile-card__subtitle">{{ p.email || '—' }}</span>
           </div>
+          <p-tag [value]="getRoleLabel(p.role)" [severity]="getRoleSeverity(p.role)"></p-tag>
+        </div>
+        <div class="mobile-card__stats mobile-card__stats--2">
+          <div class="mobile-card__stat">
+            <span class="mobile-card__stat-label">Téléphone</span>
+            <span class="mobile-card__stat-value">{{ (p.phone | phoneFormat) || '—' }}</span>
+          </div>
+          <div class="mobile-card__stat mobile-card__stat--wide">
+            <span class="mobile-card__stat-label">Adresse</span>
+            <span class="mobile-card__stat-value" [title]="p.address">{{ p.address || '—' }}</span>
+          </div>
+        </div>
+        <div class="card-actions-bar">
           <button
             pButton
-            icon="pi pi-ellipsis-v"
-            class="p-button-text p-button-rounded p-button-sm mobile-card__menu"
-            (click)="showMenu($event, p)"
-            aria-label="Actions">
+            icon="pi pi-pencil"
+            class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+            title="Modifier"
+            aria-label="Modifier"
+            (click)="editPartner(p)">
           </button>
-        </div>
-        <div class="mobile-card__footer">
-          <span>{{ p.phone | phoneFormat }}</span>
-          <span [title]="p.address">{{ (p.address | slice:0:30) || '-' }}{{ (p.address && p.address.length > 30) ? '…' : '' }}</span>
+          <button
+            pButton
+            icon="pi pi-trash"
+            class="p-button-sm p-button-rounded p-button-icon-only card-actions-bar__danger"
+            title="Supprimer"
+            aria-label="Supprimer"
+            (click)="deletePartner(p)">
+          </button>
         </div>
       </li>
     </ul>
@@ -107,8 +122,9 @@
       [totalRecords]="totalPartners"
       [first]="first"
       (onPageChange)="onPartnersLazyLoad($event)"
-      [showCurrentPageReport]="false"
-      [rowsPerPageOptions]="[10, 20]">
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} sur {totalRecords}"
+      [rowsPerPageOptions]="[10, 20, 50]">
     </p-paginator>
   </div>
 
@@ -119,8 +135,6 @@
     aria-label="Nouveau partenaire">
     <i class="pi pi-plus"></i>
   </button>
-
-  <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
 
   <p-dialog
     [(visible)]="displayDialog"

@@ -1,22 +1,16 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { CardModule } from 'primeng/card';
 import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { MenuModule } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { MenuItem } from 'primeng/api';
-import { Menu } from 'primeng/menu';
-import { TabsModule } from 'primeng/tabs';
 import { TagModule } from 'primeng/tag';
 import { PaginatorModule } from 'primeng/paginator';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
@@ -27,19 +21,15 @@ import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
   imports: [
     CommonModule,
     FormsModule,
-    TableModule,
     ButtonModule,
     InputTextModule,
     DialogModule,
     CardModule,
     SelectModule,
     SelectButtonModule,
-    MenuModule,
     ToastModule,
-    TabsModule,
     TagModule,
     PaginatorModule,
-    ProgressSpinnerModule,
     PhoneFormatDirective,
     PhoneFormatPipe
   ],
@@ -58,8 +48,6 @@ export class PartnersComponent implements OnInit {
   partner: any = {};
   selectedRoleFilter: string = '';
   globalFilter = '';
-  menuItems: MenuItem[] = [];
-  @ViewChild('actionMenu') actionMenu!: Menu;
 
   roleOptions = [
     { label: 'Client', value: 'CLIENT' },
@@ -138,15 +126,6 @@ export class PartnersComponent implements OnInit {
     this.displayDialog = true;
   }
 
-  showMenu(event: Event, p: any) {
-    this.menuItems = [
-      { label: 'Modifier', icon: 'pi pi-pencil', command: () => this.editPartner(p) },
-      { separator: true },
-      { label: 'Supprimer', icon: 'pi pi-trash', styleClass: 'text-red-500', command: () => this.deletePartner(p) }
-    ];
-    this.actionMenu.toggle(event);
-  }
-
   /** Format affichage/saisie : 78 900 88 77 */
   private formatPhone(value: string | null | undefined): string {
     if (value == null || value === '') return '';
@@ -188,7 +167,8 @@ export class PartnersComponent implements OnInit {
         next: () => {
           this.messageService.add({ severity: 'success', summary: 'Créé', detail: 'Partenaire créé', life: 4000 });
           this.displayDialog = false;
-          this.refreshPartners();
+          this.first = 0;
+          this.loadPartners({ first: 0, rows: this.rows });
         },
         error: (err) => {
           this.messageService.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message || 'Erreur lors de la création', life: 5000 });

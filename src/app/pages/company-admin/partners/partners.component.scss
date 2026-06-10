@@ -30,6 +30,12 @@
     label { display: block; margin-bottom: 0.35rem; font-weight: 500; }
     .w-full { width: 100%; }
   }
+  .mobile-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
   .text-muted { color: var(--text-color-secondary); font-size: 0.9rem; }
   .text-center { text-align: center; padding: 1rem; }
   .empty-state-cell {
