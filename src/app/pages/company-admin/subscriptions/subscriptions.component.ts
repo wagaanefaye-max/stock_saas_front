@@ -11,7 +11,6 @@ import { catchError, finalize, forkJoin, of } from 'rxjs';
 import {
   PAYMENT_PROVIDERS,
   SubscriptionDuration,
-  SubscriptionPlan,
   SubscriptionRecord,
   SubscriptionService,
   SubscriptionStatus
@@ -34,11 +33,9 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
   subscribing = false;
   showHistory = false;
   status: SubscriptionStatus | null = null;
-  plans: SubscriptionPlan[] = [];
   durations: SubscriptionDuration[] = [];
   history: SubscriptionRecord[] = [];
   paymentProviders = PAYMENT_PROVIDERS;
-  selectedPlan: SubscriptionPlan | null = null;
   selectedDuration: SubscriptionDuration | null = null;
   selectedPaymentProvider = PAYMENT_PROVIDERS.find((p) => p.enabled !== false) ?? PAYMENT_PROVIDERS[0];
   proofFile: File | null = null;
@@ -70,20 +67,14 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
   loadAll(): void {
     forkJoin({
       status: this.subscriptionService.getStatus(),
-      plans: this.subscriptionService.getPlans(),
       durations: this.subscriptionService.getDurations(),
       history: this.subscriptionService.getHistory().pipe(catchError(() => of([])))
     })
       .subscribe({
-        next: ({ status, plans, durations, history }) => {
+        next: ({ status, durations, history }) => {
           this.status = status;
-          this.plans = plans;
           this.durations = durations;
           this.history = history;
-          const preferred = plans.find((p) => p.code === 'Standard') ?? plans[0];
-          if (preferred && !this.selectedPlan) {
-            this.selectedPlan = preferred;
-          }
           if (durations.length && !this.selectedDuration) {
             this.selectedDuration = durations.find((d) => d.code === 'MONTH_3') ?? durations[0];
           }
@@ -205,12 +196,12 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
   }
 
   refreshQuote(): void {
-    if (!this.selectedPlan || !this.selectedDuration) {
+    if (!this.selectedDuration) {
       this.quoteTotal = null;
       return;
     }
     this.subscriptionService
-      .getQuote(this.selectedPlan.code, this.selectedDuration.code)
+      .getQuote(this.selectedDuration.code)
       .subscribe({
         next: (q) => (this.quoteTotal = q.totalPrice),
         error: () => {
@@ -220,13 +211,12 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
   }
 
   submitRequest(): void {
-    if (!this.selectedPlan || !this.selectedDuration || !this.proofFile) return;
+    if (!this.selectedDuration || !this.proofFile) return;
     if (!this.isPaymentProviderEnabled(this.selectedPaymentProvider)) return;
 
     this.subscribing = true;
     this.subscriptionService
       .submitRequest(
-        this.selectedPlan.code,
         this.selectedDuration.code,
         this.selectedPaymentProvider.code,
         this.proofFile

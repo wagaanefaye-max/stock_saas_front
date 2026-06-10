@@ -34,6 +34,10 @@ interface Company {
   country: string | null;
   planCode: string | null;
   planLabel: string | null;
+  subscriptionStatus: string | null;
+  subscriptionEndsAt: string | null;
+  trialEndsAt: string | null;
+  durationCode: string | null;
   statusCode: string | null;
   statusLabel: string | null;
   logoUrl: string | null;
@@ -90,12 +94,6 @@ export class CompaniesComponent implements OnInit, OnDestroy {
   globalFilter = '';
   private search$ = new Subject<void>();
   private destroy$ = new Subject<void>();
-  plans = [
-    { label: 'Gratuit', value: 'FREE' },
-    { label: 'Premium', value: 'PREMIUM' },
-    { label: 'Standard', value: 'STANDARD' },
-    { label: 'Basique', value: 'BASIQUE' }
-  ];
   statuses = [
     { label: 'Actif', value: 'Actif' },
     { label: 'Inactif', value: 'Inactif' },
@@ -225,32 +223,35 @@ export class CompaniesComponent implements OnInit, OnDestroy {
     return company?.statusLabel || statusCode;
   }
 
-  getPlanLabel(planCode: string | null): string {
-    if (!planCode) return '-';
-    const company = this.companies.find(c => c.planCode === planCode);
-    return company?.planLabel || planCode;
+  getSubscriptionLabel(company: Company): string {
+    switch (company.subscriptionStatus) {
+      case 'TRIAL':
+        return 'Essai gratuit';
+      case 'ACTIVE':
+        return 'Abonnement actif';
+      case 'EXPIRED':
+        return 'Expiré';
+      default:
+        return company.subscriptionStatus || '—';
+    }
   }
 
-  getPlanSeverity(planCode: string | null): 'success' | 'info' | 'warn' | 'secondary' | undefined {
-    if (!planCode) return undefined;
-    switch (planCode.toUpperCase()) {
-      case 'PREMIUM':
-        return 'success';
-      case 'STANDARD':
+  getSubscriptionSeverity(company: Company): 'success' | 'info' | 'warn' | 'secondary' | undefined {
+    switch (company.subscriptionStatus) {
+      case 'TRIAL':
         return 'info';
-      case 'BASIQUE':
+      case 'ACTIVE':
+        return 'success';
+      case 'EXPIRED':
         return 'warn';
-      case 'FREE':
-        return 'secondary';
       default:
-        return undefined;
+        return 'secondary';
     }
   }
 
   openNew() {
     this.company = {
       statusCode: 'Actif',
-      planCode: 'STANDARD',
       country: 'Sénégal',
       phone: '',
       address: '',
@@ -327,7 +328,6 @@ export class CompaniesComponent implements OnInit, OnDestroy {
              this.company.phone && 
              this.company.address && 
              this.company.region && 
-             this.company.planCode &&
              this.company.adminFirstName &&
              this.company.adminLastName &&
              this.company.adminEmail);
@@ -351,7 +351,6 @@ export class CompaniesComponent implements OnInit, OnDestroy {
         address: this.company.address || null,
         region: this.company.region || null,
         country: this.company.country || 'Sénégal',
-        planCode: this.company.planCode || 'FREE',
         adminFirstName: this.company.adminFirstName,
         adminLastName: this.company.adminLastName,
         adminEmail: this.company.adminEmail

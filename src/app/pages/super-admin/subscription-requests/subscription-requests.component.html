@@ -3,7 +3,6 @@
 
   <div class="page-header">
     <h1>Souscriptions</h1>
-    <p class="text-muted mobile-page__subtitle">Toutes les demandes : en attente, validées et refusées</p>
   </div>
 
   <div class="entity-filters">
@@ -60,10 +59,6 @@
           <p-tag [value]="row.requestStatusLabel" [severity]="statusSeverity(row.requestStatus)"></p-tag>
         </div>
         <div class="mobile-card__stats mobile-card__stats--2">
-          <div class="mobile-card__stat">
-            <span class="mobile-card__stat-label">Plan</span>
-            <span class="mobile-card__stat-value">{{ row.planLabel }}</span>
-          </div>
           <div class="mobile-card__stat">
             <span class="mobile-card__stat-label">Durée</span>
             <span class="mobile-card__stat-value">{{ row.durationLabel }}</span>
@@ -189,8 +184,8 @@
           <strong>{{ selectedRequest.companyName }}</strong>
         </div>
         <div class="reject-summary__row">
-          <span class="reject-summary__label">Offre</span>
-          <span>{{ selectedRequest.planLabel }} · {{ selectedRequest.durationLabel }}</span>
+          <span class="reject-summary__label">Durée</span>
+          <span>{{ selectedRequest.durationLabel }}</span>
         </div>
         <div class="reject-summary__row">
           <span class="reject-summary__label">Paiement</span>

@@ -70,8 +70,8 @@
         </div>
         <div class="mobile-card__stats mobile-card__stats--2">
           <div class="mobile-card__stat">
-            <span class="mobile-card__stat-label">Plan</span>
-            <p-tag [value]="getPlanLabel(company.planCode)" [severity]="getPlanSeverity(company.planCode)"></p-tag>
+            <span class="mobile-card__stat-label">Abonnement</span>
+            <p-tag [value]="getSubscriptionLabel(company)" [severity]="getSubscriptionSeverity(company)"></p-tag>
           </div>
           <div class="mobile-card__stat">
             <span class="mobile-card__stat-label">Utilisateurs</span>
@@ -256,27 +256,15 @@
 
       <p-divider></p-divider>
 
-      <!-- Plan et statut -->
-      <div class="form-section">
+      <!-- Statut -->
+      <div class="form-section" *ngIf="company.id">
         <h3 class="section-title">
-          <i class="pi pi-credit-card"></i>
-          Abonnement et statut
+          <i class="pi pi-building"></i>
+          Statut
         </h3>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Plan d'abonnement *</label>
-            <p-select
-              [(ngModel)]="company.planCode"
-              [options]="plans"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Sélectionner un plan"
-              class="w-full"
-              required>
-            </p-select>
-          </div>
-          <div class="form-group" *ngIf="company.id">
             <label>Statut *</label>
             <p-select
               [(ngModel)]="company.statusCode"
@@ -288,6 +276,13 @@
               required>
             </p-select>
           </div>
+        </div>
+      </div>
+
+      <div class="form-section" *ngIf="!company.id">
+        <div class="info-box" style="display: flex; gap: 0.75rem; align-items: flex-start; padding: 1rem; background: var(--surface-100); border-radius: 8px;">
+          <i class="pi pi-info-circle" style="margin-top: 2px;"></i>
+          <p style="margin: 0;">La nouvelle entreprise démarre avec un <strong>essai gratuit d'un mois</strong>. La souscription se fait ensuite par durée.</p>
         </div>
       </div>
     </div>
@@ -332,7 +327,9 @@
       </div>
       <div class="detail-section">
         <h4 class="detail-label">Abonnement et statistiques</h4>
-        <p><strong>Plan :</strong> <p-tag [value]="companyDetail.planLabel || getPlanLabel(companyDetail.planCode)" [severity]="getPlanSeverity(companyDetail.planCode)"></p-tag></p>
+        <p><strong>Abonnement :</strong> <p-tag [value]="getSubscriptionLabel(companyDetail)" [severity]="getSubscriptionSeverity(companyDetail)"></p-tag></p>
+        <p *ngIf="companyDetail.subscriptionStatus === 'TRIAL' && companyDetail.trialEndsAt"><strong>Fin de l'essai :</strong> {{ formatDate(companyDetail.trialEndsAt) }}</p>
+        <p *ngIf="companyDetail.subscriptionStatus === 'ACTIVE' && companyDetail.subscriptionEndsAt"><strong>Fin d'abonnement :</strong> {{ formatDate(companyDetail.subscriptionEndsAt) }}</p>
         <p><strong>Statut :</strong> <p-tag [value]="companyDetail.statusLabel || getStatusLabel(companyDetail.statusCode)" [severity]="getSeverity(companyDetail.statusCode)"></p-tag></p>
         <p><strong>Nombre d'utilisateurs :</strong> {{ companyDetail.userCount }}</p>
         <p><strong>Date de création :</strong> {{ formatDate(companyDetail.createdAt) }}</p>

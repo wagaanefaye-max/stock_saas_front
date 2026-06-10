@@ -136,10 +136,6 @@ export class SubscriptionService {
     return this.api.get<SubscriptionStatus>('/subscriptions/status');
   }
 
-  getPlans(): Observable<SubscriptionPlan[]> {
-    return this.api.get<SubscriptionPlan[]>('/subscriptions/plans');
-  }
-
   getDurations(): Observable<SubscriptionDuration[]> {
     return this.api.get<SubscriptionDuration[]>('/subscriptions/durations');
   }
@@ -160,18 +156,16 @@ export class SubscriptionService {
     return this.api.get<SubscriptionRequestsPage>('/subscriptions/requests', params);
   }
 
-  getQuote(planCode: string, durationCode: string): Observable<SubscriptionQuote> {
-    return this.api.get<SubscriptionQuote>('/subscriptions/quote', { planCode, durationCode });
+  getQuote(durationCode: string): Observable<SubscriptionQuote> {
+    return this.api.get<SubscriptionQuote>('/subscriptions/quote', { durationCode });
   }
 
   submitRequest(
-    planCode: string,
     durationCode: string,
     paymentProvider: string,
     proofFile: File
   ): Observable<SubscriptionRecord> {
     const form = new FormData();
-    form.append('planCode', planCode);
     form.append('durationCode', durationCode);
     form.append('paymentProvider', paymentProvider);
     form.append('proof', proofFile);

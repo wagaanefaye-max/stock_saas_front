@@ -252,57 +252,20 @@
             </div>
           </div>
 
-          <!-- Step 3: Plan et conditions -->
+          <!-- Step 3: Confirmation -->
           <div *ngIf="currentStep === 3" class="form-step">
             <h3 class="step-title">
-              <i class="pi pi-credit-card"></i>
-              Choisissez votre plan
+              <i class="pi pi-check-circle"></i>
+              Confirmation
             </h3>
-            
-            <div class="plans-selection">
-              <div 
-                *ngFor="let plan of plans" 
-                class="plan-option"
-                [class.selected]="selectedPlan === plan.value"
-                (click)="selectedPlan = plan.value">
-                <div class="plan-header">
-                  <h4>{{ plan.value }}</h4>
-                  <span class="plan-badge" *ngIf="plan.value === 'Free'" style="background: var(--secondary);">Essai gratuit</span>
-                  <span class="plan-badge" *ngIf="plan.value === 'Standard'">Populaire</span>
-                </div>
-                <p class="plan-description">
-                  <span *ngIf="plan.value === 'Free'">Testez toutes les fonctionnalités pendant 14 jours</span>
-                  <span *ngIf="plan.value === 'Basique'">Idéal pour les petites entreprises</span>
-                  <span *ngIf="plan.value === 'Standard'">Parfait pour les entreprises en croissance</span>
-                  <span *ngIf="plan.value === 'Premium'">Pour les grandes organisations</span>
+
+            <div class="form-group">
+              <div class="info-box">
+                <i class="pi pi-gift"></i>
+                <p>
+                  <strong>Essai gratuit d'un mois</strong> — toutes les fonctionnalités sont incluses.
+                  Ensuite, souscrivez par durée (1 mois, 3 mois, 6 mois ou 1 an) depuis votre espace abonnement.
                 </p>
-                <div class="plan-features">
-                  <div *ngIf="plan.value === 'Free'">
-                    <p><i class="pi pi-check"></i> Accès complet à toutes les fonctionnalités</p>
-                    <p><i class="pi pi-check"></i> Jusqu'à 10 utilisateurs</p>
-                    <p><i class="pi pi-check"></i> 3 entrepôts</p>
-                    <p><i class="pi pi-check"></i> Support email</p>
-                    <p><i class="pi pi-check"></i> <strong>14 jours gratuits</strong></p>
-                  </div>
-                  <div *ngIf="plan.value === 'Basique'">
-                    <p><i class="pi pi-check"></i> Jusqu'à 5 utilisateurs</p>
-                    <p><i class="pi pi-check"></i> 2 entrepôts</p>
-                    <p><i class="pi pi-check"></i> Support email</p>
-                  </div>
-                  <div *ngIf="plan.value === 'Standard'">
-                    <p><i class="pi pi-check"></i> Jusqu'à 20 utilisateurs</p>
-                    <p><i class="pi pi-check"></i> 5 entrepôts</p>
-                    <p><i class="pi pi-check"></i> Support prioritaire</p>
-                    <p><i class="pi pi-check"></i> Rapports avancés</p>
-                  </div>
-                  <div *ngIf="plan.value === 'Premium'">
-                    <p><i class="pi pi-check"></i> Utilisateurs illimités</p>
-                    <p><i class="pi pi-check"></i> Entrepôts illimités</p>
-                    <p><i class="pi pi-check"></i> Support 24/7</p>
-                    <p><i class="pi pi-check"></i> API personnalisée</p>
-                    <p><i class="pi pi-check"></i> Formation dédiée</p>
-                  </div>
-                </div>
               </div>
             </div>
 

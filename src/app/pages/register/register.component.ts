@@ -67,15 +67,6 @@ export class RegisterComponent {
   adminLastName = '';
   adminEmail = '';
   
-  // Plan d'abonnement
-  selectedPlan = 'Free';
-  plans = [
-    { label: 'Gratuit - 14 jours d\'essai', value: 'Free' },
-    { label: 'Basique - 19 650 FCFA/mois', value: 'Basique' },
-    { label: 'Standard - 52 650 FCFA/mois', value: 'Standard' },
-    { label: 'Premium - 99 000 FCFA/mois', value: 'Premium' }
-  ];
-  
   // Autres
   acceptTerms = false;
   currentStep = 1;
@@ -108,7 +99,7 @@ export class RegisterComponent {
       case 2:
         return !!(this.adminFirstName && this.adminLastName && this.adminEmail);
       case 3:
-        return this.acceptTerms && !!this.selectedPlan;
+        return this.acceptTerms;
       default:
         return false;
     }
@@ -130,7 +121,7 @@ export class RegisterComponent {
       companyPhone: this.companyPhone,
       companyAddress: this.companyAddress,
       companyRegion: this.companyRegion,
-      planCode: this.selectedPlan
+      planCode: 'Free'
     };
     
     this.authService.register(registerRequest).subscribe({
