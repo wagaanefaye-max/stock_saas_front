@@ -100,14 +100,10 @@
     }
   }
 
-  ::ng-deep .product-form-dialog {
-    .p-dialog-content {
-      padding-top: 0.75rem;
-    }
-
-    .p-dialog-footer .p-button {
-      min-width: 6.5rem;
-    }
+  .mobile-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   .text-muted {

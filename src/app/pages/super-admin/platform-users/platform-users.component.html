@@ -84,7 +84,9 @@
       [totalRecords]="totalRecords"
       [first]="page * size"
       (onPageChange)="onPageChange($event)"
-      [showCurrentPageReport]="false">
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} sur {totalRecords}"
+      [rowsPerPageOptions]="[10, 20, 50]">
     </p-paginator>
   </div>
 

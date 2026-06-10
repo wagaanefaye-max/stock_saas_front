@@ -98,12 +98,13 @@
             <span class="mobile-card__stat-value">{{ inv.closedAt ? (inv.closedAt | date:'short') : '–' }}</span>
           </div>
         </div>
-        <div class="mobile-card__actions">
+        <div class="card-actions-bar">
           <button
             pButton
-            label="Voir"
             icon="pi pi-eye"
-            class="p-button-outlined"
+            class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+            title="Voir le détail"
+            aria-label="Voir le détail"
             (click)="openDetail(inv)">
           </button>
         </div>
@@ -200,6 +201,7 @@
         <button pButton label="Enregistrer les quantités" icon="pi pi-save" class="p-button-outlined" (click)="saveLines()" [loading]="savingLines"></button>
         <button pButton label="Clôturer l'inventaire" icon="pi pi-lock" (click)="confirmCloseInventory()" [loading]="closing" severity="success"></button>
       </div>
+      <div class="dialog-table-wrap">
       <p-table [value]="selectedInventory.lines || []" [tableStyle]="{'min-width': '40rem'}" styleClass="p-datatable-sm p-datatable-gridlines">
         <ng-template pTemplate="header">
           <tr>
@@ -241,6 +243,7 @@
           </tr>
         </ng-template>
       </p-table>
+      </div>
       </div>
       <ng-template pTemplate="footer">
         <button pButton label="Fermer" icon="pi pi-times" class="p-button-text" (click)="displayDetailDialog = false"></button>

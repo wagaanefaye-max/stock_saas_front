@@ -12,7 +12,6 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ApiService } from '../../services/api.service';
@@ -48,7 +47,6 @@ interface InventoriesPageResponse {
     TextareaModule,
     ToastModule,
     SelectButtonModule,
-    ProgressSpinnerModule,
     PaginatorModule,
   ],
   providers: [MessageService],

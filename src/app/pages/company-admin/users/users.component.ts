@@ -1,22 +1,16 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
-import { ToolbarModule } from 'primeng/toolbar';
 import { SelectModule } from 'primeng/select';
-import { MultiSelectModule } from 'primeng/multiselect';
-import { MenuModule } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
 import { PaginatorModule } from 'primeng/paginator';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { Menu } from 'primeng/menu';
 import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
 import { UserRole } from '../../../models/user.model';
@@ -52,20 +46,15 @@ interface PageResponse {
   imports: [
     CommonModule,
     FormsModule,
-    TableModule,
     ButtonModule,
     InputTextModule,
     DialogModule,
     CardModule,
     TagModule,
-    ToolbarModule,
     SelectModule,
-    MultiSelectModule,
-    MenuModule,
     ToastModule,
     TooltipModule,
-    PaginatorModule,
-    ProgressSpinnerModule
+    PaginatorModule
   ],
   providers: [MessageService],
   templateUrl: './users.component.html',
@@ -76,13 +65,9 @@ export class CompanyUsersComponent implements OnInit {
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
 
   users: User[] = [];
-  selectedUsers: User[] = [];
   displayDialog = false;
   user: any = {};
   globalFilter = '';
-  menuItems: any[] = [];
-  selectedUser: User | null = null;
-  @ViewChild('actionMenu') actionMenu!: Menu;
 
   roles = [
     { label: 'Gestionnaire', value: UserRole.GESTIONNAIRE }
@@ -356,39 +341,6 @@ export class CompanyUsersComponent implements OnInit {
           });
       }
     });
-  }
-
-  showMenu(event: Event, user: User) {
-    this.selectedUser = user;
-    const isActive = user.status === 'Actif';
-    this.menuItems = [
-      {
-        label: 'Modifier',
-        icon: 'pi pi-pencil',
-        command: () => {
-          this.editUser(user);
-        }
-      },
-      {
-        label: isActive ? 'Désactiver' : 'Activer',
-        icon: isActive ? 'pi pi-ban' : 'pi pi-check-circle',
-        command: () => {
-          this.toggleUserStatus(user);
-        }
-      },
-      {
-        separator: true
-      },
-      {
-        label: 'Supprimer',
-        icon: 'pi pi-trash',
-        styleClass: 'text-red-500',
-        command: () => {
-          this.deleteUser(user);
-        }
-      }
-    ];
-    this.actionMenu.toggle(event);
   }
 
   /**

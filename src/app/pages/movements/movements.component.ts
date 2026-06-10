@@ -15,7 +15,6 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
@@ -38,8 +37,7 @@ import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_XL } from '../../utils/dialog-
     DatePickerModule,
     TextareaModule,
     ToastModule,
-    PaginatorModule,
-    ProgressSpinnerModule
+    PaginatorModule
   ],
   providers: [MessageService],
   templateUrl: './movements.component.html',

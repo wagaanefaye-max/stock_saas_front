@@ -26,14 +26,6 @@
           (ngModelChange)="onSearchInput()"
           placeholder="Produit, entrepôt…">
       </span>
-      <div class="mobile-toolbar__actions">
-        <button
-          pButton
-          icon="pi pi-file-export"
-          label="Exporter"
-          class="p-button-secondary hide-mobile">
-        </button>
-      </div>
     </div>
 
     <div class="mobile-toolbar__chips show-mobile-only">
@@ -70,14 +62,6 @@
             </p-selectButton>
           </div>
         </div>
-        <div class="list-toolbar__actions">
-          <button
-            pButton
-            icon="pi pi-file-export"
-            label="Exporter"
-            class="p-button-secondary list-toolbar__btn-icon">
-          </button>
-        </div>
       </div>
     </p-card>
   </div>
@@ -96,19 +80,26 @@
             <span class="mobile-card__subtitle">{{ movement.date }}</span>
             <span class="mobile-card__title">{{ movement.product }}</span>
           </div>
-        </div>
-        <div class="mobile-card__row">
           <p-tag [value]="movement.type" [severity]="getSeverity(movement.type)"></p-tag>
-          <span
-            class="mobile-card__stat-value"
-            [class.mobile-card__stat-value--danger]="movement.quantity < 0"
-            [class.mobile-card__stat-value--success]="movement.quantity > 0">
-            {{ movement.quantity > 0 ? '+' : '' }}{{ movement.quantity }}
-          </span>
         </div>
-        <div class="mobile-card__footer">
-          <span>{{ movement.warehouse }}</span>
-          <span>{{ movement.user }}</span>
+        <div class="mobile-card__stats mobile-card__stats--2">
+          <div class="mobile-card__stat">
+            <span class="mobile-card__stat-label">Quantité</span>
+            <span
+              class="mobile-card__stat-value"
+              [class.mobile-card__stat-value--danger]="movement.quantity < 0"
+              [class.mobile-card__stat-value--success]="movement.quantity > 0">
+              {{ movement.quantity > 0 ? '+' : '' }}{{ movement.quantity }}
+            </span>
+          </div>
+          <div class="mobile-card__stat">
+            <span class="mobile-card__stat-label">Entrepôt</span>
+            <span class="mobile-card__stat-value">{{ movement.warehouse || '—' }}</span>
+          </div>
+          <div class="mobile-card__stat mobile-card__stat--wide">
+            <span class="mobile-card__stat-label">Par</span>
+            <span class="mobile-card__stat-value">{{ movement.user || '—' }}</span>
+          </div>
         </div>
       </li>
     </ul>
@@ -120,8 +111,9 @@
       [totalRecords]="totalMovements"
       [first]="first"
       (onPageChange)="onMovementsLazyLoad($event)"
-      [showCurrentPageReport]="false"
-      [rowsPerPageOptions]="[10, 20]">
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} sur {totalRecords}"
+      [rowsPerPageOptions]="[10, 20, 50]">
     </p-paginator>
   </div>
 

@@ -16,10 +16,9 @@
     </button>
   </header>
 
-  <div class="products-page__content">
-    <div class="entity-filters">
-    <div class="products-toolbar">
-      <span class="p-input-icon-left products-toolbar__search">
+  <div class="entity-filters">
+    <div class="mobile-toolbar show-mobile-only">
+      <span class="p-input-icon-left mobile-toolbar__search">
         <i class="pi pi-search"></i>
         <input
           type="text"
@@ -28,23 +27,43 @@
           (ngModelChange)="onGlobalFilterChange()"
           placeholder="Rechercher…">
       </span>
-      <div class="products-toolbar__actions">
+      <div class="mobile-toolbar__actions">
         <button
           pButton
-          [label]="showFilterPanel ? 'Masquer' : 'Filtres'"
-          icon="pi pi-filter"
-          class="p-button-outlined p-button-sm products-toolbar__filter-btn"
-          [class.products-toolbar__filter-btn--active]="showFilterPanel"
+          [icon]="showFilterPanel ? 'pi pi-times' : 'pi pi-filter'"
+          class="p-button-outlined p-button-sm mobile-toolbar__filter-btn"
+          [class.mobile-toolbar__filter-btn--active]="showFilterPanel"
+          [attr.aria-label]="showFilterPanel ? 'Masquer les filtres' : 'Afficher les filtres'"
           (click)="showFilterPanel = !showFilterPanel">
-        </button>
-        <button
-          pButton
-          icon="pi pi-file-export"
-          label="Exporter"
-          class="p-button-secondary p-button-sm products-toolbar__export-btn hide-mobile">
         </button>
       </div>
     </div>
+
+    <p-card class="table-card hide-mobile">
+      <div class="list-toolbar products-toolbar">
+        <div class="list-toolbar__primary">
+          <span class="p-input-icon-left list-toolbar__search products-toolbar__search">
+            <i class="pi pi-search"></i>
+            <input
+              type="text"
+              pInputText
+              [(ngModel)]="globalFilter"
+              (ngModelChange)="onGlobalFilterChange()"
+              placeholder="Rechercher…">
+          </span>
+        </div>
+        <div class="list-toolbar__actions">
+          <button
+            pButton
+            [label]="showFilterPanel ? 'Masquer' : 'Filtres'"
+            icon="pi pi-filter"
+            class="p-button-outlined p-button-sm products-toolbar__filter-btn"
+            [class.products-toolbar__filter-btn--active]="showFilterPanel"
+            (click)="showFilterPanel = !showFilterPanel">
+          </button>
+        </div>
+      </div>
+    </p-card>
 
     <div *ngIf="showFilterPanel" class="filter-panel products-filter-panel">
       <div class="filter-row">
@@ -108,79 +127,87 @@
         <button pButton label="Réinitialiser" icon="pi pi-refresh" class="p-button-outlined p-button-sm" (click)="resetFilters()"></button>
       </div>
     </div>
-    </div>
+  </div>
 
-  <div class="products-mobile show-mobile-only">
-    <div *ngIf="products.length === 0" class="products-mobile__empty">
+  <div class="mobile-list show-mobile-only">
+    <div *ngIf="products.length === 0" class="mobile-list__empty">
       <i class="pi pi-box"></i>
       <p>Aucun produit</p>
       <button
         *ngIf="authService.isAdminEntreprise()"
         pButton
-        label="Ajouter"
+        label="Nouveau produit"
         icon="pi pi-plus"
         class="p-button-sm"
         (click)="openNew()">
       </button>
     </div>
 
-    <ul *ngIf="products.length > 0" class="products-mobile__list">
-      <li *ngFor="let product of products; trackBy: trackByProductId" class="product-card">
-        <div class="product-card__top">
-          <div class="product-card__identity">
-            <span class="product-card__name">{{ product.name }}</span>
-            <span class="product-card__meta">
+    <ul *ngIf="products.length > 0" class="mobile-list__items">
+      <li *ngFor="let product of products; trackBy: trackByProductId" class="mobile-card">
+        <div class="mobile-card__top">
+          <div class="mobile-card__main">
+            <span class="mobile-card__title">{{ product.name }}</span>
+            <span class="mobile-card__subtitle">
               <code *ngIf="product.reference">{{ product.reference }}</code>
               <span *ngIf="product.sku">{{ product.reference ? ' · ' : '' }}{{ product.sku }}</span>
             </span>
           </div>
-          <button
-            *ngIf="authService.isAdminEntreprise()"
-            pButton
-            icon="pi pi-ellipsis-v"
-            class="p-button-text p-button-rounded p-button-sm product-card__menu"
-            (click)="showMenu($event, product)"
-            aria-label="Actions">
-          </button>
+          <p-tag
+            [value]="product.statusLabel || product.status || 'N/A'"
+            [severity]="getSeverity(product.statusLabel || product.status)">
+          </p-tag>
         </div>
-        <div class="product-card__stats">
-          <div class="product-card__stat">
-            <span class="product-card__stat-label">Stock</span>
-            <span class="product-card__stat-value" [class.product-card__stat-value--low]="!product.stock">
+        <div class="mobile-card__stats mobile-card__stats--2">
+          <div class="mobile-card__stat">
+            <span class="mobile-card__stat-label">Stock</span>
+            <span
+              class="mobile-card__stat-value"
+              [class.mobile-card__stat-value--danger]="!product.stock">
               {{ product.stock || 0 }}
             </span>
           </div>
-          <div class="product-card__stat">
-            <span class="product-card__stat-label">Prix</span>
-            <span class="product-card__stat-value">{{ product.price | number:'1.0-0' }} F</span>
+          <div class="mobile-card__stat">
+            <span class="mobile-card__stat-label">Prix</span>
+            <span class="mobile-card__stat-value">{{ product.price | number:'1.0-0' }} F</span>
           </div>
-          <div class="product-card__stat product-card__stat--tag">
-            <p-tag
-              [value]="product.statusLabel || product.status || 'N/A'"
-              [severity]="getSeverity(product.statusLabel || product.status)">
-            </p-tag>
+          <div class="mobile-card__stat mobile-card__stat--wide">
+            <span class="mobile-card__stat-label">Catégorie</span>
+            <span class="mobile-card__stat-value">{{ product.category || '—' }}</span>
           </div>
         </div>
-        <div class="product-card__footer">
-          <span *ngIf="product.category">{{ product.category }}</span>
-          <span *ngIf="product.createdAt">{{ product.createdAt | date:'dd/MM/yy' }}</span>
+        <div class="card-actions-bar" *ngIf="authService.isAdminEntreprise()">
+          <button
+            pButton
+            icon="pi pi-pencil"
+            class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+            title="Modifier"
+            aria-label="Modifier"
+            (click)="editProduct(product)">
+          </button>
+          <button
+            pButton
+            icon="pi pi-trash"
+            class="p-button-sm p-button-rounded p-button-icon-only card-actions-bar__danger"
+            title="Supprimer"
+            aria-label="Supprimer"
+            (click)="deleteProduct(product)">
+          </button>
         </div>
       </li>
     </ul>
 
     <p-paginator
       *ngIf="totalProducts > 0"
-      class="products-mobile__paginator entity-paginator"
+      class="mobile-list__paginator entity-paginator"
       [rows]="rows"
       [totalRecords]="totalProducts"
       [first]="first"
       (onPageChange)="onProductsLazyLoad($event)"
-      [showCurrentPageReport]="false"
-      [rowsPerPageOptions]="[10, 20]">
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} sur {totalRecords}"
+      [rowsPerPageOptions]="[10, 20, 50]">
     </p-paginator>
-  </div>
-
-  <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
   </div>
 
   <button

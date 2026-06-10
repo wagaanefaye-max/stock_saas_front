@@ -15,6 +15,12 @@
     }
   }
 
+  .mobile-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
   .form-group {
     margin-bottom: 1.5rem;
 

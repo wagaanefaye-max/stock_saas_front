@@ -1,8 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
@@ -10,14 +9,11 @@ import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { MenuModule } from 'primeng/menu';
-import { Menu } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
 import { DatePickerModule } from 'primeng/datepicker';
 import { PaginatorModule } from 'primeng/paginator';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
 import {
@@ -31,7 +27,6 @@ import {
   imports: [
     CommonModule,
     FormsModule,
-    TableModule,
     ButtonModule,
     InputTextModule,
     DialogModule,
@@ -39,12 +34,10 @@ import {
     TagModule,
     SelectModule,
     InputNumberModule,
-    MenuModule,
     ToastModule,
     TooltipModule,
     DatePickerModule,
-    PaginatorModule,
-    ProgressSpinnerModule
+    PaginatorModule
   ],
   providers: [MessageService],
   templateUrl: './products.component.html',
@@ -471,38 +464,5 @@ export class ProductsComponent implements OnInit {
     return purchase > 0 && selling >= 0 && selling < purchase;
   }
 
-  // Menu contextuel
-  menuItems: any[] = [];
-  selectedProduct: any = null;
-  @ViewChild('actionMenu') actionMenu!: Menu;
-
-  showMenu(event: Event, product: any) {
-    if (!this.authService.isAdminEntreprise()) {
-      return; // Pas de menu pour les gestionnaires
-    }
-    
-    this.selectedProduct = product;
-    this.menuItems = [
-      {
-        label: 'Modifier',
-        icon: 'pi pi-pencil',
-        command: () => {
-          this.editProduct(product);
-        }
-      },
-      {
-        separator: true
-      },
-      {
-        label: 'Supprimer',
-        icon: 'pi pi-trash',
-        styleClass: 'text-red-500',
-        command: () => {
-          this.deleteProduct(product);
-        }
-      }
-    ];
-    this.actionMenu.toggle(event);
-  }
 }
 

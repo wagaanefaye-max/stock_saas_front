@@ -89,27 +89,30 @@
             par {{ row.validatedByEmail }}
           </small>
         </div>
-        <div class="mobile-card__actions">
+        <div class="card-actions-bar">
           <button
             pButton
-            label="Justificatif"
             icon="pi pi-image"
-            class="p-button-outlined p-button-sm"
+            class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+            title="Justificatif"
+            aria-label="Justificatif"
             [disabled]="!row.proofUrl"
             (click)="viewProof(row)"></button>
           <ng-container *ngIf="isPending(row)">
             <button
               pButton
-              label="Valider"
               icon="pi pi-check"
-              class="p-button-success p-button-sm"
+              class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+              title="Valider"
+              aria-label="Valider"
               [loading]="processingId === row.id"
               (click)="approve(row)"></button>
             <button
               pButton
-              label="Refuser"
               icon="pi pi-times"
-              class="p-button-danger p-button-sm subscription-reject-btn"
+              class="p-button-sm p-button-rounded p-button-icon-only card-actions-bar__danger"
+              title="Refuser"
+              aria-label="Refuser"
               (click)="openReject(row)"></button>
           </ng-container>
         </div>

@@ -16,7 +16,7 @@
   </div>
 
   <div class="entity-filters">
-    <div class="mobile-toolbar">
+    <div class="mobile-toolbar show-mobile-only">
       <span class="mobile-toolbar__search p-input-icon-left">
         <i class="pi pi-search"></i>
         <input
@@ -26,15 +26,22 @@
           (input)="onGlobalFilter()"
           placeholder="Nom ou email…">
       </span>
-      <div class="mobile-toolbar__actions">
-        <button
-          pButton
-          icon="pi pi-file-export"
-          label="Exporter"
-          class="p-button-secondary hide-mobile">
-        </button>
-      </div>
     </div>
+    <p-card class="table-card hide-mobile">
+      <div class="list-toolbar">
+        <div class="list-toolbar__primary">
+          <span class="p-input-icon-left list-toolbar__search">
+            <i class="pi pi-search"></i>
+            <input
+              type="text"
+              pInputText
+              [(ngModel)]="globalFilter"
+              (input)="onGlobalFilter()"
+              placeholder="Nom ou email…">
+          </span>
+        </div>
+      </div>
+    </p-card>
   </div>
 
   <div class="mobile-list show-mobile-only">
@@ -50,21 +57,43 @@
             <span class="mobile-card__title">{{ user.name }}</span>
             <span class="mobile-card__subtitle">{{ user.email }}</span>
           </div>
-          <button
-            pButton
-            icon="pi pi-ellipsis-v"
-            class="p-button-text p-button-rounded mobile-card__menu"
-            (click)="showMenu($event, user)"
-            aria-label="Actions">
-          </button>
-        </div>
-        <div class="mobile-card__row">
-          <p-tag [value]="getRoleLabel(user.roleCode)" [severity]="getRoleSeverity(user.roleCode)"></p-tag>
           <p-tag [value]="user.status" [severity]="getSeverity(user.status)"></p-tag>
         </div>
-        <div class="mobile-card__footer">
-          <span>Dernière connexion</span>
-          <span>{{ formatDate(user.lastLogin) }}</span>
+        <div class="mobile-card__stats mobile-card__stats--2">
+          <div class="mobile-card__stat">
+            <span class="mobile-card__stat-label">Rôle</span>
+            <span class="mobile-card__stat-value">{{ getRoleLabel(user.roleCode) }}</span>
+          </div>
+          <div class="mobile-card__stat mobile-card__stat--wide">
+            <span class="mobile-card__stat-label">Dernière connexion</span>
+            <span class="mobile-card__stat-value">{{ formatDate(user.lastLogin) }}</span>
+          </div>
+        </div>
+        <div class="card-actions-bar">
+          <button
+            pButton
+            icon="pi pi-pencil"
+            class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+            title="Modifier"
+            aria-label="Modifier"
+            (click)="editUser(user)">
+          </button>
+          <button
+            pButton
+            [icon]="user.status === 'Actif' ? 'pi pi-ban' : 'pi pi-check-circle'"
+            class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+            [title]="user.status === 'Actif' ? 'Désactiver' : 'Activer'"
+            [attr.aria-label]="user.status === 'Actif' ? 'Désactiver' : 'Activer'"
+            (click)="toggleUserStatus(user)">
+          </button>
+          <button
+            pButton
+            icon="pi pi-trash"
+            class="p-button-sm p-button-rounded p-button-icon-only card-actions-bar__danger"
+            title="Supprimer"
+            aria-label="Supprimer"
+            (click)="deleteUser(user)">
+          </button>
         </div>
       </li>
     </ul>
@@ -76,12 +105,11 @@
       [totalRecords]="totalRecords"
       [first]="page * size"
       (onPageChange)="onPageChange($event)"
-      [showCurrentPageReport]="false"
-      [rowsPerPageOptions]="[10, 20]">
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} – {last} sur {totalRecords}"
+      [rowsPerPageOptions]="[10, 20, 50]">
     </p-paginator>
   </div>
-
-  <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
 
   <button
     type="button"
