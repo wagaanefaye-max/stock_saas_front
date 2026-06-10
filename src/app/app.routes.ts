@@ -179,11 +179,10 @@ export const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'gestionnaire/dashboard',
-    pathMatch: 'full'
+    loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent)
   },
   {
     path: '**',
-    redirectTo: 'gestionnaire/dashboard'
+    redirectTo: ''
   }
 ];

@@ -1,0 +1,210 @@
+<div class="landing">
+  <!-- Fond animé -->
+  <div class="landing__bg" aria-hidden="true">
+    <span class="landing__orb landing__orb--1"></span>
+    <span class="landing__orb landing__orb--2"></span>
+    <span class="landing__orb landing__orb--3"></span>
+    <span class="landing__grid"></span>
+  </div>
+
+  <!-- En-tête -->
+  <header class="landing-header">
+    <a routerLink="/" class="landing-header__brand">
+      <img src="/assets/logo.jpg" alt="Stock SaaS" class="landing-header__logo" />
+      <span>Stock SaaS</span>
+    </a>
+    <nav class="landing-header__nav">
+      <button type="button" class="landing-header__link" (click)="scrollTo('features')">Fonctionnalités</button>
+      <button type="button" class="landing-header__link" (click)="scrollTo('pricing')">Tarifs</button>
+      <a routerLink="/login" class="landing-header__link landing-header__link--ghost">Connexion</a>
+      <a routerLink="/register" class="landing-header__cta">Essai gratuit</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="landing-hero">
+    <div class="landing-hero__content landing-animate landing-animate--1">
+      <span class="landing-hero__badge">
+        <i class="pi pi-sparkles"></i>
+        Plateforme SaaS · PME &amp; commerces
+      </span>
+      <h1 class="landing-hero__title">
+        Gérez votre stock,<br />
+        <span class="landing-hero__highlight">factures</span> et entrepôts<br />
+        en toute simplicité
+      </h1>
+      <p class="landing-hero__lead">
+        Stock SaaS centralise inventaire, mouvements, partenaires et facturation
+        pour les entreprises au Sénégal et en Afrique de l'Ouest.
+      </p>
+      <div class="landing-hero__actions">
+        <a routerLink="/register" class="landing-btn landing-btn--primary">
+          Démarrer gratuitement
+          <i class="pi pi-arrow-right"></i>
+        </a>
+        <a routerLink="/login" class="landing-btn landing-btn--outline">Se connecter</a>
+      </div>
+      <ul class="landing-hero__trust">
+        <li><i class="pi pi-check-circle"></i> Essai 1 mois offert</li>
+        <li><i class="pi pi-check-circle"></i> Sans engagement</li>
+        <li><i class="pi pi-check-circle"></i> Paiement Wave &amp; Orange Money</li>
+      </ul>
+    </div>
+
+    <div class="landing-hero__visual landing-animate landing-animate--2" aria-hidden="true">
+      <div class="landing-mock">
+        <div class="landing-mock__bar">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="landing-mock__header">
+          <div class="landing-mock__title">Tableau de bord</div>
+          <span class="landing-mock__pill landing-mock__pill--green">Actif</span>
+        </div>
+        <div class="landing-mock__stats">
+          <div class="landing-mock__stat">
+            <span class="landing-mock__stat-label">Produits</span>
+            <strong>248</strong>
+            <span class="landing-mock__trend landing-mock__trend--up">+12%</span>
+          </div>
+          <div class="landing-mock__stat">
+            <span class="landing-mock__stat-label">Entrepôts</span>
+            <strong>5</strong>
+          </div>
+          <div class="landing-mock__stat">
+            <span class="landing-mock__stat-label">Factures</span>
+            <strong>36</strong>
+            <span class="landing-mock__trend landing-mock__trend--up">+8%</span>
+          </div>
+        </div>
+        <div class="landing-mock__chart">
+          <div class="landing-mock__bar-col" style="--h: 45%"></div>
+          <div class="landing-mock__bar-col" style="--h: 72%"></div>
+          <div class="landing-mock__bar-col" style="--h: 58%"></div>
+          <div class="landing-mock__bar-col" style="--h: 90%"></div>
+          <div class="landing-mock__bar-col" style="--h: 65%"></div>
+          <div class="landing-mock__bar-col" style="--h: 80%"></div>
+        </div>
+        <div class="landing-mock__row">
+          <i class="pi pi-box"></i>
+          <span>Mouvement entrée — Entrepôt Dakar</span>
+          <span class="landing-mock__qty">+24</span>
+        </div>
+        <div class="landing-mock__row landing-mock__row--warn">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span>Stock bas — Riz 25 kg</span>
+          <span class="landing-mock__qty">3</span>
+        </div>
+      </div>
+      <div class="landing-mock-float landing-mock-float--1">
+        <i class="pi pi-file"></i>
+        <span>Facture #F-042</span>
+      </div>
+      <div class="landing-mock-float landing-mock-float--2">
+        <i class="pi pi-check"></i>
+        <span>Inventaire clôturé</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fonctionnalités -->
+  <section id="features" class="landing-section">
+    <div class="landing-section__head reveal" #reveal>
+      <span class="landing-section__eyebrow">Fonctionnalités</span>
+      <h2>Tout ce qu'il faut pour piloter votre activité</h2>
+      <p>Une suite complète pensée pour les équipes terrain et les dirigeants.</p>
+    </div>
+    <div class="landing-features">
+      <article
+        *ngFor="let f of features; let i = index"
+        class="landing-feature reveal"
+        #reveal
+        [style.--delay]="i * 0.08 + 's'">
+        <div class="landing-feature__icon">
+          <i [class]="f.icon"></i>
+        </div>
+        <h3>{{ f.title }}</h3>
+        <p>{{ f.description }}</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Étapes -->
+  <section class="landing-section landing-section--alt">
+    <div class="landing-section__head reveal" #reveal>
+      <span class="landing-section__eyebrow">Démarrage</span>
+      <h2>Opérationnel en quelques minutes</h2>
+    </div>
+    <ol class="landing-steps">
+      <li *ngFor="let s of steps; let i = index" class="landing-step reveal" #reveal [style.--delay]="i * 0.1 + 's'">
+        <span class="landing-step__num">{{ s.num }}</span>
+        <div>
+          <h3>{{ s.title }}</h3>
+          <p>{{ s.text }}</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Tarifs -->
+  <section id="pricing" class="landing-section">
+    <div class="landing-section__head reveal" #reveal>
+      <span class="landing-section__eyebrow">Tarifs</span>
+      <h2>Simple et transparent</h2>
+      <p>Un tarif unique par durée — pas de paliers Standard / Premium.</p>
+    </div>
+    <div class="landing-pricing reveal" #reveal>
+      <div class="landing-pricing__card landing-pricing__card--trial">
+        <span class="landing-pricing__tag">Recommandé</span>
+        <h3>Essai gratuit</h3>
+        <p class="landing-pricing__price">0 <small>FCFA</small></p>
+        <p class="landing-pricing__period">pendant 1 mois</p>
+        <ul>
+          <li><i class="pi pi-check"></i> Toutes les fonctionnalités</li>
+          <li><i class="pi pi-check"></i> Utilisateurs &amp; entrepôts inclus</li>
+          <li><i class="pi pi-check"></i> Sans carte bancaire</li>
+        </ul>
+        <a routerLink="/register" class="landing-btn landing-btn--primary landing-btn--block">Créer mon compte</a>
+      </div>
+      <div class="landing-pricing__card">
+        <h3>Abonnement</h3>
+        <p class="landing-pricing__price">5 000 <small>FCFA / mois</small></p>
+        <p class="landing-pricing__period">remises sur 3, 6 ou 12 mois</p>
+        <ul>
+          <li><i class="pi pi-check"></i> 1 mois, 3 mois (−5 %)</li>
+          <li><i class="pi pi-check"></i> 6 mois (−10 %)</li>
+          <li><i class="pi pi-check"></i> 1 an (−15 %)</li>
+          <li><i class="pi pi-check"></i> Paiement Wave ou Orange Money</li>
+        </ul>
+        <a routerLink="/register" class="landing-btn landing-btn--outline landing-btn--block">Commencer l'essai</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA final -->
+  <section class="landing-cta reveal" #reveal>
+    <div class="landing-cta__inner">
+      <h2>Prêt à simplifier votre gestion de stock ?</h2>
+      <p>Rejoignez les entreprises qui centralisent leurs opérations sur Stock SaaS.</p>
+      <div class="landing-cta__actions">
+        <a routerLink="/register" class="landing-btn landing-btn--white">
+          Essai gratuit 1 mois
+          <i class="pi pi-arrow-right"></i>
+        </a>
+        <a routerLink="/login" class="landing-btn landing-btn--ghost-white">J'ai déjà un compte</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pied de page -->
+  <footer class="landing-footer">
+    <div class="landing-footer__brand">
+      <img src="/assets/logo.jpg" alt="" class="landing-footer__logo" />
+      <span>Stock SaaS</span>
+    </div>
+    <p class="landing-footer__copy">© {{ currentYear }} Stock SaaS — Gestion de stock &amp; facturation en ligne.</p>
+    <div class="landing-footer__links">
+      <a routerLink="/login">Connexion</a>
+      <a routerLink="/register">Inscription</a>
+    </div>
+  </footer>
+</div>
