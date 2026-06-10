@@ -93,15 +93,9 @@
               <span class="mobile-card__title">{{ inv.invoiceNumber }}</span>
               <span class="mobile-card__subtitle">{{ inv.clientName || '—' }}</span>
             </div>
-            <button
-              pButton
-              icon="pi pi-ellipsis-v"
-              class="p-button-text p-button-rounded mobile-card__menu"
-              (click)="showMenu($event, inv)"
-              aria-label="Actions">
-            </button>
+            <p-tag [value]="inv.statusLabel" [severity]="getStatusSeverity(inv.status)"></p-tag>
           </div>
-          <div class="mobile-card__stats">
+          <div class="mobile-card__stats mobile-card__stats--2">
             <div class="mobile-card__stat">
               <span class="mobile-card__stat-label">Date</span>
               <span class="mobile-card__stat-value">{{ formatDate(inv.invoiceDate) }}</span>
@@ -110,25 +104,84 @@
               <span class="mobile-card__stat-label">Échéance</span>
               <span class="mobile-card__stat-value">{{ formatDate(inv.dueDate ?? null) }}</span>
             </div>
-            <div class="mobile-card__stat">
+            <div class="mobile-card__stat mobile-card__stat--wide">
               <span class="mobile-card__stat-label">Total</span>
               <span class="mobile-card__stat-value">{{ formatMoney(inv.total) }}</span>
             </div>
           </div>
-          <div class="mobile-card__footer">
-            <p-tag [value]="inv.statusLabel" [severity]="getStatusSeverity(inv.status)"></p-tag>
+          <div class="card-actions-bar">
+            <button
+              pButton
+              icon="pi pi-eye"
+              class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+              title="Voir"
+              aria-label="Voir"
+              (click)="viewInvoice(inv)">
+            </button>
+            <button
+              pButton
+              icon="pi pi-file-pdf"
+              class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+              title="Télécharger PDF"
+              aria-label="Télécharger PDF"
+              (click)="downloadPdf(inv)">
+            </button>
+            <button
+              pButton
+              icon="pi pi-print"
+              class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+              title="Imprimer"
+              aria-label="Imprimer"
+              (click)="printInvoice(inv)">
+            </button>
+            <button
+              pButton
+              icon="pi pi-whatsapp"
+              class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+              title="Envoyer sur WhatsApp"
+              aria-label="Envoyer sur WhatsApp"
+              (click)="sendInvoiceToWhatsApp(inv)">
+            </button>
+            <button
+              *ngIf="inv.status === 'DRAFT'"
+              pButton
+              icon="pi pi-pencil"
+              class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+              title="Modifier"
+              aria-label="Modifier"
+              (click)="openEditDialog(inv)">
+            </button>
+            <button
+              *ngIf="inv.status !== 'PAID'"
+              pButton
+              icon="pi pi-check-circle"
+              class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+              title="Marquer comme payée"
+              aria-label="Marquer comme payée"
+              (click)="markAsPaid(inv)">
+            </button>
+            <button
+              pButton
+              icon="pi pi-trash"
+              class="p-button-sm p-button-rounded p-button-icon-only card-actions-bar__danger"
+              title="Supprimer"
+              aria-label="Supprimer"
+              (click)="deleteInvoice(inv)">
+            </button>
           </div>
         </li>
       </ul>
 
       <p-paginator
-        *ngIf="filteredInvoices.length > mobileRows"
+        *ngIf="filteredInvoices.length > 0"
         class="mobile-list__paginator entity-paginator"
         [rows]="mobileRows"
         [totalRecords]="filteredInvoices.length"
         [first]="mobileFirst"
         (onPageChange)="onMobilePageChange($event)"
-        [showCurrentPageReport]="false">
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="{first} – {last} sur {totalRecords}"
+        [rowsPerPageOptions]="[10, 20, 50]">
       </p-paginator>
   </div>
 
@@ -139,8 +192,6 @@
     aria-label="Nouvelle facture">
     <i class="pi pi-plus"></i>
   </button>
-
-  <p-menu #actionMenu [model]="menuItems" [popup]="true"></p-menu>
 
   <p-dialog
     styleClass="app-mobile-dialog"

@@ -1,8 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
@@ -10,14 +9,10 @@ import { CardModule } from 'primeng/card';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { MenuItem } from 'primeng/api';
-import { MenuModule } from 'primeng/menu';
-import { Menu } from 'primeng/menu';
 import { TagModule } from 'primeng/tag';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PaginatorModule } from 'primeng/paginator';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
@@ -50,7 +45,6 @@ interface ProductForInvoice {
   imports: [
     CommonModule,
     FormsModule,
-    TableModule,
     ButtonModule,
     InputTextModule,
     DialogModule,
@@ -59,11 +53,9 @@ interface ProductForInvoice {
     ToastModule,
     TagModule,
     SelectButtonModule,
-    MenuModule,
     CheckboxModule,
     PhoneFormatPipe,
-    PaginatorModule,
-    ProgressSpinnerModule
+    PaginatorModule
   ],
   providers: [MessageService],
   templateUrl: './invoices.component.html',
@@ -71,10 +63,9 @@ interface ProductForInvoice {
 })
 export class InvoicesComponent implements OnInit {
   invoices: Invoice[] = [];
-  invoicesLoading = false;
   readonly dialogStyle = APP_DIALOG_STYLE;
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
-  readonly mobileRows = 10;
+  mobileRows = 10;
   mobileFirst = 0;
   displayCreateDialog = false;
   displayEditDialog = false;
@@ -90,8 +81,6 @@ export class InvoicesComponent implements OnInit {
   /** Recherche serveur : nom, prénom ou email */
   clientSearchTerm = '';
   readonly clientsPageSize = 10;
-  menuItems: MenuItem[] = [];
-  @ViewChild('actionMenu') actionMenu!: Menu;
   /** Produits avec stock > 0, pour le select facture (nom - ref - quantité) */
   productsForInvoice: ProductForInvoice[] = [];
   /** Filtres liste factures (envoyés au backend) */
@@ -155,15 +144,12 @@ export class InvoicesComponent implements OnInit {
       clientName: this.clientNameFilter?.trim() || null
     };
 
-    this.invoicesLoading = true;
     this.apiService.get<Invoice[]>('/invoices', params).subscribe({
       next: (data) => {
         this.invoices = data || [];
         this.mobileFirst = 0;
-        this.invoicesLoading = false;
       },
       error: () => {
-        this.invoicesLoading = false;
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les factures', life: 5000 });
       }
     });
@@ -178,7 +164,10 @@ export class InvoicesComponent implements OnInit {
     return this.filteredInvoices.slice(this.mobileFirst, this.mobileFirst + this.mobileRows);
   }
 
-  onMobilePageChange(event: { first?: number }): void {
+  onMobilePageChange(event: { first?: number; rows?: number }): void {
+    if (event.rows != null) {
+      this.mobileRows = event.rows;
+    }
     this.mobileFirst = event.first ?? 0;
   }
 
@@ -521,24 +510,6 @@ export class InvoicesComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de générer le PDF', life: 5000 });
       }
     });
-  }
-
-  showMenu(event: Event, inv: any) {
-    const items: MenuItem[] = [
-      { label: 'Voir', icon: 'pi pi-eye', command: () => this.viewInvoice(inv) },
-      { label: 'Télécharger PDF', icon: 'pi pi-file-pdf', command: () => this.downloadPdf(inv) },
-      { label: 'Imprimer', icon: 'pi pi-print', command: () => this.printInvoice(inv) },
-      { label: 'Envoyer sur WhatsApp', icon: 'pi pi-whatsapp', command: () => this.sendInvoiceToWhatsApp(inv) }
-    ];
-    if (inv.status === 'DRAFT') {
-      items.push({ label: 'Modifier', icon: 'pi pi-pencil', command: () => this.openEditDialog(inv) });
-    }
-    if (inv.status !== 'PAID') {
-      items.push({ label: 'Marquer comme payée', icon: 'pi pi-check-circle', command: () => this.markAsPaid(inv) });
-    }
-    items.push({ separator: true }, { label: 'Supprimer', icon: 'pi pi-trash', styleClass: 'text-red-500', command: () => this.deleteInvoice(inv) });
-    this.menuItems = items;
-    this.actionMenu.toggle(event);
   }
 
   sendInvoiceToWhatsApp(inv: any) {

@@ -1,4 +1,10 @@
 .invoices-page {
+  .mobile-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
   @media (max-width: 768px) {
     .mobile-toolbar {
       flex-direction: column;
