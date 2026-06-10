@@ -10,6 +10,7 @@ import { Component } from '@angular/core';
         <div class="global-loading__spinner" aria-hidden="true">
           <span class="global-loading__ring global-loading__ring--outer"></span>
           <span class="global-loading__ring global-loading__ring--inner"></span>
+          <img src="/assets/logo.jpg" alt="" class="global-loading__logo" />
         </div>
       </div>
     </div>
