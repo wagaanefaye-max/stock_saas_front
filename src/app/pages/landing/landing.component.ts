@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChildren, 
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-landing',
@@ -22,6 +23,87 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   readonly appName = 'Stock SaaS';
   readonly currentYear = new Date().getFullYear();
+  readonly contact = environment.landingContact;
+  readonly whatsappLink = `https://wa.me/${environment.landingContact.whatsapp}?text=${encodeURIComponent('Bonjour, je souhaite en savoir plus sur Stock SaaS.')}`;
+
+  readonly sectors = [
+    {
+      icon: 'pi pi-shopping-bag',
+      title: 'Boutiques & supérettes',
+      description: 'Riz, huile, sucre, boissons — suivez les ventes et les ruptures au quotidien.',
+      example: 'Ex. : boutique à Parcelles, HLM ou Médina'
+    },
+    {
+      icon: 'pi pi-wrench',
+      title: 'Quincailleries',
+      description: 'Ciment, fer, peinture, outillage — stock multi-dépôts par magasin ou entrepôt.',
+      example: 'Ex. : dépôt Colobane, succursale Pikine'
+    },
+    {
+      icon: 'pi pi-heart',
+      title: 'Pharmacies & parapharmacies',
+      description: 'Alertes stock bas, traçabilité des entrées et facturation client intégrée.',
+      example: 'Ex. : officine Dakar ou Thiès'
+    },
+    {
+      icon: 'pi pi-truck',
+      title: 'Grossistes & importateurs',
+      description: 'Entrepôts à Dakar, Thiès ou Saint-Louis — mouvements et inventaires centralisés.',
+      example: 'Ex. : dépôt portuaire + point de vente'
+    },
+    {
+      icon: 'pi pi-star',
+      title: 'Restaurants & snacks',
+      description: 'Matières premières, sorties journalières et contrôle des coûts en FCFA.',
+      example: 'Ex. : snack, fast-food, traiteur'
+    },
+    {
+      icon: 'pi pi-map',
+      title: 'Multi-régions',
+      description: 'Pilotez plusieurs sites dans les 14 régions du Sénégal depuis un seul compte.',
+      example: 'Dakar · Thiès · Ziguinchor · Saint-Louis…'
+    }
+  ];
+
+  readonly paymentMethods = [
+    {
+      name: 'Wave',
+      description: 'Paiement mobile instantané, très utilisé au Sénégal.',
+      accent: 'wave'
+    },
+    {
+      name: 'Orange Money',
+      description: 'Réglez votre abonnement depuis votre téléphone.',
+      accent: 'om'
+    }
+  ];
+
+  readonly faqItems = [
+    {
+      question: 'Est-ce que je peux payer avec Wave ou Orange Money ?',
+      answer: 'Oui. L\'abonnement se règle par Wave ou Orange Money après votre essai gratuit d\'un mois. Pas de carte bancaire obligatoire.'
+    },
+    {
+      question: 'Puis-je gérer plusieurs magasins ou entrepôts ?',
+      answer: 'Oui. Vous pouvez créer plusieurs entrepôts (Dakar, Thiès, etc.) et suivre le stock de chaque site séparément.'
+    },
+    {
+      question: 'Mon gestionnaire peut-il voir seulement son entrepôt ?',
+      answer: 'Oui. Le rôle gestionnaire limite l\'accès aux entrepôts qui lui sont assignés — idéal pour les équipes terrain.'
+    },
+    {
+      question: 'Les prix sont-ils bien en FCFA ?',
+      answer: 'Tous les tarifs et factures sont en franc CFA (FCFA). Aucune conversion en dollars ou euros.'
+    },
+    {
+      question: 'L\'essai gratuit engage-t-il à quelque chose ?',
+      answer: 'Non. Vous disposez d\'un mois complet pour tester toutes les fonctionnalités, sans engagement ni carte bancaire.'
+    },
+    {
+      question: 'Comment contacter le support ?',
+      answer: 'Par WhatsApp ou e-mail depuis le bas de cette page. Nous répondons aux horaires de Dakar (GMT).'
+    }
+  ];
 
   readonly features = [
     {
@@ -57,9 +139,10 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   ];
 
   readonly steps = [
-    { num: '1', title: 'Créez votre compte', text: 'Inscription rapide avec essai gratuit d\'un mois.' },
-    { num: '2', title: 'Configurez vos entrepôts', text: 'Ajoutez produits, partenaires et utilisateurs.' },
-    { num: '3', title: 'Pilotez au quotidien', text: 'Stock, factures et rapports depuis n\'importe où.' }
+    { num: '1', title: 'Créez votre compte', text: 'Inscription en 2 minutes — essai gratuit d\'un mois, sans carte.' },
+    { num: '2', title: 'Ajoutez vos produits', text: 'Riz, huile, matériaux… et votre entrepôt à Dakar ou ailleurs.' },
+    { num: '3', title: 'Facturez & déstockez', text: 'Une facture payée met à jour le stock automatiquement.' },
+    { num: '4', title: 'Payez en mobile money', text: 'Abonnement en Wave ou Orange Money quand l\'essai se termine.' }
   ];
 
   constructor(

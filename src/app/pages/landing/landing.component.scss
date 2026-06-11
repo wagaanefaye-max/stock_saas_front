@@ -437,6 +437,19 @@
   color: transparent;
 }
 
+.landing-hero__wolof {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  font-style: italic;
+  color: #b45309;
+  margin: -0.5rem 0 0.75rem;
+  letter-spacing: 0.01em;
+
+  @media (max-width: 968px) {
+    text-align: center;
+  }
+}
+
 .landing-hero__lead {
   font-size: 1.125rem;
   color: var(--text-muted);
@@ -742,6 +755,13 @@
     padding-left: max(2rem, calc((100vw - 1200px) / 2 + 2rem));
     padding-right: max(2rem, calc((100vw - 1200px) / 2 + 2rem));
   }
+
+  &--warm {
+    background: linear-gradient(180deg, rgba(180, 83, 9, 0.04), rgba(22, 163, 74, 0.04));
+    max-width: none;
+    padding-left: max(2rem, calc((100vw - 1200px) / 2 + 2rem));
+    padding-right: max(2rem, calc((100vw - 1200px) / 2 + 2rem));
+  }
 }
 
 .landing-section__head {
@@ -829,18 +849,196 @@
   }
 }
 
+/* ── Secteurs Sénégal ── */
+.landing-sectors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+
+  @media (max-width: 968px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.landing-sector {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.35rem;
+  transition: transform 0.25s, box-shadow 0.25s;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(180, 83, 9, 0.08);
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin-bottom: 0.65rem;
+  }
+
+  &__icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(180, 83, 9, 0.12), rgba(22, 163, 74, 0.1));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.85rem;
+
+    i {
+      color: #b45309;
+      font-size: 1.1rem;
+    }
+  }
+
+  &__example {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary);
+  }
+}
+
+/* ── Paiement mobile ── */
+.landing-pay {
+  max-width: 720px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.landing-pay__card {
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+
+  p {
+    margin: 0.5rem 0 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  &--wave {
+    border-color: rgba(29, 161, 242, 0.35);
+    background: linear-gradient(135deg, rgba(29, 161, 242, 0.08), rgba(29, 161, 242, 0.02));
+
+    .landing-pay__logo { color: #1da1f2; }
+  }
+
+  &--om {
+    border-color: rgba(255, 121, 0, 0.35);
+    background: linear-gradient(135deg, rgba(255, 121, 0, 0.08), rgba(255, 121, 0, 0.02));
+
+    .landing-pay__logo { color: #ff7900; }
+  }
+}
+
+.landing-pay__logo {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.landing-pay__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 1rem 1.15rem;
+  border-radius: 12px;
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+
+  i {
+    color: var(--primary);
+    margin-top: 0.1rem;
+  }
+}
+
+/* ── FAQ ── */
+.landing-faq {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.landing-faq__item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+
+  summary {
+    padding: 1rem 1.15rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::after {
+      content: '+';
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+  }
+
+  &[open] summary::after {
+    content: '−';
+  }
+
+  p {
+    margin: 0;
+    padding: 0 1.15rem 1rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+}
+
 /* ── Steps ── */
 .landing-steps {
   list-style: none;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  max-width: 900px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  max-width: 1100px;
   margin: 0 auto;
 
-  @media (max-width: 768px) {
+  @media (max-width: 968px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 560px) {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.25rem;
   }
 }
 
@@ -1046,13 +1244,46 @@
   border-radius: 4px;
 }
 
-.landing-footer__links {
+.landing-footer__contact {
   display: flex;
-  gap: 1.25rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
 
   a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     color: var(--text-muted);
     text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      color: var(--primary);
+    }
+  }
+}
+
+.landing-footer__wa i {
+  color: #25d366;
+  font-size: 1.1rem;
+}
+
+.landing-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: center;
+
+  a,
+  .landing-footer__link-btn {
+    color: var(--text-muted);
+    text-decoration: none;
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
 
     &:hover { color: var(--primary); }
   }

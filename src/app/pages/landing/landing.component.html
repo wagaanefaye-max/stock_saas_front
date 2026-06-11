@@ -59,8 +59,9 @@
       <span>Stock SaaS</span>
     </a>
     <nav class="landing-header__nav">
-      <button type="button" class="landing-header__link" (click)="scrollTo('features')">Fonctionnalités</button>
+      <button type="button" class="landing-header__link" (click)="scrollTo('sectors')">Métiers</button>
       <button type="button" class="landing-header__link" (click)="scrollTo('pricing')">Tarifs</button>
+      <button type="button" class="landing-header__link" (click)="scrollTo('faq')">FAQ</button>
       <a routerLink="/login" class="landing-header__link landing-header__link--ghost">Connexion</a>
       <a routerLink="/register" class="landing-header__cta">Essai gratuit</a>
     </nav>
@@ -71,16 +72,17 @@
     <div class="landing-hero__content landing-animate landing-animate--1">
       <span class="landing-hero__badge">
         <i class="pi pi-sparkles"></i>
-        Plateforme SaaS · PME &amp; commerces
+        Fait pour le Sénégal · PME &amp; commerces
       </span>
       <h1 class="landing-hero__title">
         Gérez votre stock,<br />
         <span class="landing-hero__highlight">factures</span> et entrepôts<br />
         en toute simplicité
       </h1>
+      <p class="landing-hero__wolof">Gérez sa stock, sa facturation ak sa boutique.</p>
       <p class="landing-hero__lead">
         Stock SaaS centralise inventaire, mouvements, partenaires et facturation
-        pour les entreprises au Sénégal et en Afrique de l'Ouest.
+        pour les boutiques, dépôts et commerces du Sénégal — en FCFA, avec Wave et Orange Money.
       </p>
       <div class="landing-hero__actions">
         <a routerLink="/register" class="landing-btn landing-btn--primary">
@@ -173,6 +175,29 @@
     </div>
   </section>
 
+  <!-- Métiers au Sénégal -->
+  <section id="sectors" class="landing-section landing-section--warm">
+    <div class="landing-section__head reveal" #reveal>
+      <span class="landing-section__eyebrow">Au Sénégal</span>
+      <h2>Conçu pour les commerces de chez nous</h2>
+      <p>Boutiques, quincailleries, grossistes — une solution pensée pour votre réalité terrain.</p>
+    </div>
+    <div class="landing-sectors">
+      <article
+        *ngFor="let s of sectors; let i = index"
+        class="landing-sector reveal"
+        #reveal
+        [style.--delay]="i * 0.07 + 's'">
+        <div class="landing-sector__icon">
+          <i [class]="s.icon"></i>
+        </div>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.description }}</p>
+        <span class="landing-sector__example">{{ s.example }}</span>
+      </article>
+    </div>
+  </section>
+
   <!-- Étapes -->
   <section class="landing-section landing-section--alt">
     <div class="landing-section__head reveal" #reveal>
@@ -188,6 +213,29 @@
         </div>
       </li>
     </ol>
+  </section>
+
+  <!-- Paiement mobile -->
+  <section id="payment" class="landing-section">
+    <div class="landing-section__head reveal" #reveal>
+      <span class="landing-section__eyebrow">Paiement</span>
+      <h2>Payez comme au Sénégal</h2>
+      <p>Pas de carte bancaire obligatoire — mobile money et tarifs clairs en FCFA.</p>
+    </div>
+    <div class="landing-pay reveal" #reveal>
+      <article
+        *ngFor="let p of paymentMethods"
+        class="landing-pay__card"
+        [class.landing-pay__card--wave]="p.accent === 'wave'"
+        [class.landing-pay__card--om]="p.accent === 'om'">
+        <span class="landing-pay__logo">{{ p.name }}</span>
+        <p>{{ p.description }}</p>
+      </article>
+      <div class="landing-pay__note">
+        <i class="pi pi-shield"></i>
+        <span>Tarif unique <strong>5 000 FCFA / mois</strong> — remises sur 3, 6 ou 12 mois. Essai gratuit 1 mois.</span>
+      </div>
+    </div>
   </section>
 
   <!-- Tarifs -->
@@ -225,17 +273,35 @@
     </div>
   </section>
 
+  <!-- FAQ -->
+  <section id="faq" class="landing-section landing-section--alt">
+    <div class="landing-section__head reveal" #reveal>
+      <span class="landing-section__eyebrow">FAQ</span>
+      <h2>Questions fréquentes</h2>
+      <p>Tout ce que les commerçants sénégalais nous demandent le plus souvent.</p>
+    </div>
+    <div class="landing-faq reveal" #reveal>
+      <details *ngFor="let item of faqItems" class="landing-faq__item">
+        <summary>{{ item.question }}</summary>
+        <p>{{ item.answer }}</p>
+      </details>
+    </div>
+  </section>
+
   <!-- CTA final -->
   <section class="landing-cta reveal" #reveal>
     <div class="landing-cta__inner">
       <h2>Prêt à simplifier votre gestion de stock ?</h2>
-      <p>Rejoignez les entreprises qui centralisent leurs opérations sur Stock SaaS.</p>
+      <p>Rejoignez les commerces sénégalais qui centralisent stock et facturation sur Stock SaaS.</p>
       <div class="landing-cta__actions">
         <a routerLink="/register" class="landing-btn landing-btn--white">
           Essai gratuit 1 mois
           <i class="pi pi-arrow-right"></i>
         </a>
-        <a routerLink="/login" class="landing-btn landing-btn--ghost-white">J'ai déjà un compte</a>
+        <a [href]="whatsappLink" target="_blank" rel="noopener noreferrer" class="landing-btn landing-btn--ghost-white">
+          <i class="pi pi-whatsapp"></i>
+          Nous écrire sur WhatsApp
+        </a>
       </div>
     </div>
   </section>
@@ -246,10 +312,21 @@
       <img src="/assets/logo.jpg" alt="" class="landing-footer__logo" />
       <span>Stock SaaS</span>
     </div>
-    <p class="landing-footer__copy">© {{ currentYear }} Stock SaaS — Gestion de stock &amp; facturation en ligne.</p>
+    <p class="landing-footer__copy">© {{ currentYear }} Stock SaaS — {{ contact.city }}</p>
+    <div class="landing-footer__contact">
+      <a [href]="whatsappLink" target="_blank" rel="noopener noreferrer" class="landing-footer__wa">
+        <i class="pi pi-whatsapp"></i>
+        WhatsApp
+      </a>
+      <a [href]="'mailto:' + contact.email" class="landing-footer__mail">
+        <i class="pi pi-envelope"></i>
+        {{ contact.email }}
+      </a>
+    </div>
     <div class="landing-footer__links">
       <a routerLink="/login">Connexion</a>
       <a routerLink="/register">Inscription</a>
+      <button type="button" class="landing-footer__link-btn" (click)="scrollTo('faq')">FAQ</button>
     </div>
   </footer>
 </div>
