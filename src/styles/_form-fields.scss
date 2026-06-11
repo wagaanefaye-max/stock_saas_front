@@ -1,0 +1,307 @@
+/* Champs de formulaire — charte Stock SaaS (bleu #2563EB, vert #16A34A) */
+
+/* ——— Labels ——— */
+.form-group label,
+.product-form__field label,
+.app-dialog-form label,
+.filter-field label,
+.login-form .form-group label,
+.register-form .form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  letter-spacing: 0.01em;
+  color: var(--label-color);
+  line-height: 1.35;
+
+  i {
+    color: var(--text-muted);
+  }
+}
+
+.form-group label .required,
+.product-form__field .required {
+  color: var(--danger);
+  margin-left: 0.125rem;
+}
+
+/* ——— Champs texte PrimeNG & natifs ——— */
+.p-inputtext,
+.p-textarea,
+input.p-inputtext,
+textarea.p-inputtext,
+.p-inputnumber-input,
+.p-datepicker-input,
+.p-select-label,
+.p-select {
+  font-family: var(--font-sans);
+  font-size: var(--input-font-size);
+  color: var(--text-main);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  box-shadow: var(--input-shadow);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+
+  &::placeholder {
+    color: var(--placeholder-color);
+    opacity: 1;
+  }
+
+  &:hover:not(:disabled):not([readonly]):not(.p-disabled) {
+    border-color: var(--input-border-hover);
+    background: var(--input-bg-hover);
+  }
+
+  &:enabled:focus,
+  &:focus-visible,
+  &.p-focus {
+    outline: none;
+    border-color: var(--input-border-focus);
+    background: var(--input-bg);
+    box-shadow: var(--input-shadow), 0 0 0 3px var(--input-ring-focus);
+  }
+
+  &:disabled,
+  &[readonly],
+  &.p-disabled {
+    background: var(--input-bg-disabled);
+    color: var(--text-muted);
+    border-color: var(--border);
+    cursor: not-allowed;
+    opacity: 0.92;
+  }
+}
+
+.p-inputtext,
+input.p-inputtext,
+.p-inputnumber-input,
+.p-datepicker-input,
+.p-select {
+  min-height: var(--input-height);
+  padding: 0.625rem var(--input-padding-x);
+}
+
+.p-textarea {
+  min-height: 6.5rem;
+  padding: 0.75rem var(--input-padding-x);
+  line-height: 1.55;
+  resize: vertical;
+}
+
+/* Password */
+.p-password {
+  width: 100%;
+
+  .p-password-input,
+  input {
+    width: 100%;
+    font-family: var(--font-sans);
+    font-size: var(--input-font-size);
+    color: var(--text-main);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--input-radius);
+    box-shadow: var(--input-shadow);
+    min-height: var(--input-height);
+    padding: 0.625rem 2.5rem 0.625rem var(--input-padding-x);
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      background-color 0.15s ease;
+
+    &::placeholder {
+      color: var(--placeholder-color);
+    }
+
+    &:hover:not(:disabled) {
+      border-color: var(--input-border-hover);
+      background: var(--input-bg-hover);
+    }
+
+    &:enabled:focus {
+      outline: none;
+      border-color: var(--input-border-focus);
+      background: var(--input-bg);
+      box-shadow: var(--input-shadow), 0 0 0 3px var(--input-ring-focus);
+    }
+  }
+
+  .p-password-toggle-icon,
+  svg.p-icon {
+    color: var(--text-muted);
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: var(--primary);
+    }
+  }
+}
+
+/* Select / Datepicker */
+.p-select,
+.p-datepicker {
+  min-height: var(--input-height);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  box-shadow: var(--input-shadow);
+  background: var(--input-bg);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+
+  &:not(.p-disabled):hover {
+    border-color: var(--input-border-hover);
+    background: var(--input-bg-hover);
+  }
+
+  &.p-focus,
+  &:focus-within {
+    border-color: var(--input-border-focus);
+    background: var(--input-bg);
+    box-shadow: var(--input-shadow), 0 0 0 3px var(--input-ring-focus);
+  }
+
+  .p-select-label {
+    border: none;
+    box-shadow: none;
+    min-height: auto;
+    padding: 0.625rem var(--input-padding-x);
+    background: transparent;
+
+    &.p-placeholder {
+      color: var(--placeholder-color);
+    }
+  }
+}
+
+.p-datepicker .p-datepicker-input {
+  border: none;
+  box-shadow: none;
+  min-height: auto;
+  background: transparent;
+}
+
+/* InputNumber */
+.p-inputnumber {
+  width: 100%;
+
+  .p-inputnumber-input {
+    width: 100%;
+  }
+
+  &.p-inputnumber-stacked .p-inputnumber-button,
+  &.p-inputnumber-horizontal .p-inputnumber-button {
+    border-color: var(--input-border);
+    background: var(--bg-main);
+    color: var(--text-muted);
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+      background: color-mix(in srgb, var(--primary) 8%, var(--bg-main));
+      border-color: var(--input-border-hover);
+      color: var(--primary);
+    }
+  }
+}
+
+/* Checkbox */
+.p-checkbox .p-checkbox-box {
+  border-radius: 6px;
+  border-color: var(--input-border);
+  background: var(--input-bg);
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+
+  &.p-highlight {
+    border-color: var(--primary);
+    background: var(--primary);
+  }
+}
+
+.p-checkbox:not(.p-disabled):has(.p-checkbox-input:focus-visible) .p-checkbox-box {
+  box-shadow: 0 0 0 3px var(--input-ring-focus);
+}
+
+/* Champs natifs hors PrimeNG */
+input[type='text']:not(.p-inputtext),
+input[type='email']:not(.p-inputtext),
+input[type='password']:not(.p-inputtext),
+input[type='tel']:not(.p-inputtext),
+input[type='number']:not(.p-inputtext),
+input[type='search']:not(.p-inputtext),
+textarea:not(.p-inputtext) {
+  font-family: var(--font-sans);
+  font-size: var(--input-font-size);
+  color: var(--text-main);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  box-shadow: var(--input-shadow);
+  min-height: var(--input-height);
+  padding: 0.625rem var(--input-padding-x);
+  width: 100%;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+
+  &::placeholder {
+    color: var(--placeholder-color);
+  }
+
+  &:hover:not(:disabled):not([readonly]) {
+    border-color: var(--input-border-hover);
+    background: var(--input-bg-hover);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--input-border-focus);
+    background: var(--input-bg);
+    box-shadow: var(--input-shadow), 0 0 0 3px var(--input-ring-focus);
+  }
+
+  &:disabled,
+  &[readonly] {
+    background: var(--input-bg-disabled);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+}
+
+/* Hints & messages de validation */
+.form-group small,
+.product-form__field .product-form__hint,
+.app-dialog-form small.text-muted {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.product-form__field .product-form__hint--warn {
+  color: var(--warning);
+}
+
+/* Mobile : 16px pour éviter le zoom iOS */
+@media (max-width: 768px) {
+  .p-inputtext,
+  input.p-inputtext,
+  .p-password input,
+  .p-select-label,
+  .p-datepicker-input,
+  .p-inputnumber-input,
+  input[type='text']:not(.p-inputtext),
+  input[type='email']:not(.p-inputtext),
+  input[type='password']:not(.p-inputtext),
+  input[type='tel']:not(.p-inputtext) {
+    font-size: 16px;
+    min-height: 2.875rem;
+  }
+}

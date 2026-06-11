@@ -295,10 +295,10 @@ $modal-radius: 20px;
 
     label {
       display: block;
-      margin-bottom: 0.35rem;
-      font-weight: 500;
-      font-size: 0.875rem;
-      color: var(--text-main);
+      margin-bottom: 0.4rem;
+      font-weight: var(--label-weight, 600);
+      font-size: var(--label-size, 0.8125rem);
+      color: var(--label-color, var(--text-main));
     }
 
     .w-full {

@@ -8,6 +8,7 @@
 @import './styles/mobile-list';
 @import './styles/app-branding';
 @import './styles/entity-page';
+@import './styles/form-fields';
 @import './styles/global-loading';
 
 /* Variables de couleurs personnalisées */
@@ -24,6 +25,24 @@
   --text-main: #111827;
   --text-muted: #6B7280;
   --border: #E5E7EB;
+
+  /* Champs de formulaire — dérivés de la charte */
+  --input-bg: var(--bg-card);
+  --input-bg-hover: color-mix(in srgb, var(--primary) 4%, var(--bg-card));
+  --input-bg-disabled: var(--bg-main);
+  --input-border: var(--border);
+  --input-border-hover: color-mix(in srgb, var(--primary) 28%, var(--border));
+  --input-border-focus: var(--primary);
+  --input-ring-focus: color-mix(in srgb, var(--primary) 16%, transparent);
+  --input-radius: 10px;
+  --input-height: 2.75rem;
+  --input-padding-x: 0.875rem;
+  --input-font-size: 0.9375rem;
+  --input-shadow: 0 1px 2px color-mix(in srgb, var(--primary) 8%, transparent);
+  --label-size: 0.8125rem;
+  --label-weight: 600;
+  --label-color: var(--text-main);
+  --placeholder-color: var(--text-muted);
 }
 
 /* Override PrimeNG avec nos couleurs */
@@ -211,48 +230,6 @@ body {
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-}
-
-/* Inputs */
-.p-inputtext,
-.p-select,
-.p-datepicker,
-.p-inputnumber,
-.p-textarea {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text-main);
-  font-size: 0.875rem;
-  min-height: 40px;
-
-  @media (max-width: 768px) {
-    font-size: 16px; /* Évite le zoom automatique sur iOS */
-    min-height: 44px;
-    padding: 0.625rem 0.75rem;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 16px;
-    min-height: 42px;
-    padding: 0.5625rem 0.625rem;
-  }
-
-  &:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-  }
-}
-
-.p-textarea {
-  min-height: 100px;
-
-  @media (max-width: 768px) {
-    min-height: 120px;
-  }
-
-  @media (max-width: 480px) {
-    min-height: 100px;
-  }
 }
 
 /* Drawer / Sidebar mobile */
