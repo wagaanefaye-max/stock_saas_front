@@ -1,5 +1,11 @@
 <div class="register-container">
   <p-toast></p-toast>
+
+  <a routerLink="/" class="register-back-home">
+    <i class="pi pi-arrow-left" aria-hidden="true"></i>
+    Retour à l'accueil
+  </a>
+
   <div class="register-wrapper">
     <!-- Left side - Branding -->
     <div class="register-branding">
@@ -325,6 +331,12 @@
 
         <div class="form-footer">
           <p>Vous avez déjà un compte ? <a routerLink="/login">Se connecter</a></p>
+          <p class="form-footer__home">
+            <a routerLink="/" class="form-footer__home-link">
+              <i class="pi pi-home" aria-hidden="true"></i>
+              Page d'accueil
+            </a>
+          </p>
         </div>
       </div>
     </div>

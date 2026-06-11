@@ -1,5 +1,11 @@
 <div class="login-container">
   <p-toast></p-toast>
+
+  <a routerLink="/" class="login-back-home">
+    <i class="pi pi-arrow-left" aria-hidden="true"></i>
+    Retour à l'accueil
+  </a>
+
   <div class="login-wrapper">
     <!-- Left side - Branding -->
     <div class="login-branding">
@@ -96,6 +102,12 @@
 
         <div class="form-footer">
           <p>Vous n'avez pas de compte ? <a routerLink="/register">Créer un compte</a></p>
+          <p class="form-footer__home">
+            <a routerLink="/" class="form-footer__home-link">
+              <i class="pi pi-home" aria-hidden="true"></i>
+              Page d'accueil
+            </a>
+          </p>
         </div>
       </div>
     </div>
