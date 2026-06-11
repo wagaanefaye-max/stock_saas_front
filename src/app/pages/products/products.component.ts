@@ -74,6 +74,7 @@ export class ProductsComponent implements OnInit {
 
   ngOnInit() {
     this.loadCategories();
+    this.loadProducts({ first: 0, rows: this.rows });
 
     // Vérifier si on doit ouvrir le formulaire automatiquement
     this.route.queryParams.subscribe(params => {
