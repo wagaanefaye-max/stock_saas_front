@@ -15,8 +15,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const loadingService = inject(LoadingService);
 
-  // Afficher l'indicateur de chargement avant la requête
-  loadingService.show();
+  const isMutation = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method.toUpperCase());
+  loadingService.show(isMutation);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {

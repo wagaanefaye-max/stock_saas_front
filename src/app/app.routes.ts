@@ -33,10 +33,12 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
+        data: { preload: true },
         loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
         path: 'products',
+        data: { preload: true },
         loadComponent: () => import('./pages/products/products.component').then(m => m.ProductsComponent)
       },
       {
@@ -69,10 +71,12 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
+        data: { preload: true },
         loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
         path: 'products',
+        data: { preload: true },
         loadComponent: () => import('./pages/products/products.component').then(m => m.ProductsComponent)
       },
       {
@@ -105,6 +109,7 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
+        data: { preload: true },
         loadComponent: () => import('./pages/company-admin/dashboard/dashboard.component').then(m => m.CompanyAdminDashboardComponent)
       },
       {
@@ -117,18 +122,22 @@ export const routes: Routes = [
       },
       {
         path: 'invoices',
+        data: { preload: true },
         loadComponent: () => import('./pages/company-admin/invoices/invoices.component').then(m => m.InvoicesComponent)
       },
       {
         path: 'products',
+        data: { preload: true },
         loadComponent: () => import('./pages/products/products.component').then(m => m.ProductsComponent)
       },
       {
         path: 'warehouses',
+        data: { preload: true },
         loadComponent: () => import('./pages/warehouses/warehouses.component').then(m => m.WarehousesComponent)
       },
       {
         path: 'movements',
+        data: { preload: true },
         loadComponent: () => import('./pages/movements/movements.component').then(m => m.MovementsComponent)
       },
       {

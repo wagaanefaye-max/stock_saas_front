@@ -5,39 +5,59 @@ import { BehaviorSubject, Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class LoadingService {
-  private _loading = new BehaviorSubject<boolean>(false);
-  public readonly loading$: Observable<boolean> = this._loading.asObservable();
+  /** Délai avant d'afficher l'overlay (évite le flash à chaque navigation GET). */
+  private static readonly SHOW_DELAY_MS = 280;
+
+  private readonly _loading = new BehaviorSubject<boolean>(false);
+  readonly loading$: Observable<boolean> = this._loading.asObservable();
 
   private requestCount = 0;
+  private showTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor() { }
-
-  /**
-   * Affiche l'indicateur de chargement
-   */
-  show() {
+  show(immediate = false): void {
     this.requestCount++;
-    if (this.requestCount === 1) {
-      this._loading.next(true);
+
+    if (this._loading.value) {
+      return;
     }
+
+    if (immediate) {
+      this.clearShowTimer();
+      this._loading.next(true);
+      return;
+    }
+
+    if (this.showTimer) {
+      return;
+    }
+
+    this.showTimer = setTimeout(() => {
+      this.showTimer = null;
+      if (this.requestCount > 0) {
+        this._loading.next(true);
+      }
+    }, LoadingService.SHOW_DELAY_MS);
   }
 
-  /**
-   * Masque l'indicateur de chargement
-   */
-  hide() {
-    this.requestCount--;
-    if (this.requestCount <= 0) {
-      this.requestCount = 0;
+  hide(): void {
+    this.requestCount = Math.max(0, this.requestCount - 1);
+
+    if (this.requestCount === 0) {
+      this.clearShowTimer();
       this._loading.next(false);
     }
   }
 
-  /**
-   * Réinitialise l'état de chargement (en cas d'erreur)
-   */
-  reset() {
+  reset(): void {
     this.requestCount = 0;
+    this.clearShowTimer();
     this._loading.next(false);
+  }
+
+  private clearShowTimer(): void {
+    if (this.showTimer) {
+      clearTimeout(this.showTimer);
+      this.showTimer = null;
+    }
   }
 }
