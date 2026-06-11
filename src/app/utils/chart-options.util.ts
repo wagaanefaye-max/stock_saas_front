@@ -108,6 +108,75 @@ export function buildLineChartOptions(config: LineChartConfig = {}): Record<stri
   };
 }
 
+export interface BarChartConfig {
+  showLegend?: boolean;
+  legendPosition?: 'top' | 'bottom';
+  beginAtZero?: boolean;
+}
+
+export function buildBarChartOptions(config: BarChartConfig = {}): Record<string, unknown> {
+  const mobile = isChartMobile();
+  const showLegend = config.showLegend ?? true;
+  const legendPosition = mobile ? 'bottom' : (config.legendPosition ?? 'top');
+  const beginAtZero = config.beginAtZero ?? true;
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: 'index',
+      intersect: false
+    },
+    plugins: {
+      legend: {
+        display: showLegend,
+        position: legendPosition,
+        labels: {
+          color: '#64748b',
+          boxWidth: mobile ? 8 : 12,
+          padding: mobile ? 6 : 12,
+          font: { size: mobile ? 9 : 11 },
+          usePointStyle: true
+        }
+      },
+      tooltip: {
+        padding: mobile ? 8 : 12,
+        titleFont: { size: mobile ? 11 : 13 },
+        bodyFont: { size: mobile ? 10 : 12 },
+        boxPadding: mobile ? 4 : 6
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: '#64748b',
+          font: { size: mobile ? 9 : 11 },
+          maxRotation: mobile ? 0 : 0,
+          autoSkip: true,
+          maxTicksLimit: mobile ? 6 : 12
+        },
+        grid: {
+          display: false
+        }
+      },
+      y: {
+        beginAtZero,
+        ticks: {
+          color: '#64748b',
+          font: { size: mobile ? 9 : 11 },
+          maxTicksLimit: mobile ? 5 : 8,
+          stepSize: 1,
+          callback: (value: number | string) => {
+            const n = Number(value);
+            return Number.isInteger(n) ? String(n) : '';
+          }
+        },
+        grid: { color: 'rgba(100, 116, 139, 0.12)' }
+      }
+    }
+  };
+}
+
 export function buildDoughnutChartOptions(
   extraPlugins?: Record<string, unknown>
 ): Record<string, unknown> {

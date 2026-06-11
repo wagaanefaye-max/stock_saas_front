@@ -1,19 +1,30 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import { buildDoughnutChartOptions, buildLineChartOptions } from '../../../utils/chart-options.util';
+import { buildBarChartOptions, buildDoughnutChartOptions, buildLineChartOptions } from '../../../utils/chart-options.util';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
 import { catchError, of } from 'rxjs';
 
+type SubscriptionChartFilter = 'ALL' | 'APPROVED' | 'REJECTED';
+
+interface MonthlySubscriptionPoint {
+  month: string;
+  approvedCount: number;
+  rejectedCount: number;
+  pendingCount?: number;
+}
+
 @Component({
   selector: 'app-super-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, CardModule, ChartModule, ToastModule],
+  imports: [CommonModule, FormsModule, RouterModule, CardModule, ChartModule, SelectButtonModule, ToastModule],
   providers: [MessageService],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
@@ -26,6 +37,15 @@ export class SuperAdminDashboardComponent implements OnInit {
   chartOptions: any;
   planChartData: any;
   planChartOptions: any;
+  subscriptionChartData: any;
+  subscriptionChartOptions: any;
+  monthlySubscriptionsRaw: MonthlySubscriptionPoint[] = [];
+  subscriptionFilter: SubscriptionChartFilter = 'ALL';
+  subscriptionFilterOptions: { label: string; value: SubscriptionChartFilter }[] = [
+    { label: 'Toutes', value: 'ALL' },
+    { label: 'Validées', value: 'APPROVED' },
+    { label: 'Rejetées', value: 'REJECTED' }
+  ];
 
   constructor(
     public authService: AuthService,
@@ -35,6 +55,7 @@ export class SuperAdminDashboardComponent implements OnInit {
 
   ngOnInit() {
     this.refreshChartOptions();
+    this.updateSubscriptionChartData();
     this.loadStats();
   }
 
@@ -60,6 +81,7 @@ export class SuperAdminDashboardComponent implements OnInit {
             monthlyRevenue: '0 FCFA',
             supportTickets: 0,
             monthlyCompaniesData: [],
+            monthlySubscriptionsData: [],
             planDistribution: [],
             recentCompanies: [],
             companiesChange: '0',
@@ -119,7 +141,64 @@ export class SuperAdminDashboardComponent implements OnInit {
         } else {
           this.updatePlanChartData([]);
         }
+
+        this.monthlySubscriptionsRaw = (data.monthlySubscriptionsData || []).map((d: MonthlySubscriptionPoint) => ({
+          month: d.month,
+          approvedCount: d.approvedCount ?? 0,
+          rejectedCount: d.rejectedCount ?? 0,
+          pendingCount: d.pendingCount ?? 0
+        }));
+        this.updateSubscriptionChartData();
       });
+  }
+
+  onSubscriptionFilterChange(): void {
+    this.updateSubscriptionChartData();
+  }
+
+  updateSubscriptionChartData(): void {
+    const months = this.monthlySubscriptionsRaw.length > 0
+      ? this.monthlySubscriptionsRaw.map(d => d.month)
+      : ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'];
+
+    const approvedData = this.monthlySubscriptionsRaw.length > 0
+      ? this.monthlySubscriptionsRaw.map(d => d.approvedCount ?? 0)
+      : new Array(months.length).fill(0);
+
+    const rejectedData = this.monthlySubscriptionsRaw.length > 0
+      ? this.monthlySubscriptionsRaw.map(d => d.rejectedCount ?? 0)
+      : new Array(months.length).fill(0);
+
+    const datasets: any[] = [];
+
+    if (this.subscriptionFilter === 'ALL' || this.subscriptionFilter === 'APPROVED') {
+      datasets.push({
+        label: 'Validées',
+        data: approvedData,
+        backgroundColor: 'rgba(22, 163, 74, 0.85)',
+        borderColor: '#16A34A',
+        borderWidth: 1,
+        borderRadius: 6,
+        maxBarThickness: 48
+      });
+    }
+
+    if (this.subscriptionFilter === 'ALL' || this.subscriptionFilter === 'REJECTED') {
+      datasets.push({
+        label: 'Rejetées',
+        data: rejectedData,
+        backgroundColor: 'rgba(239, 68, 68, 0.85)',
+        borderColor: '#EF4444',
+        borderWidth: 1,
+        borderRadius: 6,
+        maxBarThickness: 48
+      });
+    }
+
+    this.subscriptionChartData = {
+      labels: months,
+      datasets
+    };
   }
 
   updateChartData(monthlyData: any[]) {
@@ -211,6 +290,9 @@ export class SuperAdminDashboardComponent implements OnInit {
       ...buildLineChartOptions({ showLegend: false, beginAtZero: true })
     };
     this.planChartOptions = { ...buildDoughnutChartOptions() };
+    this.subscriptionChartOptions = {
+      ...buildBarChartOptions({ showLegend: true, beginAtZero: true })
+    };
   }
 }
 
