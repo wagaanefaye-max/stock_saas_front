@@ -62,6 +62,24 @@
         </div>
       </div>
 
+      <div class="payment-qr-panel" *ngIf="showPaymentQrPanel()">
+        <p class="payment-qr-panel__hint">
+          Scannez ce QR code {{ selectedPaymentProvider.label }} pour payer
+          <strong *ngIf="quoteTotal">{{ formatAmount(quoteTotal) }}</strong>
+        </p>
+        <div *ngIf="paymentQrLoading" class="payment-qr-panel__loading">
+          <i class="pi pi-spin pi-spinner"></i> Chargement du QR code…
+        </div>
+        <img
+          *ngIf="activePaymentQrUrl && !paymentQrLoading"
+          [src]="activePaymentQrUrl"
+          [alt]="'QR code ' + selectedPaymentProvider.label"
+          class="payment-qr-panel__image" />
+        <p *ngIf="paymentQrError && !paymentQrLoading" class="payment-qr-panel__error">
+          {{ paymentQrError }}
+        </p>
+      </div>
+
       <div class="step">
         <span class="step-num">3</span>
         <div class="step-body">

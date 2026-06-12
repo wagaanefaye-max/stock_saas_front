@@ -69,6 +69,107 @@
       </div>
     </p-card>
 
+    <p-card class="settings-card settings-card--qr">
+      <h3>QR codes marchands</h3>
+      <p-divider></p-divider>
+      <p class="text-muted qr-hint">
+        Images affichées aux entreprises lors de la souscription pour payer via Wave ou Orange Money.
+      </p>
+
+      <input
+        #waveQrInput
+        type="file"
+        class="qr-input-hidden"
+        accept="image/jpeg,image/png,image/webp"
+        (change)="onQrInputChange('WAVE', $event)" />
+      <input
+        #orangeQrInput
+        type="file"
+        class="qr-input-hidden"
+        accept="image/jpeg,image/png,image/webp"
+        (change)="onQrInputChange('ORANGE_MONEY', $event)" />
+
+      <div class="qr-grid">
+        <div class="qr-card qr-card--wave">
+          <div class="qr-card__head">
+            <strong>Wave</strong>
+            <span class="qr-badge" [class.qr-badge--ok]="platformSettings.hasWaveQr">
+              {{ platformSettings.hasWaveQr ? 'Configuré' : 'Non configuré' }}
+            </span>
+          </div>
+          <div class="qr-preview" *ngIf="waveQrPreviewUrl">
+            <img [src]="waveQrPreviewUrl" alt="QR code Wave" />
+          </div>
+          <div class="qr-empty" *ngIf="!waveQrPreviewUrl">
+            <i class="pi pi-qrcode"></i>
+            <span>Aucun QR code</span>
+          </div>
+          <div class="qr-actions">
+            <button
+              pButton
+              type="button"
+              [label]="platformSettings.hasWaveQr ? 'Remplacer' : 'Ajouter'"
+              icon="pi pi-upload"
+              class="p-button-sm"
+              (click)="openQrPicker('WAVE')"
+              [loading]="uploadingQr === 'WAVE'"
+              [disabled]="uploadingQr !== null">
+            </button>
+            <button
+              pButton
+              type="button"
+              label="Supprimer"
+              icon="pi pi-trash"
+              class="p-button-sm p-button-text p-button-danger"
+              *ngIf="platformSettings.hasWaveQr"
+              (click)="deletePaymentQr('WAVE')"
+              [loading]="uploadingQr === 'WAVE'"
+              [disabled]="uploadingQr !== null">
+            </button>
+          </div>
+        </div>
+
+        <div class="qr-card qr-card--orange">
+          <div class="qr-card__head">
+            <strong>Orange Money</strong>
+            <span class="qr-badge" [class.qr-badge--ok]="platformSettings.hasOrangeMoneyQr">
+              {{ platformSettings.hasOrangeMoneyQr ? 'Configuré' : 'Non configuré' }}
+            </span>
+          </div>
+          <div class="qr-preview" *ngIf="orangeMoneyQrPreviewUrl">
+            <img [src]="orangeMoneyQrPreviewUrl" alt="QR code Orange Money" />
+          </div>
+          <div class="qr-empty" *ngIf="!orangeMoneyQrPreviewUrl">
+            <i class="pi pi-qrcode"></i>
+            <span>Aucun QR code</span>
+          </div>
+          <div class="qr-actions">
+            <button
+              pButton
+              type="button"
+              [label]="platformSettings.hasOrangeMoneyQr ? 'Remplacer' : 'Ajouter'"
+              icon="pi pi-upload"
+              class="p-button-sm"
+              (click)="openQrPicker('ORANGE_MONEY')"
+              [loading]="uploadingQr === 'ORANGE_MONEY'"
+              [disabled]="uploadingQr !== null">
+            </button>
+            <button
+              pButton
+              type="button"
+              label="Supprimer"
+              icon="pi pi-trash"
+              class="p-button-sm p-button-text p-button-danger"
+              *ngIf="platformSettings.hasOrangeMoneyQr"
+              (click)="deletePaymentQr('ORANGE_MONEY')"
+              [loading]="uploadingQr === 'ORANGE_MONEY'"
+              [disabled]="uploadingQr !== null">
+            </button>
+          </div>
+        </div>
+      </div>
+    </p-card>
+
     <div class="settings-actions">
       <button
         pButton

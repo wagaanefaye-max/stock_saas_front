@@ -112,6 +112,11 @@ export interface PaymentProviderOption {
   enabled?: boolean;
 }
 
+export interface PaymentQrAvailability {
+  wave: boolean;
+  orangeMoney: boolean;
+}
+
 export const PAYMENT_PROVIDERS: PaymentProviderOption[] = [
   { code: 'WAVE', label: 'Wave', enabled: true },
   { code: 'ORANGE_MONEY', label: 'Orange Money', enabled: true },
@@ -173,6 +178,16 @@ export class SubscriptionService {
   getProofBlob(recordId: number): Observable<Blob> {
     return this.api.getBlob(`/subscriptions/requests/${recordId}/proof`).pipe(
       catchError((err) => readBlobErrorMessage(err, 'Impossible d\'afficher le justificatif.'))
+    );
+  }
+
+  getPaymentQrAvailability(): Observable<PaymentQrAvailability> {
+    return this.api.get<PaymentQrAvailability>('/subscriptions/payment-qr/availability');
+  }
+
+  getPaymentQrBlob(provider: 'WAVE' | 'ORANGE_MONEY'): Observable<Blob> {
+    return this.api.getBlob(`/subscriptions/payment-qr/${provider}`).pipe(
+      catchError((err) => readBlobErrorMessage(err, 'QR code non disponible.'))
     );
   }
 }

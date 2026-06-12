@@ -42,6 +42,11 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
   proofPreviewUrl: string | null = null;
   isDragOver = false;
   quoteTotal: number | null = null;
+  paymentQrAvailability: { wave: boolean; orangeMoney: boolean } = { wave: false, orangeMoney: false };
+  activePaymentQrUrl: string | null = null;
+  paymentQrLoading = false;
+  paymentQrError: string | null = null;
+  private paymentQrCache: Partial<Record<'WAVE' | 'ORANGE_MONEY', string>> = {};
   detailDialogVisible = false;
   selectedRecord: SubscriptionRecord | null = null;
   detailProofUrl: string | null = null;
@@ -62,23 +67,27 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.revokePreview();
     this.revokeDetailProof();
+    this.revokePaymentQrCache();
   }
 
   loadAll(): void {
     forkJoin({
       status: this.subscriptionService.getStatus(),
       durations: this.subscriptionService.getDurations(),
-      history: this.subscriptionService.getHistory().pipe(catchError(() => of([])))
+      history: this.subscriptionService.getHistory().pipe(catchError(() => of([]))),
+      paymentQr: this.subscriptionService.getPaymentQrAvailability().pipe(catchError(() => of({ wave: false, orangeMoney: false })))
     })
       .subscribe({
-        next: ({ status, durations, history }) => {
+        next: ({ status, durations, history, paymentQr }) => {
           this.status = status;
           this.durations = durations;
           this.history = history;
+          this.paymentQrAvailability = paymentQr;
           if (durations.length && !this.selectedDuration) {
             this.selectedDuration = durations.find((d) => d.code === 'MONTH_3') ?? durations[0];
           }
           this.refreshQuote();
+          this.loadPaymentQrForSelectedProvider();
         },
         error: (err) => {
           this.messageService.add({
@@ -110,6 +119,66 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
       return;
     }
     this.selectedPaymentProvider = provider;
+    this.loadPaymentQrForSelectedProvider();
+  }
+
+  showPaymentQrPanel(): boolean {
+    const code = this.selectedPaymentProvider.code;
+    if (code === 'WAVE') {
+      return this.paymentQrAvailability.wave;
+    }
+    if (code === 'ORANGE_MONEY') {
+      return this.paymentQrAvailability.orangeMoney;
+    }
+    return false;
+  }
+
+  private loadPaymentQrForSelectedProvider(): void {
+    this.paymentQrError = null;
+    const code = this.selectedPaymentProvider.code;
+    if (code !== 'WAVE' && code !== 'ORANGE_MONEY') {
+      this.activePaymentQrUrl = null;
+      return;
+    }
+    if (code === 'WAVE' && !this.paymentQrAvailability.wave) {
+      this.activePaymentQrUrl = null;
+      return;
+    }
+    if (code === 'ORANGE_MONEY' && !this.paymentQrAvailability.orangeMoney) {
+      this.activePaymentQrUrl = null;
+      return;
+    }
+
+    const cached = this.paymentQrCache[code];
+    if (cached) {
+      this.activePaymentQrUrl = cached;
+      return;
+    }
+
+    this.paymentQrLoading = true;
+    this.subscriptionService.getPaymentQrBlob(code).subscribe({
+      next: (blob) => {
+        this.paymentQrLoading = false;
+        const url = URL.createObjectURL(blob);
+        this.paymentQrCache[code] = url;
+        this.activePaymentQrUrl = url;
+      },
+      error: (err: { userMessage?: string }) => {
+        this.paymentQrLoading = false;
+        this.activePaymentQrUrl = null;
+        this.paymentQrError = err?.userMessage || 'QR code non disponible.';
+      }
+    });
+  }
+
+  private revokePaymentQrCache(): void {
+    Object.values(this.paymentQrCache).forEach((url) => {
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+    });
+    this.paymentQrCache = {};
+    this.activePaymentQrUrl = null;
   }
 
   canSubmitRequest(): boolean {

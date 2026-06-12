@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
@@ -18,7 +18,14 @@ interface PlatformSettings {
   maintenanceMode: boolean;
   maintenanceMessage: string;
   allowNewRegistrations: boolean;
+  hasWaveQr?: boolean;
+  hasOrangeMoneyQr?: boolean;
 }
+
+type PaymentQrProvider = 'WAVE' | 'ORANGE_MONEY';
+
+const ACCEPTED_QR_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const MAX_QR_BYTES = 5 * 1024 * 1024;
 
 @Component({
   selector: 'app-platform-settings',
@@ -38,14 +45,22 @@ interface PlatformSettings {
   templateUrl: './platform-settings.component.html',
   styleUrl: './platform-settings.component.scss'
 })
-export class PlatformSettingsComponent implements OnInit {
+export class PlatformSettingsComponent implements OnInit, OnDestroy {
+  @ViewChild('waveQrInput') waveQrInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('orangeQrInput') orangeQrInput?: ElementRef<HTMLInputElement>;
+
   saving = false;
+  uploadingQr: PaymentQrProvider | null = null;
+  waveQrPreviewUrl: string | null = null;
+  orangeMoneyQrPreviewUrl: string | null = null;
 
   platformSettings: PlatformSettings = {
     subscriptionMonthlyPriceFcfa: 5000,
     maintenanceMode: false,
     maintenanceMessage: '',
-    allowNewRegistrations: true
+    allowNewRegistrations: true,
+    hasWaveQr: false,
+    hasOrangeMoneyQr: false
   };
 
   constructor(
@@ -56,6 +71,11 @@ export class PlatformSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSettings();
+  }
+
+  ngOnDestroy(): void {
+    this.revokeQrPreview('WAVE');
+    this.revokeQrPreview('ORANGE_MONEY');
   }
 
   loadSettings(): void {
@@ -76,9 +96,157 @@ export class PlatformSettingsComponent implements OnInit {
           subscriptionMonthlyPriceFcfa: data.subscriptionMonthlyPriceFcfa ?? 5000,
           maintenanceMode: !!data.maintenanceMode,
           maintenanceMessage: data.maintenanceMessage ?? '',
-          allowNewRegistrations: data.allowNewRegistrations !== false
+          allowNewRegistrations: data.allowNewRegistrations !== false,
+          hasWaveQr: !!data.hasWaveQr,
+          hasOrangeMoneyQr: !!data.hasOrangeMoneyQr
         };
+        this.loadQrPreviews();
       });
+  }
+
+  openQrPicker(provider: PaymentQrProvider): void {
+    if (provider === 'WAVE') {
+      this.waveQrInput?.nativeElement.click();
+    } else {
+      this.orangeQrInput?.nativeElement.click();
+    }
+  }
+
+  onQrInputChange(provider: PaymentQrProvider, event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    (event.target as HTMLInputElement).value = '';
+    if (file) {
+      this.uploadPaymentQr(provider, file);
+    }
+  }
+
+  uploadPaymentQr(provider: PaymentQrProvider, file: File): void {
+    if (!ACCEPTED_QR_TYPES.includes(file.type.toLowerCase())) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Format non accepté',
+        detail: 'Utilisez une image JPEG, PNG ou WebP.'
+      });
+      return;
+    }
+    if (file.size > MAX_QR_BYTES) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Fichier trop volumineux',
+        detail: 'L\'image ne doit pas dépasser 5 Mo.'
+      });
+      return;
+    }
+
+    const form = new FormData();
+    form.append('image', file);
+    this.uploadingQr = provider;
+
+    this.apiService.postFormData<PlatformSettings>(`/platform-settings/payment-qr/${provider}`, form)
+      .pipe(
+        catchError(error => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: error?.error?.message || 'Téléversement impossible'
+          });
+          return of(null);
+        }),
+        finalize(() => {
+          this.uploadingQr = null;
+        })
+      )
+      .subscribe(data => {
+        if (!data) return;
+        this.applySettings(data);
+        this.loadQrPreview(provider);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'QR code enregistré',
+          detail: provider === 'WAVE' ? 'QR Wave mis à jour.' : 'QR Orange Money mis à jour.',
+          life: 3500
+        });
+      });
+  }
+
+  deletePaymentQr(provider: PaymentQrProvider): void {
+    this.uploadingQr = provider;
+    this.apiService.delete<PlatformSettings>(`/platform-settings/payment-qr/${provider}`)
+      .pipe(
+        catchError(error => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: error?.error?.message || 'Suppression impossible'
+          });
+          return of(null);
+        }),
+        finalize(() => {
+          this.uploadingQr = null;
+        })
+      )
+      .subscribe(data => {
+        if (!data) return;
+        this.applySettings(data);
+        this.revokeQrPreview(provider);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'QR code supprimé',
+          life: 3000
+        });
+      });
+  }
+
+  private applySettings(data: PlatformSettings): void {
+    this.platformSettings = {
+      subscriptionMonthlyPriceFcfa: data.subscriptionMonthlyPriceFcfa ?? this.platformSettings.subscriptionMonthlyPriceFcfa,
+      maintenanceMode: !!data.maintenanceMode,
+      maintenanceMessage: data.maintenanceMessage ?? '',
+      allowNewRegistrations: data.allowNewRegistrations !== false,
+      hasWaveQr: !!data.hasWaveQr,
+      hasOrangeMoneyQr: !!data.hasOrangeMoneyQr
+    };
+  }
+
+  private loadQrPreviews(): void {
+    if (this.platformSettings.hasWaveQr) {
+      this.loadQrPreview('WAVE');
+    } else {
+      this.revokeQrPreview('WAVE');
+    }
+    if (this.platformSettings.hasOrangeMoneyQr) {
+      this.loadQrPreview('ORANGE_MONEY');
+    } else {
+      this.revokeQrPreview('ORANGE_MONEY');
+    }
+  }
+
+  private loadQrPreview(provider: PaymentQrProvider): void {
+    this.apiService.getBlob(`/platform-settings/payment-qr/${provider}`).subscribe({
+      next: (blob) => {
+        this.revokeQrPreview(provider);
+        const url = URL.createObjectURL(blob);
+        if (provider === 'WAVE') {
+          this.waveQrPreviewUrl = url;
+        } else {
+          this.orangeMoneyQrPreviewUrl = url;
+        }
+      },
+      error: () => {
+        this.revokeQrPreview(provider);
+      }
+    });
+  }
+
+  private revokeQrPreview(provider: PaymentQrProvider): void {
+    if (provider === 'WAVE' && this.waveQrPreviewUrl) {
+      URL.revokeObjectURL(this.waveQrPreviewUrl);
+      this.waveQrPreviewUrl = null;
+    }
+    if (provider === 'ORANGE_MONEY' && this.orangeMoneyQrPreviewUrl) {
+      URL.revokeObjectURL(this.orangeMoneyQrPreviewUrl);
+      this.orangeMoneyQrPreviewUrl = null;
+    }
   }
 
   saveSettings(): void {
@@ -128,7 +296,9 @@ export class PlatformSettingsComponent implements OnInit {
           subscriptionMonthlyPriceFcfa: data.subscriptionMonthlyPriceFcfa,
           maintenanceMode: !!data.maintenanceMode,
           maintenanceMessage: data.maintenanceMessage ?? '',
-          allowNewRegistrations: data.allowNewRegistrations !== false
+          allowNewRegistrations: data.allowNewRegistrations !== false,
+          hasWaveQr: !!data.hasWaveQr,
+          hasOrangeMoneyQr: !!data.hasOrangeMoneyQr
         };
         this.platformStatusService.refresh().subscribe();
         this.messageService.add({
