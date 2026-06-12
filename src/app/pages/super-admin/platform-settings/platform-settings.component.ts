@@ -12,6 +12,7 @@ import { MessageService } from 'primeng/api';
 import { catchError, finalize, of } from 'rxjs';
 import { ApiService } from '../../../services/api.service';
 import { PlatformStatusService } from '../../../services/platform-status.service';
+import { compressImageIfNeeded, MAX_IMAGE_BYTES } from '../../../utils/image-compress.util';
 
 interface PlatformSettings {
   subscriptionMonthlyPriceFcfa: number;
@@ -116,11 +117,11 @@ export class PlatformSettingsComponent implements OnInit, OnDestroy {
     const file = (event.target as HTMLInputElement).files?.[0];
     (event.target as HTMLInputElement).value = '';
     if (file) {
-      this.uploadPaymentQr(provider, file);
+      this.prepareAndUploadPaymentQr(provider, file);
     }
   }
 
-  uploadPaymentQr(provider: PaymentQrProvider, file: File): void {
+  private prepareAndUploadPaymentQr(provider: PaymentQrProvider, file: File): void {
     if (!ACCEPTED_QR_TYPES.includes(file.type.toLowerCase())) {
       this.messageService.add({
         severity: 'warn',
@@ -138,9 +139,34 @@ export class PlatformSettingsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.uploadingQr = provider;
+    compressImageIfNeeded(file, MAX_IMAGE_BYTES)
+      .then((processed) => {
+        if (processed.size < file.size) {
+          const beforeKb = Math.round(file.size / 1024);
+          const afterKb = Math.round(processed.size / 1024);
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Image optimisée',
+            detail: `Taille réduite de ${beforeKb} Ko à ${afterKb} Ko`,
+            life: 3500
+          });
+        }
+        this.uploadPaymentQr(provider, processed);
+      })
+      .catch(() => {
+        this.uploadingQr = null;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de traiter l\'image'
+        });
+      });
+  }
+
+  private uploadPaymentQr(provider: PaymentQrProvider, file: File): void {
     const form = new FormData();
     form.append('image', file);
-    this.uploadingQr = provider;
 
     this.apiService.postFormData<PlatformSettings>(`/platform-settings/payment-qr/${provider}`, form)
       .pipe(
