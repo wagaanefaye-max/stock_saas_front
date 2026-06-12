@@ -1,0 +1,30 @@
+<div class="maintenance-page">
+  <div class="maintenance-card">
+    <div class="maintenance-icon" aria-hidden="true">
+      <i class="pi pi-wrench"></i>
+    </div>
+    <h1>Plateforme en maintenance</h1>
+    <p *ngIf="!maintenanceMessage">
+      Stock SaaS est temporairement indisponible pour une opération de maintenance.
+      Nous serons de retour très bientôt.
+    </p>
+    <div *ngIf="maintenanceMessage" class="maintenance-custom-message">
+      <p class="maintenance-custom-message__label">Information</p>
+      <p class="maintenance-custom-message__text">{{ maintenanceMessage }}</p>
+    </div>
+    <p class="maintenance-hint text-muted">
+      Merci de votre patience. Si vous êtes administrateur plateforme, connectez-vous depuis la page de connexion.
+    </p>
+    <div class="maintenance-actions">
+      <button
+        pButton
+        type="button"
+        label="Réessayer"
+        icon="pi pi-refresh"
+        (click)="checkAgain()"
+        [loading]="checking">
+      </button>
+      <a routerLink="/login" class="maintenance-login-link">Connexion administrateur</a>
+    </div>
+  </div>
+</div>

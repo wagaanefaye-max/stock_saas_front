@@ -47,6 +47,11 @@
           <p>Connectez-vous à votre compte</p>
         </div>
 
+        <div *ngIf="maintenanceMode" class="login-maintenance-banner" role="status">
+          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+          <span>Plateforme en maintenance — seuls les super administrateurs peuvent se connecter.</span>
+        </div>
+
       <form (ngSubmit)="login()" class="login-form">
         <div class="form-group">
             <label for="email">

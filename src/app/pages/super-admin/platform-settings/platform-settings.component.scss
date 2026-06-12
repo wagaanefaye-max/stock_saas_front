@@ -55,6 +55,30 @@
           }
         }
 
+        .maintenance-message-field {
+          margin: 0.5rem 0 1rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid var(--border);
+
+          label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+          }
+
+          textarea {
+            width: 100%;
+            resize: vertical;
+            min-height: 6rem;
+          }
+
+          .text-muted {
+            margin-top: 0.5rem;
+            font-size: 0.8125rem;
+          }
+        }
+
         .setting-item {
           display: flex;
           justify-content: space-between;

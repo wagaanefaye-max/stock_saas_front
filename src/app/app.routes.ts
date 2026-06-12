@@ -3,28 +3,37 @@ import { authGuard } from './guards/auth.guard';
 import { superAdminGuard } from './guards/super-admin.guard';
 import { adminEntrepriseGuard } from './guards/admin-entreprise.guard';
 import { gestionnaireGuard } from './guards/gestionnaire.guard';
+import { maintenanceGuard } from './guards/maintenance.guard';
+import { registrationGuard } from './guards/registration.guard';
 
 export const routes: Routes = [
+  {
+    path: 'maintenance',
+    loadComponent: () => import('./pages/maintenance/maintenance.component').then(m => m.MaintenanceComponent)
+  },
   {
     path: 'login',
     loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent)
   },
   {
     path: 'forgot-password',
-    loadComponent: () => import('./pages/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+    loadComponent: () => import('./pages/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+    canActivate: [maintenanceGuard]
   },
   {
     path: 'register',
-    loadComponent: () => import('./pages/register/register.component').then(m => m.RegisterComponent)
+    loadComponent: () => import('./pages/register/register.component').then(m => m.RegisterComponent),
+    canActivate: [registrationGuard]
   },
   {
     path: 'verify-account',
-    loadComponent: () => import('./pages/verify-account/verify-account.component').then(m => m.VerifyAccountComponent)
+    loadComponent: () => import('./pages/verify-account/verify-account.component').then(m => m.VerifyAccountComponent),
+    canActivate: [maintenanceGuard]
   },
   {
     path: 'gestionnaire',
     loadComponent: () => import('./layout/gestionnaire-layout/gestionnaire-layout.component').then(m => m.GestionnaireLayoutComponent),
-    canActivate: [gestionnaireGuard],
+    canActivate: [maintenanceGuard, gestionnaireGuard],
     children: [
       {
         path: '',
@@ -60,7 +69,7 @@ export const routes: Routes = [
   {
     path: 'gestion',
     loadComponent: () => import('./layout/layout.component').then(m => m.LayoutComponent),
-    canActivate: [authGuard],
+    canActivate: [maintenanceGuard, authGuard],
     children: [
       {
         path: '',
@@ -96,7 +105,7 @@ export const routes: Routes = [
   {
     path: 'company-admin',
     loadComponent: () => import('./layout/company-admin-layout/company-admin-layout.component').then(m => m.CompanyAdminLayoutComponent),
-    canActivate: [adminEntrepriseGuard],
+    canActivate: [maintenanceGuard, adminEntrepriseGuard],
     children: [
       {
         path: '',
@@ -179,7 +188,8 @@ export const routes: Routes = [
   },
   {
     path: '',
-    loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent)
+    loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent),
+    canActivate: [maintenanceGuard]
   },
   {
     path: '**',

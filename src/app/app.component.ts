@@ -1,4 +1,5 @@
-import { Component, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectorRef, OnDestroy, OnInit } from '@angular/core';
+import { PlatformStatusService } from './services/platform-status.service';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -38,7 +39,7 @@ import { Subscription } from 'rxjs';
     }
   `]
 })
-export class AppComponent implements OnDestroy {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'Stock SaaS';
   isLoading = false;
   readonly confirmStyle = APP_CONFIRM_STYLE;
@@ -47,16 +48,19 @@ export class AppComponent implements OnDestroy {
 
   constructor(
     private loadingService: LoadingService,
+    private platformStatusService: PlatformStatusService,
     private cdr: ChangeDetectorRef
   ) {
-    // S'abonner aux changements de l'état de chargement
     this.loadingSubscription = this.loadingService.loading$.subscribe(loading => {
-      // Utiliser queueMicrotask pour éviter ExpressionChangedAfterItHasBeenCheckedError
       queueMicrotask(() => {
         this.isLoading = loading;
         this.cdr.markForCheck();
       });
     });
+  }
+
+  ngOnInit(): void {
+    this.platformStatusService.loadStatus().subscribe();
   }
 
   ngOnDestroy(): void {

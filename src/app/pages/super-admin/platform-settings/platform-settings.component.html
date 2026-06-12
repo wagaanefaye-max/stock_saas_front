@@ -44,6 +44,21 @@
           <p-toggleButton [(ngModel)]="platformSettings.maintenanceMode"></p-toggleButton>
         </div>
 
+        <div class="maintenance-message-field" *ngIf="platformSettings.maintenanceMode">
+          <label for="maintenance-message">Motif affiché aux utilisateurs</label>
+          <textarea
+            pInputTextarea
+            id="maintenance-message"
+            [(ngModel)]="platformSettings.maintenanceMessage"
+            rows="4"
+            maxlength="1000"
+            placeholder="Ex. : Mise à jour planifiée ce soir de 22h à minuit. Merci de votre compréhension.">
+          </textarea>
+          <p class="text-muted">
+            Ce message sera visible sur la page de maintenance ({{ (platformSettings.maintenanceMessage || '').length }}/1000).
+          </p>
+        </div>
+
         <div class="setting-item">
           <div>
             <label>Autoriser les nouvelles inscriptions</label>

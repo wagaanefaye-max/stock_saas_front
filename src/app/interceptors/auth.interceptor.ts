@@ -1,5 +1,6 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, finalize, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { LoadingService } from '../services/loading.service';
@@ -15,20 +16,20 @@ function isAuthEndpoint(url: string): boolean {
   );
 }
 
-function isSubscriptionReadOnlyError(error: HttpErrorResponse): boolean {
+function isMaintenanceError(error: HttpErrorResponse): boolean {
   const body = error.error;
   if (!body || typeof body !== 'object') {
     return false;
   }
-  return body.readOnly === true || body.error === 'SubscriptionReadOnly';
+  return body.error === 'MaintenanceMode' || body.maintenanceMode === true;
 }
 
 /**
- * Intercepteur HTTP pour gérer les erreurs d'authentification.
- * L'authentification est gérée par cookie (envoi automatique avec withCredentials).
+ * Intercepteur HTTP pour gérer les erreurs d'authentification et de maintenance.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const router = inject(Router);
   const loadingService = inject(LoadingService);
 
   loadingService.show();
@@ -36,6 +37,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       const url = req.url || '';
+
+      if (error.status === 503 && isMaintenanceError(error) && !authService.isSuperAdmin()) {
+        authService.clearLocalSession();
+        void router.navigate(['/maintenance']);
+      }
 
       if (error.status === 401 && !isAuthEndpoint(url)) {
         authService.handleSessionExpired();

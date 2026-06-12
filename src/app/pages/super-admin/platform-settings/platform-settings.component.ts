@@ -6,14 +6,17 @@ import { ButtonModule } from 'primeng/button';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { DividerModule } from 'primeng/divider';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextarea } from 'primeng/inputtextarea';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { catchError, finalize, of } from 'rxjs';
 import { ApiService } from '../../../services/api.service';
+import { PlatformStatusService } from '../../../services/platform-status.service';
 
 interface PlatformSettings {
   subscriptionMonthlyPriceFcfa: number;
   maintenanceMode: boolean;
+  maintenanceMessage: string;
   allowNewRegistrations: boolean;
 }
 
@@ -28,6 +31,7 @@ interface PlatformSettings {
     ToggleButtonModule,
     DividerModule,
     InputNumberModule,
+    InputTextarea,
     ToastModule
   ],
   providers: [MessageService],
@@ -40,11 +44,13 @@ export class PlatformSettingsComponent implements OnInit {
   platformSettings: PlatformSettings = {
     subscriptionMonthlyPriceFcfa: 5000,
     maintenanceMode: false,
+    maintenanceMessage: '',
     allowNewRegistrations: true
   };
 
   constructor(
     private apiService: ApiService,
+    private platformStatusService: PlatformStatusService,
     private messageService: MessageService
   ) {}
 
@@ -69,6 +75,7 @@ export class PlatformSettingsComponent implements OnInit {
         this.platformSettings = {
           subscriptionMonthlyPriceFcfa: data.subscriptionMonthlyPriceFcfa ?? 5000,
           maintenanceMode: !!data.maintenanceMode,
+          maintenanceMessage: data.maintenanceMessage ?? '',
           allowNewRegistrations: data.allowNewRegistrations !== false
         };
       });
@@ -85,10 +92,21 @@ export class PlatformSettingsComponent implements OnInit {
       return;
     }
 
+    const maintenanceMessage = (this.platformSettings.maintenanceMessage || '').trim();
+    if (maintenanceMessage.length > 1000) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation',
+        detail: 'Le motif de maintenance ne peut pas dépasser 1000 caractères.'
+      });
+      return;
+    }
+
     this.saving = true;
     this.apiService.put<PlatformSettings>('/platform-settings', {
       subscriptionMonthlyPriceFcfa: price,
       maintenanceMode: this.platformSettings.maintenanceMode,
+      maintenanceMessage: maintenanceMessage || null,
       allowNewRegistrations: this.platformSettings.allowNewRegistrations
     })
       .pipe(
@@ -109,8 +127,10 @@ export class PlatformSettingsComponent implements OnInit {
         this.platformSettings = {
           subscriptionMonthlyPriceFcfa: data.subscriptionMonthlyPriceFcfa,
           maintenanceMode: !!data.maintenanceMode,
+          maintenanceMessage: data.maintenanceMessage ?? '',
           allowNewRegistrations: data.allowNewRegistrations !== false
         };
+        this.platformStatusService.refresh().subscribe();
         this.messageService.add({
           severity: 'success',
           summary: 'Paramètres enregistrés',

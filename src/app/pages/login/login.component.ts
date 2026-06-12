@@ -9,6 +9,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
+import { PlatformStatusService } from '../../services/platform-status.service';
 import { getErrorMessage } from '../../utils/error-message.util';
 
 @Component({
@@ -34,11 +35,13 @@ export class LoginComponent {
   rememberMe = false;
 
   errorMessage = '';
+  maintenanceMode = false;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private authService: AuthService,
+    private platformStatusService: PlatformStatusService,
     private messageService: MessageService
   ) {
     // Vérifier si on vient de l'inscription
@@ -71,6 +74,10 @@ export class LoginComponent {
         });
         this.errorMessage = params['error'];
       }
+    });
+
+    this.platformStatusService.loadStatus().subscribe((status) => {
+      this.maintenanceMode = status.maintenanceMode;
     });
 
     // Si l'utilisateur est déjà connecté, rediriger vers le dashboard approprié
