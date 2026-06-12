@@ -12,6 +12,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { finalize } from 'rxjs';
 import { SubscriptionRecord, SubscriptionService } from '../../../services/subscription.service';
+import { SuperAdminSubscriptionBadgeService } from '../../../services/super-admin-subscription-badge.service';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
 
 type StatusFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';
@@ -81,6 +82,7 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
 
   constructor(
     private subscriptionService: SubscriptionService,
+    private subscriptionBadgeService: SuperAdminSubscriptionBadgeService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService
   ) {}
@@ -108,6 +110,7 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
             approved: response.totalApproved,
             rejected: response.totalRejected
           };
+          this.subscriptionBadgeService.setPendingCount(response.totalPending ?? 0);
           this.updateFilterOptions();
         },
         error: (err) =>

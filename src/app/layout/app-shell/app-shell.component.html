@@ -42,6 +42,12 @@
               [title]="sidebarCollapsed ? navItem.label : ''">
               <span class="app-nav-desktop__icon" aria-hidden="true">
                 <i [class]="navItem.icon"></i>
+                <span
+                  *ngIf="getNavBadge(navItem) > 0"
+                  class="app-nav-badge"
+                  [attr.aria-label]="getNavBadge(navItem) + ' demande(s) en attente'">
+                  {{ formatNavBadge(getNavBadge(navItem)) }}
+                </span>
               </span>
               <span class="app-nav-desktop__label">{{ navItem.label }}</span>
             </a>
@@ -94,6 +100,12 @@
       [attr.aria-label]="navItem.label">
       <span class="app-bottom-nav__icon-wrap" aria-hidden="true">
         <i [class]="navItem.icon"></i>
+        <span
+          *ngIf="getNavBadge(navItem) > 0"
+          class="app-nav-badge app-nav-badge--bottom"
+          [attr.aria-label]="getNavBadge(navItem) + ' demande(s) en attente'">
+          {{ formatNavBadge(getNavBadge(navItem)) }}
+        </span>
       </span>
       <span class="app-bottom-nav__label">{{ navItem.mobileLabel || navItem.label }}</span>
     </a>
@@ -154,6 +166,12 @@
             (click)="closeMobileMenu()">
             <span class="mobile-menu-list__icon" aria-hidden="true">
               <i [class]="navItem.icon"></i>
+              <span
+                *ngIf="getNavBadge(navItem) > 0"
+                class="app-nav-badge app-nav-badge--mobile-menu"
+                [attr.aria-label]="getNavBadge(navItem) + ' demande(s) en attente'">
+                {{ formatNavBadge(getNavBadge(navItem)) }}
+              </span>
             </span>
             <span>{{ navItem.label }}</span>
           </a>

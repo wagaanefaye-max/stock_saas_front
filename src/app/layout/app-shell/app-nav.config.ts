@@ -8,6 +8,8 @@ export interface AppNavItem {
   mobilePrimary?: boolean;
   /** Mots-clés pour la palette de commandes */
   searchTerms?: string[];
+  /** Clé pour afficher un badge de notification sur l'entrée de menu */
+  badgeKey?: 'pendingSubscriptions';
 }
 
 export interface AppShellConfig {
@@ -92,6 +94,7 @@ export const SUPER_ADMIN_NAV_CONFIG: AppShellConfig = {
     item('Souscriptions', 'pi pi-credit-card', '/super-admin/subscription-requests', {
       mobileLabel: 'Demandes',
       mobilePrimary: true,
+      badgeKey: 'pendingSubscriptions',
       searchTerms: ['souscription', 'abonnement', 'demande', 'paiement']
     }),
     item('Utilisateurs', 'pi pi-user', '/super-admin/platform-users', {

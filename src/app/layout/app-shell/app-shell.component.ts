@@ -11,7 +11,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { SidebarModule } from 'primeng/sidebar';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { SuperAdminSubscriptionBadgeService } from '../../services/super-admin-subscription-badge.service';
 import { AppNavItem, AppShellConfig } from './app-nav.config';
 
 const SIDEBAR_COLLAPSED_KEY = 'stock-saas-sidebar-collapsed';
@@ -35,23 +37,45 @@ export class AppShellComponent implements OnInit, OnDestroy {
   commandPaletteOpen = false;
   commandQuery = '';
   commandActiveIndex = 0;
+  pendingSubscriptions = 0;
 
+  private badgeSub?: Subscription;
   private readonly onDocumentClick = () => {
     this.profileMenuOpen = false;
   };
 
   constructor(
     public authService: AuthService,
-    private router: Router
+    private router: Router,
+    private subscriptionBadgeService: SuperAdminSubscriptionBadgeService
   ) {}
 
   ngOnInit() {
     this.sidebarCollapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1';
     document.addEventListener('click', this.onDocumentClick);
+    if (this.config.layoutClass === 'super-admin-layout') {
+      this.badgeSub = this.subscriptionBadgeService.pendingCount$.subscribe(
+        (count) => (this.pendingSubscriptions = count)
+      );
+      this.subscriptionBadgeService.startPolling();
+    }
   }
 
   ngOnDestroy() {
     document.removeEventListener('click', this.onDocumentClick);
+    this.subscriptionBadgeService.stopPolling();
+    this.badgeSub?.unsubscribe();
+  }
+
+  getNavBadge(navItem: AppNavItem): number {
+    if (navItem.badgeKey === 'pendingSubscriptions') {
+      return this.pendingSubscriptions;
+    }
+    return 0;
+  }
+
+  formatNavBadge(count: number): string {
+    return count > 99 ? '99+' : String(count);
   }
 
   get commandShortcutLabel(): string {
