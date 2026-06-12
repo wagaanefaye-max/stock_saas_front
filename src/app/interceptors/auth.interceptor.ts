@@ -1,10 +1,27 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { catchError, finalize, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { LoadingService } from '../services/loading.service';
 import { getErrorMessage } from '../utils/error-message.util';
+
+function isAuthEndpoint(url: string): boolean {
+  return (
+    url.includes('/api/auth/login') ||
+    url.includes('/api/auth/register') ||
+    url.includes('/api/auth/verify-account') ||
+    url.includes('/api/auth/forgot-password') ||
+    url.includes('/api/auth/logout')
+  );
+}
+
+function isSubscriptionReadOnlyError(error: HttpErrorResponse): boolean {
+  const body = error.error;
+  if (!body || typeof body !== 'object') {
+    return false;
+  }
+  return body.readOnly === true || body.error === 'SubscriptionReadOnly';
+}
 
 /**
  * Intercepteur HTTP pour gérer les erreurs d'authentification.
@@ -12,32 +29,16 @@ import { getErrorMessage } from '../utils/error-message.util';
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const router = inject(Router);
   const loadingService = inject(LoadingService);
 
-  // Afficher l'indicateur de chargement avant la requête
   loadingService.show();
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      // Gérer les erreurs d'authentification (401, 403)
-      if (error.status === 401 || error.status === 403) {
-        const url = req.url || '';
-        const isAuthEndpoint =
-          url.includes('/api/auth/login') ||
-          url.includes('/api/auth/register') ||
-          url.includes('/api/auth/verify-account') ||
-          url.includes('/api/auth/forgot-password') ||
-          url.includes('/api/auth/logout');
+      const url = req.url || '';
 
-        if (!isAuthEndpoint && authService.isAuthenticated()) {
-          authService.clearLocalSession();
-          router.navigate(['/login'], {
-            queryParams: {
-              error: 'Votre session a expiré. Veuillez vous reconnecter.'
-            }
-          });
-        }
+      if (error.status === 401 && !isAuthEndpoint(url)) {
+        authService.handleSessionExpired();
       }
 
       const userMessage = getErrorMessage(error);
@@ -53,7 +54,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       }));
     }),
     finalize(() => {
-      // Masquer l'indicateur de chargement après la requête (succès ou erreur)
       loadingService.hide();
     })
   );

@@ -118,9 +118,9 @@ export class SuperAdminDashboardComponent implements OnInit {
             change: data.revenueChange || '0%'
           },
           {
-            title: 'Souscriptions en attente',
+            title: 'Tickets support',
             value: formatNumber(data.supportTickets || 0),
-            icon: 'pi pi-clock',
+            icon: 'pi pi-ticket',
             color: 'var(--danger)',
             change: data.ticketsChange || '0'
           }
