@@ -49,6 +49,15 @@ interface DashboardStats {
   }[];
 }
 
+interface DashboardStatCard {
+  title: string;
+  value: string;
+  sub?: string;
+  icon: string;
+  color: string;
+  alert?: boolean;
+}
+
 @Component({
   selector: 'app-company-admin-dashboard',
   standalone: true,
@@ -80,6 +89,9 @@ export class CompanyAdminDashboardComponent implements OnInit {
   paidRevenue = 0;
   pendingRevenue = 0;
   lowStockProducts = 0;
+
+  salesStats: DashboardStatCard[] = [];
+  stockStats: DashboardStatCard[] = [];
 
   salesByMonthData: any;
   statusChartData: any;
@@ -124,6 +136,7 @@ export class CompanyAdminDashboardComponent implements OnInit {
         this.applyStats(stats);
         this.applyProducts(products || []);
         this.computeInvoiceKpis();
+        this.buildStatCards();
         this.buildInvoiceLists();
         this.buildSalesByMonthChart();
         this.buildStatusChart();
@@ -173,6 +186,73 @@ export class CompanyAdminDashboardComponent implements OnInit {
     this.pendingRevenue = this.invoices
       .filter(i => i.status === 'SENT')
       .reduce((sum, i) => sum + (Number(i.total) || 0), 0);
+  }
+
+  private buildStatCards(): void {
+    const alertCount = this.stockAlerts || this.lowStockProducts;
+
+    this.salesStats = [
+      {
+        title: 'Ventes encaissées',
+        value: `${this.formatMoney(this.paidRevenue)} F`,
+        sub: `${this.paidInvoices} facture(s) payée(s)`,
+        icon: 'pi pi-wallet',
+        color: '#16a34a'
+      },
+      {
+        title: 'Impayées',
+        value: `${this.formatMoney(this.pendingRevenue)} F`,
+        sub: `${this.sentInvoices} envoyée(s)`,
+        icon: 'pi pi-clock',
+        color: '#f59e0b'
+      },
+      {
+        title: 'Brouillons',
+        value: String(this.draftInvoices),
+        sub: 'À finaliser',
+        icon: 'pi pi-pencil',
+        color: '#64748b'
+      },
+      {
+        title: 'Factures payées',
+        value: String(this.paidInvoices),
+        sub: 'Total validé',
+        icon: 'pi pi-check-circle',
+        color: '#2563eb'
+      }
+    ];
+
+    this.stockStats = [
+      {
+        title: 'Produits',
+        value: String(this.totalProducts),
+        sub: 'Dans le catalogue',
+        icon: 'pi pi-box',
+        color: '#2563eb'
+      },
+      {
+        title: 'Entrepôts',
+        value: String(this.totalWarehouses),
+        sub: 'Points de stockage',
+        icon: 'pi pi-building',
+        color: '#7c3aed'
+      },
+      {
+        title: 'Mouvements (mois)',
+        value: String(this.monthlyMovements),
+        sub: 'Ce mois-ci',
+        icon: 'pi pi-sync',
+        color: '#0891b2'
+      },
+      {
+        title: 'Alertes stock bas',
+        value: String(alertCount),
+        sub: alertCount > 0 ? 'À réapprovisionner' : 'Tout est OK',
+        icon: 'pi pi-exclamation-triangle',
+        color: alertCount > 0 ? '#dc2626' : '#16a34a',
+        alert: alertCount > 0
+      }
+    ];
   }
 
   private buildInvoiceLists(): void {

@@ -2,11 +2,19 @@
   <p-toast></p-toast>
 
   <header class="dashboard-header">
-    <h1>Accueil — {{ companyName }}</h1>
-    <p class="dashboard-header__subtitle">Créez une facture, consultez le stock ou gérez vos clients</p>
+    <div class="dashboard-header__main">
+      <h1>Bonjour, {{ companyName }}</h1>
+      <p class="dashboard-header__subtitle">Vue d'ensemble de votre activité commerciale et de votre stock</p>
+    </div>
+    <a
+      routerLink="/company-admin/invoices"
+      [queryParams]="{ new: '1' }"
+      class="dashboard-header__cta">
+      <i class="pi pi-plus"></i>
+      <span>Nouvelle facture</span>
+    </a>
   </header>
 
-  <!-- Bandeau abonnement -->
   <section *ngIf="subscriptionStatus" class="subscription-banner" aria-label="Statut abonnement">
     <div class="subscription-banner__item subscription-banner__item--pending" *ngIf="subscriptionStatus.hasPendingRequest">
       <i class="pi pi-clock"></i>
@@ -53,218 +61,200 @@
   </div>
 
   <ng-container *ngIf="!loading">
-    <section class="main-actions" aria-label="Actions principales">
-      <a
-        routerLink="/company-admin/invoices"
-        [queryParams]="{ new: '1' }"
-        class="main-action-card main-action-sale dashboard-cta-primary">
-        <div class="main-action-icon">
+    <section class="dashboard-section" aria-label="Indicateurs clés">
+      <div class="dashboard-section__head">
+        <h2>Indicateurs clés</h2>
+      </div>
+      <div class="stats-grid">
+        <div *ngFor="let stat of salesStats" class="stat-card">
+          <div class="stat-icon" [style.background-color]="stat.color + '18'">
+            <i [class]="stat.icon" [style.color]="stat.color"></i>
+          </div>
+          <div class="stat-content">
+            <p class="stat-title">{{ stat.title }}</p>
+            <h3 class="stat-value">{{ stat.value }}</h3>
+            <span class="stat-change" *ngIf="stat.sub">{{ stat.sub }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="stats-grid stats-grid--stock">
+        <div *ngFor="let stat of stockStats" class="stat-card" [class.stat-card--alert]="stat.alert">
+          <div class="stat-icon" [style.background-color]="stat.color + '18'">
+            <i [class]="stat.icon" [style.color]="stat.color"></i>
+          </div>
+          <div class="stat-content">
+            <p class="stat-title">{{ stat.title }}</p>
+            <h3 class="stat-value">{{ stat.value }}</h3>
+            <span class="stat-change" *ngIf="stat.sub">{{ stat.sub }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-section" aria-label="Actions rapides">
+      <div class="dashboard-section__head">
+        <h2>Actions rapides</h2>
+      </div>
+      <nav class="quick-actions">
+        <a
+          routerLink="/company-admin/invoices"
+          [queryParams]="{ new: '1' }"
+          class="quick-action quick-action--primary">
           <i class="pi pi-file-edit"></i>
-        </div>
-        <div class="main-action-text">
-          <span class="main-action-label">Nouvelle facture</span>
-          <span class="main-action-hint">Créer une facture client</span>
-        </div>
-        <i class="pi pi-chevron-right dashboard-cta-arrow" aria-hidden="true"></i>
-      </a>
-
-      <div class="main-actions-row">
-        <a routerLink="/company-admin/invoices" class="main-action-card main-action-invoices">
-          <div class="main-action-icon">
-            <i class="pi pi-list"></i>
-          </div>
-          <span class="main-action-label">Factures</span>
+          <span>Nouvelle facture</span>
         </a>
-
-        <a routerLink="/company-admin/products" class="main-action-card main-action-stock">
-          <div class="main-action-icon">
-            <i class="pi pi-box"></i>
-          </div>
-          <span class="main-action-label">Stock</span>
+        <a routerLink="/company-admin/invoices" class="quick-action">
+          <i class="pi pi-list"></i>
+          <span>Factures</span>
         </a>
+        <a routerLink="/company-admin/products" class="quick-action">
+          <i class="pi pi-box"></i>
+          <span>Stock</span>
+        </a>
+        <a routerLink="/company-admin/partners" class="quick-action">
+          <i class="pi pi-users"></i>
+          <span>Clients</span>
+        </a>
+        <a routerLink="/company-admin/products" [queryParams]="{ action: 'new' }" class="quick-action">
+          <i class="pi pi-plus-circle"></i>
+          <span>Nouveau produit</span>
+        </a>
+        <a routerLink="/company-admin/movements" class="quick-action">
+          <i class="pi pi-sync"></i>
+          <span>Mouvements</span>
+        </a>
+      </nav>
+    </section>
+
+    <section class="dashboard-section" aria-label="À traiter">
+      <div class="dashboard-section__head">
+        <h2>À traiter</h2>
       </div>
-    </section>
-
-    <nav class="secondary-actions" aria-label="Raccourcis">
-      <a routerLink="/company-admin/products" [queryParams]="{ action: 'new' }" class="secondary-link">
-        <i class="pi pi-plus-circle"></i>
-        <span>Nouveau produit</span>
-      </a>
-      <a routerLink="/company-admin/warehouses" class="secondary-link">
-        <i class="pi pi-building"></i>
-        <span>Entrepôts</span>
-      </a>
-      <a routerLink="/company-admin/users" class="secondary-link">
-        <i class="pi pi-user-edit"></i>
-        <span>Utilisateurs</span>
-      </a>
-      <a routerLink="/company-admin/partners" class="secondary-link">
-        <i class="pi pi-users"></i>
-        <span>Clients</span>
-      </a>
-      <a routerLink="/company-admin/inventories" class="secondary-link">
-        <i class="pi pi-clipboard"></i>
-        <span>Inventaires</span>
-      </a>
-      <a routerLink="/company-admin/movements" class="secondary-link">
-        <i class="pi pi-sync"></i>
-        <span>Mouvements</span>
-      </a>
-      <a routerLink="/company-admin/subscriptions" class="secondary-link">
-        <i class="pi pi-credit-card"></i>
-        <span>Abonnement</span>
-      </a>
-    </nav>
-
-    <section class="kpi-grid" aria-label="Indicateurs ventes">
-      <p-card class="kpi-card kpi-card--revenue">
-        <div class="kpi-title">Ventes encaissées</div>
-        <div class="kpi-value">{{ formatMoney(paidRevenue) }} <span class="kpi-unit">FCFA</span></div>
-      </p-card>
-      <p-card class="kpi-card">
-        <div class="kpi-title">Factures payées</div>
-        <div class="kpi-value">{{ paidInvoices }}</div>
-      </p-card>
-      <p-card class="kpi-card kpi-card--muted">
-        <div class="kpi-title">Brouillons</div>
-        <div class="kpi-value">{{ draftInvoices }}</div>
-      </p-card>
-      <p-card class="kpi-card kpi-card--warn">
-        <div class="kpi-title">Envoyées (impayées)</div>
-        <div class="kpi-value">{{ sentInvoices }}</div>
-        <div class="kpi-sub" *ngIf="pendingRevenue > 0">{{ formatMoney(pendingRevenue) }} FCFA</div>
-      </p-card>
-    </section>
-
-    <section class="kpi-grid kpi-grid--stock" aria-label="Indicateurs stock">
-      <p-card class="kpi-card">
-        <div class="kpi-title">Produits</div>
-        <div class="kpi-value">{{ totalProducts }}</div>
-      </p-card>
-      <p-card class="kpi-card">
-        <div class="kpi-title">Entrepôts</div>
-        <div class="kpi-value">{{ totalWarehouses }}</div>
-      </p-card>
-      <p-card class="kpi-card">
-        <div class="kpi-title">Mouvements (mois)</div>
-        <div class="kpi-value">{{ monthlyMovements }}</div>
-      </p-card>
-      <p-card class="kpi-card kpi-card--alert">
-        <div class="kpi-title">Alertes stock bas</div>
-        <div class="kpi-value">{{ stockAlerts || lowStockProducts }}</div>
-      </p-card>
-    </section>
-
-    <section class="panels-grid" aria-label="À traiter">
-      <p-card class="panel-card">
-        <div class="panel-card__head">
-          <h3><i class="pi pi-exclamation-triangle"></i> Stock bas</h3>
-          <a routerLink="/company-admin/products" class="panel-card__link">Voir tout</a>
-        </div>
-        <ul class="panel-list" *ngIf="lowStockItems.length > 0">
-          <li *ngFor="let p of lowStockItems">
-            <a routerLink="/company-admin/products" class="panel-list__item">
-              <span class="panel-list__main">
-                <strong>{{ p.name || 'Produit #' + p.id }}</strong>
-                <span class="panel-list__meta">Seuil {{ p.minThreshold | number }} · Stock {{ p.stock | number }}</span>
-              </span>
-              <p-tag value="Bas" severity="warn"></p-tag>
-            </a>
-          </li>
-        </ul>
-        <p *ngIf="lowStockItems.length === 0" class="panel-empty">Aucune alerte stock pour le moment.</p>
-      </p-card>
-
-      <p-card class="panel-card">
-        <div class="panel-card__head">
-          <h3><i class="pi pi-file"></i> Factures à traiter</h3>
-          <a routerLink="/company-admin/invoices" class="panel-card__link">Voir tout</a>
-        </div>
-        <ul class="panel-list" *ngIf="pendingInvoices.length > 0">
-          <li *ngFor="let inv of pendingInvoices">
-            <a routerLink="/company-admin/invoices" class="panel-list__item">
-              <span class="panel-list__main">
-                <strong>{{ inv.invoiceNumber || 'Facture #' + inv.id }}</strong>
-                <span class="panel-list__meta">
-                  {{ inv.clientName || 'Client' }} · {{ formatMoney(inv.total) }} FCFA
+      <div class="panels-grid">
+        <p-card class="panel-card">
+          <div class="panel-card__head">
+            <h3><i class="pi pi-exclamation-triangle"></i> Stock bas</h3>
+            <a routerLink="/company-admin/products" class="panel-card__link">Voir tout</a>
+          </div>
+          <ul class="panel-list" *ngIf="lowStockItems.length > 0">
+            <li *ngFor="let p of lowStockItems">
+              <a routerLink="/company-admin/products" class="panel-list__item">
+                <span class="panel-list__main">
+                  <strong>{{ p.name || 'Produit #' + p.id }}</strong>
+                  <span class="panel-list__meta">Seuil {{ p.minThreshold | number }} · Stock {{ p.stock | number }}</span>
                 </span>
-              </span>
-              <p-tag [value]="getInvoiceStatusLabel(inv)" [severity]="getInvoiceStatusSeverity(inv.status)"></p-tag>
-            </a>
-          </li>
-        </ul>
-        <p *ngIf="pendingInvoices.length === 0" class="panel-empty">Aucune facture en attente.</p>
-      </p-card>
+                <p-tag value="Bas" severity="warn"></p-tag>
+              </a>
+            </li>
+          </ul>
+          <p *ngIf="lowStockItems.length === 0" class="panel-empty">Aucune alerte stock pour le moment.</p>
+        </p-card>
+
+        <p-card class="panel-card">
+          <div class="panel-card__head">
+            <h3><i class="pi pi-file"></i> Factures à traiter</h3>
+            <a routerLink="/company-admin/invoices" class="panel-card__link">Voir tout</a>
+          </div>
+          <ul class="panel-list" *ngIf="pendingInvoices.length > 0">
+            <li *ngFor="let inv of pendingInvoices">
+              <a routerLink="/company-admin/invoices" class="panel-list__item">
+                <span class="panel-list__main">
+                  <strong>{{ inv.invoiceNumber || 'Facture #' + inv.id }}</strong>
+                  <span class="panel-list__meta">
+                    {{ inv.clientName || 'Client' }} · {{ formatMoney(inv.total) }} FCFA
+                  </span>
+                </span>
+                <p-tag [value]="getInvoiceStatusLabel(inv)" [severity]="getInvoiceStatusSeverity(inv.status)"></p-tag>
+              </a>
+            </li>
+          </ul>
+          <p *ngIf="pendingInvoices.length === 0" class="panel-empty">Aucune facture en attente.</p>
+        </p-card>
+      </div>
     </section>
 
-    <section class="charts-grid" aria-label="Graphiques">
-      <p-card class="chart-card">
-        <h3>Ventes — 6 derniers mois</h3>
-        <div class="chart-wrap chart-wrap--tall">
-          <p-chart type="line" [data]="salesByMonthData" [options]="chartOptions"></p-chart>
-        </div>
-      </p-card>
-      <p-card class="chart-card">
-        <h3>Statuts des factures</h3>
-        <div class="chart-wrap chart-wrap--donut">
-          <p-chart type="doughnut" [data]="statusChartData" [options]="doughnutChartOptions"></p-chart>
-        </div>
-      </p-card>
-      <p-card class="chart-card chart-card--wide">
-        <h3>Mouvements de stock — 6 mois</h3>
-        <div class="chart-wrap chart-wrap--tall">
-          <p-chart type="line" [data]="movementsChartData" [options]="movementsChartOptions"></p-chart>
-        </div>
-      </p-card>
+    <section class="dashboard-section" aria-label="Analyses">
+      <div class="dashboard-section__head">
+        <h2>Analyses</h2>
+      </div>
+      <div class="charts-grid">
+        <p-card class="chart-card">
+          <h3>Ventes — 6 derniers mois</h3>
+          <div class="chart-wrap chart-wrap--tall">
+            <p-chart type="line" [data]="salesByMonthData" [options]="chartOptions"></p-chart>
+          </div>
+        </p-card>
+        <p-card class="chart-card">
+          <h3>Statuts des factures</h3>
+          <div class="chart-wrap chart-wrap--donut">
+            <p-chart type="doughnut" [data]="statusChartData" [options]="doughnutChartOptions"></p-chart>
+          </div>
+        </p-card>
+        <p-card class="chart-card chart-card--wide">
+          <h3>Mouvements de stock — 6 mois</h3>
+          <div class="chart-wrap chart-wrap--tall">
+            <p-chart type="line" [data]="movementsChartData" [options]="movementsChartOptions"></p-chart>
+          </div>
+        </p-card>
+      </div>
     </section>
 
-    <p-card class="recent-card">
-      <div class="panel-card__head">
-        <h3><i class="pi pi-history"></i> Mouvements récents</h3>
-        <a routerLink="/company-admin/movements" class="panel-card__link">Voir tout</a>
+    <section class="dashboard-section dashboard-section--last" aria-label="Activité récente">
+      <div class="dashboard-section__head">
+        <h2>Activité récente</h2>
       </div>
-      <div class="recent-table-wrap">
-        <table class="recent-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Produit</th>
-              <th>Type</th>
-              <th>Qté</th>
-              <th>Entrepôt</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let m of recentMovements">
-              <td>{{ m.date }}</td>
-              <td>{{ m.productName }}</td>
-              <td><span class="movement-badge">{{ m.movementType }}</span></td>
-              <td>{{ m.quantity }}</td>
-              <td>{{ m.warehouseName }}</td>
-            </tr>
-            <tr *ngIf="recentMovements.length === 0">
-              <td colspan="5" class="panel-empty">Aucun mouvement récent.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </p-card>
+      <div class="activity-grid">
+        <p-card class="recent-card">
+          <div class="panel-card__head">
+            <h3><i class="pi pi-history"></i> Mouvements récents</h3>
+            <a routerLink="/company-admin/movements" class="panel-card__link">Voir tout</a>
+          </div>
+          <div class="recent-table-wrap">
+            <table class="recent-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Produit</th>
+                  <th>Type</th>
+                  <th>Qté</th>
+                  <th class="recent-table__hide-mobile">Entrepôt</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let m of recentMovements">
+                  <td>{{ m.date }}</td>
+                  <td>{{ m.productName }}</td>
+                  <td><span class="movement-badge">{{ m.movementType }}</span></td>
+                  <td>{{ m.quantity }}</td>
+                  <td class="recent-table__hide-mobile">{{ m.warehouseName }}</td>
+                </tr>
+                <tr *ngIf="recentMovements.length === 0">
+                  <td colspan="5" class="panel-empty">Aucun mouvement récent.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </p-card>
 
-    <p-card class="recent-card recent-card--invoices" *ngIf="recentInvoices.length > 0">
-      <div class="panel-card__head">
-        <h3><i class="pi pi-receipt"></i> Dernières factures</h3>
+        <p-card class="recent-card">
+          <div class="panel-card__head">
+            <h3><i class="pi pi-receipt"></i> Dernières factures</h3>
+            <a routerLink="/company-admin/invoices" class="panel-card__link">Voir tout</a>
+          </div>
+          <ul class="panel-list panel-list--compact" *ngIf="recentInvoices.length > 0">
+            <li *ngFor="let inv of recentInvoices">
+              <a routerLink="/company-admin/invoices" class="panel-list__item">
+                <span class="panel-list__main">
+                  <strong>{{ inv.invoiceNumber || 'Facture #' + inv.id }}</strong>
+                  <span class="panel-list__meta">{{ formatDate(inv.invoiceDate) }} · {{ formatMoney(inv.total) }} FCFA</span>
+                </span>
+                <p-tag [value]="getInvoiceStatusLabel(inv)" [severity]="getInvoiceStatusSeverity(inv.status)"></p-tag>
+              </a>
+            </li>
+          </ul>
+          <p *ngIf="recentInvoices.length === 0" class="panel-empty">Aucune facture enregistrée.</p>
+        </p-card>
       </div>
-      <ul class="panel-list panel-list--compact">
-        <li *ngFor="let inv of recentInvoices">
-          <a routerLink="/company-admin/invoices" class="panel-list__item">
-            <span class="panel-list__main">
-              <strong>{{ inv.invoiceNumber || 'Facture #' + inv.id }}</strong>
-              <span class="panel-list__meta">{{ formatDate(inv.invoiceDate) }} · {{ formatMoney(inv.total) }} FCFA</span>
-            </span>
-            <p-tag [value]="getInvoiceStatusLabel(inv)" [severity]="getInvoiceStatusSeverity(inv.status)"></p-tag>
-          </a>
-        </li>
-      </ul>
-    </p-card>
+    </section>
   </ng-container>
 </div>
