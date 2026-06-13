@@ -18,7 +18,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
-import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_XL } from '../../utils/dialog-mobile.util';
+import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_SM, APP_DIALOG_STYLE_XL } from '../../utils/dialog-mobile.util';
 @Component({
   selector: 'app-movements',
   standalone: true,
@@ -45,6 +45,7 @@ import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_XL } from '../../utils/dialog-
 })
 export class MovementsComponent implements OnInit {
   readonly dialogStyle = APP_DIALOG_STYLE_XL;
+  readonly dialogStyleSm = APP_DIALOG_STYLE_SM;
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
 
   movements: any[] = [];
@@ -70,7 +71,10 @@ export class MovementsComponent implements OnInit {
   products: any[] = [];
 
   displayDialog = false;
+  displayProductDialog = false;
   movement: any = {};
+  newProduct: { name?: string } = {};
+  defaultWarehouseId: number | null = null;
   types: any[] = [];
 
   constructor(
@@ -224,6 +228,10 @@ export class MovementsComponent implements OnInit {
     this.apiService.get<any[]>('/warehouses/simple').subscribe({
       next: (data) => {
         this.accessibleWarehouses = data;
+        this.defaultWarehouseId = this.resolveDefaultWarehouseId(data);
+        if (this.displayDialog && !this.movement.warehouseId && this.defaultWarehouseId) {
+          this.movement.warehouseId = this.defaultWarehouseId;
+        }
       },
       error: (error) => {
         console.error('Erreur lors du chargement des entrepôts', error);
@@ -282,12 +290,76 @@ export class MovementsComponent implements OnInit {
     const defaultType = this.types.length > 0 ? this.types[0].value : 'ENTREE';
     this.movement = {
       typeCode: defaultType,
-      warehouseId: null,
+      warehouseId: this.defaultWarehouseId,
       destinationWarehouseId: null,
       date: new Date(),
       quantity: 1
     };
     this.displayDialog = true;
+  }
+
+  resolveDefaultWarehouseId(warehouses: any[] = this.accessibleWarehouses): number | null {
+    if (!warehouses?.length) {
+      return null;
+    }
+    const defaultWarehouse = warehouses.find(
+      (warehouse) => warehouse.name?.toUpperCase() === 'DEFAULT-ENTREPOT'
+    );
+    return defaultWarehouse?.id ?? warehouses[0].id;
+  }
+
+  openCreateProductDialog(): void {
+    this.newProduct = { name: '' };
+    this.displayProductDialog = true;
+  }
+
+  saveNewProduct(): void {
+    const name = this.newProduct.name?.trim();
+    if (!name) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation',
+        detail: 'Le nom du produit est obligatoire'
+      });
+      return;
+    }
+
+    const payload = {
+      name,
+      quantity: 0,
+      minThreshold: 0,
+      warehouseId: this.defaultWarehouseId
+    };
+
+    this.apiService.post<any>('/products', payload).subscribe({
+      next: (createdProduct) => {
+        this.products = [
+          ...this.products,
+          {
+            id: createdProduct.id,
+            name: createdProduct.name,
+            sku: createdProduct.sku
+          }
+        ];
+        this.movement.productId = createdProduct.id;
+        this.movement.warehouseId = createdProduct.warehouseId ?? this.defaultWarehouseId;
+        this.displayProductDialog = false;
+        this.newProduct = {};
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Produit créé',
+          detail: `« ${createdProduct.name} » est rattaché à l'entrepôt par défaut.`
+        });
+      },
+      error: (error) => {
+        const errorMessage = error.userMessage || error.error?.message || 'Impossible de créer le produit';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: errorMessage
+        });
+      }
+    });
   }
 
   onWarehouseChange() {
@@ -411,19 +483,15 @@ export class MovementsComponent implements OnInit {
 
   onProductChange() {
     if (!this.movement.productId) {
-      this.movement.warehouseId = null;
+      this.movement.warehouseId = this.defaultWarehouseId;
       return;
     }
     this.apiService.get<any>(`/products/${this.movement.productId}`).subscribe({
       next: (p) => {
-        if (p && p.warehouseId) {
-          this.movement.warehouseId = p.warehouseId;
-        } else {
-          this.movement.warehouseId = null;
-        }
+        this.movement.warehouseId = p?.warehouseId ?? this.defaultWarehouseId;
       },
       error: () => {
-        this.movement.warehouseId = null;
+        this.movement.warehouseId = this.defaultWarehouseId;
       }
     });
   }

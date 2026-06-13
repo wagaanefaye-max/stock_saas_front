@@ -184,9 +184,17 @@
           class="w-full"
           [style]="{ width: '100%' }"
           [appendTo]="'body'"
+          [filter]="products.length > 8"
+          filterPlaceholder="Rechercher…"
           (onChange)="onProductChange()"
           required>
         </p-select>
+        <button
+          type="button"
+          class="movement-form__link"
+          (click)="openCreateProductDialog()">
+          + Nouveau produit
+        </button>
       </div>
     </div>
 
@@ -283,6 +291,50 @@
         (click)="saveMovement()"
         [disabled]="!isFormValid()"
         [title]="!isFormValid() ? 'Veuillez remplir tous les champs obligatoires' : 'Cliquez pour enregistrer'">
+      </button>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog
+    [(visible)]="displayProductDialog"
+    styleClass="app-mobile-dialog"
+    [style]="dialogStyleSm"
+    [breakpoints]="dialogBreakpoints"
+    header="Nouveau produit"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false">
+
+    <div class="app-dialog-form">
+      <div class="form-group">
+        <label for="movement-new-product-name">Nom du produit *</label>
+        <input
+          id="movement-new-product-name"
+          type="text"
+          pInputText
+          [(ngModel)]="newProduct.name"
+          class="w-full"
+          placeholder="Ex : Riz parfumé 25 kg">
+      </div>
+      <p class="movement-form__hint">
+        Le produit sera automatiquement rattaché à l'entrepôt par défaut.
+      </p>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        label="Annuler"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="displayProductDialog = false">
+      </button>
+      <button
+        pButton
+        label="Créer le produit"
+        icon="pi pi-check"
+        (click)="saveNewProduct()"
+        [disabled]="!newProduct.name?.trim()">
       </button>
     </ng-template>
   </p-dialog>
