@@ -37,7 +37,7 @@ interface DashboardStats {
   monthlyMovements: number;
   alerts: number;
   activeUsers: number;
-  monthlyMovementsData: { month: string; entries: number; exits: number }[];
+  monthlyMovementsData: { month: string; entries: number; exits: number; transfers: number; adjustments: number }[];
   productsByCategory: { category: string; count: number }[];
   recentMovements: {
     id: number;
@@ -300,28 +300,46 @@ export class CompanyAdminDashboardComponent implements OnInit {
   }
 
   private buildMovementsChart(monthlyData: DashboardStats['monthlyMovementsData']): void {
+    const emptyMovementDatasets = [
+      {
+        label: 'Entrées',
+        data: new Array(6).fill(0),
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+        tension: 0.3,
+        fill: true
+      },
+      {
+        label: 'Sorties',
+        data: new Array(6).fill(0),
+        borderColor: '#dc2626',
+        backgroundColor: 'rgba(220, 38, 38, 0.08)',
+        tension: 0.3,
+        fill: true
+      },
+      {
+        label: 'Transferts',
+        data: new Array(6).fill(0),
+        borderColor: '#7c3aed',
+        backgroundColor: 'rgba(124, 58, 237, 0.08)',
+        tension: 0.3,
+        fill: true
+      },
+      {
+        label: 'Ajustements',
+        data: new Array(6).fill(0),
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(245, 158, 11, 0.08)',
+        tension: 0.3,
+        fill: true
+      }
+    ];
+
     if (!monthlyData.length) {
       const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'];
       this.movementsChartData = {
         labels: months,
-        datasets: [
-          {
-            label: 'Entrées',
-            data: new Array(6).fill(0),
-            borderColor: '#2563eb',
-            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-            tension: 0.3,
-            fill: true
-          },
-          {
-            label: 'Sorties',
-            data: new Array(6).fill(0),
-            borderColor: '#dc2626',
-            backgroundColor: 'rgba(220, 38, 38, 0.08)',
-            tension: 0.3,
-            fill: true
-          }
-        ]
+        datasets: emptyMovementDatasets
       };
       return;
     }
@@ -342,6 +360,22 @@ export class CompanyAdminDashboardComponent implements OnInit {
           data: monthlyData.map(d => d.exits || 0),
           borderColor: '#dc2626',
           backgroundColor: 'rgba(220, 38, 38, 0.08)',
+          tension: 0.3,
+          fill: true
+        },
+        {
+          label: 'Transferts',
+          data: monthlyData.map(d => d.transfers || 0),
+          borderColor: '#7c3aed',
+          backgroundColor: 'rgba(124, 58, 237, 0.08)',
+          tension: 0.3,
+          fill: true
+        },
+        {
+          label: 'Ajustements',
+          data: monthlyData.map(d => d.adjustments || 0),
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245, 158, 11, 0.08)',
           tension: 0.3,
           fill: true
         }

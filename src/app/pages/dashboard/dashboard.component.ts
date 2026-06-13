@@ -158,39 +158,66 @@ export class DashboardComponent implements OnInit {
   }
   
   updateChartData(monthlyData: any[]) {
+    const emptyDatasets = [
+      {
+        label: 'Entrées',
+        data: new Array(6).fill(0),
+        fill: true,
+        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+        borderColor: '#2563EB',
+        borderWidth: 2,
+        tension: 0.4,
+        pointBackgroundColor: '#2563EB',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4
+      },
+      {
+        label: 'Sorties',
+        data: new Array(6).fill(0),
+        fill: true,
+        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+        borderColor: '#DC2626',
+        borderWidth: 2,
+        tension: 0.4,
+        pointBackgroundColor: '#DC2626',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4
+      },
+      {
+        label: 'Transferts',
+        data: new Array(6).fill(0),
+        fill: true,
+        backgroundColor: 'rgba(124, 58, 237, 0.1)',
+        borderColor: '#7C3AED',
+        borderWidth: 2,
+        tension: 0.4,
+        pointBackgroundColor: '#7C3AED',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4
+      },
+      {
+        label: 'Ajustements',
+        data: new Array(6).fill(0),
+        fill: true,
+        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+        borderColor: '#F59E0B',
+        borderWidth: 2,
+        tension: 0.4,
+        pointBackgroundColor: '#F59E0B',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4
+      }
+    ];
+
     if (monthlyData.length === 0) {
-      // Initialiser avec des données vides pour les 6 derniers mois
       const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'];
       this.chartData = {
         labels: months,
-        datasets: [
-          {
-            label: 'Entrées',
-            data: new Array(6).fill(0),
-            fill: true,
-            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-            borderColor: '#2563EB',
-            borderWidth: 2,
-            tension: 0.4,
-            pointBackgroundColor: '#2563EB',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 4
-          },
-          {
-            label: 'Sorties',
-            data: new Array(6).fill(0),
-            fill: true,
-            backgroundColor: 'rgba(220, 38, 38, 0.1)',
-            borderColor: '#DC2626',
-            borderWidth: 2,
-            tension: 0.4,
-            pointBackgroundColor: '#DC2626',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 4
-          }
-        ]
+        datasets: emptyDatasets
       };
     } else {
       this.chartData = {
@@ -218,6 +245,32 @@ export class DashboardComponent implements OnInit {
             borderWidth: 2,
             tension: 0.4,
             pointBackgroundColor: '#DC2626',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+          },
+          {
+            label: 'Transferts',
+            data: monthlyData.map(d => d.transfers || 0),
+            fill: true,
+            backgroundColor: 'rgba(124, 58, 237, 0.1)',
+            borderColor: '#7C3AED',
+            borderWidth: 2,
+            tension: 0.4,
+            pointBackgroundColor: '#7C3AED',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+          },
+          {
+            label: 'Ajustements',
+            data: monthlyData.map(d => d.adjustments || 0),
+            fill: true,
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            borderColor: '#F59E0B',
+            borderWidth: 2,
+            tension: 0.4,
+            pointBackgroundColor: '#F59E0B',
             pointBorderColor: '#fff',
             pointBorderWidth: 2,
             pointRadius: 4
