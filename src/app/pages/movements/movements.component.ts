@@ -75,6 +75,7 @@ export class MovementsComponent implements OnInit {
   movement: any = {};
   newProduct: { name?: string } = {};
   defaultWarehouseId: number | null = null;
+  availableStockInWarehouse: number | null = null;
   types: any[] = [];
 
   constructor(
@@ -295,6 +296,7 @@ export class MovementsComponent implements OnInit {
       date: new Date(),
       quantity: 1
     };
+    this.availableStockInWarehouse = null;
     this.displayDialog = true;
   }
 
@@ -345,6 +347,7 @@ export class MovementsComponent implements OnInit {
         this.movement.warehouseId = createdProduct.warehouseId ?? this.defaultWarehouseId;
         this.displayProductDialog = false;
         this.newProduct = {};
+        this.refreshAvailableStockInWarehouse();
         this.messageService.add({
           severity: 'success',
           summary: 'Produit créé',
@@ -363,10 +366,27 @@ export class MovementsComponent implements OnInit {
   }
 
   onWarehouseChange() {
-    // Réinitialiser l'entrepôt de destination si l'entrepôt d'origine change et qu'il était sélectionné
     if (this.movement.destinationWarehouseId === this.movement.warehouseId) {
       this.movement.destinationWarehouseId = null;
     }
+    this.refreshAvailableStockInWarehouse();
+  }
+
+  refreshAvailableStockInWarehouse(): void {
+    if (!this.movement.productId || !this.movement.warehouseId) {
+      this.availableStockInWarehouse = null;
+      return;
+    }
+
+    this.apiService.get<any[]>(`/warehouses/${this.movement.warehouseId}/products`).subscribe({
+      next: (products) => {
+        const match = (products ?? []).find((item) => item.productId === this.movement.productId);
+        this.availableStockInWarehouse = match?.quantity != null ? Number(match.quantity) : 0;
+      },
+      error: () => {
+        this.availableStockInWarehouse = null;
+      }
+    });
   }
 
   saveMovement() {
@@ -387,6 +407,19 @@ export class MovementsComponent implements OnInit {
         severity: 'warn',
         summary: 'Validation',
         detail: 'Pour un transfert, vous devez choisir l\'entrepôt de destination'
+      });
+      return;
+    }
+
+    if (
+      selectedType?.value === 'TRANSFERT' &&
+      this.availableStockInWarehouse != null &&
+      this.availableStockInWarehouse <= 0
+    ) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Stock insuffisant',
+        detail: 'Ce produit n\'a pas de stock dans l\'entrepôt source. Effectuez d\'abord une entrée de stock.'
       });
       return;
     }
@@ -428,7 +461,7 @@ export class MovementsComponent implements OnInit {
       productId: this.movement.productId,
       quantity: this.movement.quantity,
       date: movementDate,
-      warehouseId: selectedType?.value === 'TRANSFERT' ? null : this.movement.warehouseId,
+      warehouseId: this.movement.warehouseId ?? null,
       destinationWarehouseId: selectedType?.requiresDestination ? this.movement.destinationWarehouseId : null,
       justification: this.movement.justification || null
     };
@@ -470,28 +503,20 @@ export class MovementsComponent implements OnInit {
     return selectedType?.allowsNegative || false;
   }
 
-  getSourceWarehouseLabel(): string {
-    if (this.movement.typeCode !== 'TRANSFERT') {
-      return '';
-    }
-    if (this.movement.warehouseId && this.accessibleWarehouses?.length) {
-      const w = this.accessibleWarehouses.find((wh: any) => wh.id === this.movement.warehouseId);
-      return w?.name || 'Entrepôt source';
-    }
-    return 'Déterminé automatiquement selon le stock du produit';
-  }
-
   onProductChange() {
     if (!this.movement.productId) {
       this.movement.warehouseId = this.defaultWarehouseId;
+      this.availableStockInWarehouse = null;
       return;
     }
     this.apiService.get<any>(`/products/${this.movement.productId}`).subscribe({
       next: (p) => {
         this.movement.warehouseId = p?.warehouseId ?? this.defaultWarehouseId;
+        this.refreshAvailableStockInWarehouse();
       },
       error: () => {
         this.movement.warehouseId = this.defaultWarehouseId;
+        this.availableStockInWarehouse = null;
       }
     });
   }
@@ -515,9 +540,20 @@ export class MovementsComponent implements OnInit {
     }
 
     const selectedType = this.getSelectedMovementType();
-    // Pour les types autres que TRANSFERT, l'entrepôt source doit être renseigné
-    if (selectedType?.value !== 'TRANSFERT' && !this.movement.warehouseId) {
+    if (!this.movement.warehouseId) {
       return false;
+    }
+
+    if (selectedType?.value === 'TRANSFERT') {
+      if (this.availableStockInWarehouse != null && this.availableStockInWarehouse <= 0) {
+        return false;
+      }
+      if (
+        this.availableStockInWarehouse != null &&
+        this.movement.quantity > this.availableStockInWarehouse
+      ) {
+        return false;
+      }
     }
     
     // Vérifier la quantité selon le type

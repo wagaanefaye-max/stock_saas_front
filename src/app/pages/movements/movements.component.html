@@ -216,30 +216,25 @@
       <div class="form-group">
         <label>
           <i class="pi pi-warehouse" style="margin-right: 0.5rem;"></i>
-          Entrepôt *
+          {{ movement.typeCode === 'TRANSFERT' ? 'Entrepôt source *' : 'Entrepôt *' }}
         </label>
-        <ng-container *ngIf="movement.typeCode === 'TRANSFERT'; else editableWarehouse">
-          <div class="readonly-warehouse">
-            <input
-              pInputText
-              class="w-full"
-              [readonly]="true"
-              [value]="getSourceWarehouseLabel()">
-          </div>
-        </ng-container>
-        <ng-template #editableWarehouse>
-          <p-select
-            [(ngModel)]="movement.warehouseId"
-            [options]="accessibleWarehouses"
-            optionLabel="name"
-            optionValue="id"
-            placeholder="Choisir l'entrepôt"
-            class="w-full"
-            [appendTo]="'body'"
-            (ngModelChange)="onWarehouseChange()"
-            required>
-          </p-select>
-        </ng-template>
+        <p-select
+          [(ngModel)]="movement.warehouseId"
+          [options]="accessibleWarehouses"
+          optionLabel="name"
+          optionValue="id"
+          [placeholder]="movement.typeCode === 'TRANSFERT' ? 'Choisir l\'entrepôt source' : 'Choisir l\'entrepôt'"
+          class="w-full"
+          [appendTo]="'body'"
+          (ngModelChange)="onWarehouseChange()"
+          required>
+        </p-select>
+        <p
+          *ngIf="movement.productId && movement.warehouseId && availableStockInWarehouse != null"
+          class="movement-form__hint"
+          [class.movement-form__hint--warn]="availableStockInWarehouse <= 0">
+          Stock disponible dans cet entrepôt : {{ availableStockInWarehouse | number:'1.0-0' }} unité(s)
+        </p>
       </div>
     </div>
 
