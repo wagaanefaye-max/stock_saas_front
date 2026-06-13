@@ -89,21 +89,111 @@
     border-radius: var(--border-radius);
     font-weight: 500;
   }
-  .lines-toolbar { margin-bottom: 0.5rem; }
-  .lines-table-wrap {
+  .lines-toolbar { margin-bottom: 0.75rem; }
+
+  .invoice-lines-wrap {
     border: 1px solid var(--surface-border);
     border-radius: var(--border-radius);
+    background: var(--surface-ground);
+    max-height: min(420px, 55vh);
     overflow: auto;
-    max-height: 280px;
   }
-  .lines-table {
+
+  .invoice-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .invoice-line-card {
+    background: var(--surface-card, #fff);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--border-radius);
+    padding: 0.85rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .invoice-line-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .invoice-line-card__title {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-color-secondary);
+  }
+
+  .invoice-line-card__product,
+  .invoice-line-field {
+    label {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-weight: 600;
+      font-size: 0.8125rem;
+      color: var(--text-color);
+    }
+  }
+
+  .invoice-line-card__numbers {
+    display: grid;
+    grid-template-columns: minmax(7.5rem, 1fr) minmax(9rem, 1.35fr);
+    gap: 0.75rem 1rem;
+    align-items: start;
+  }
+
+  .invoice-line-hint {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--text-color-secondary);
+  }
+
+  .invoice-line-card__amount {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-top: 0.65rem;
+    border-top: 1px dashed var(--surface-border);
+  }
+
+  .invoice-line-card__amount-label {
+    font-size: 0.8125rem;
+    color: var(--text-color-secondary);
+    font-weight: 500;
+  }
+
+  .invoice-line-card__amount-value {
+    font-size: 1rem;
+    color: var(--primary-color, #2563eb);
+    white-space: nowrap;
+  }
+
+  ::ng-deep .invoice-line-field .p-inputnumber,
+  ::ng-deep .invoice-line-field .p-inputnumber-input {
     width: 100%;
-    border-collapse: collapse;
-    th, td { padding: 0.5rem; text-align: left; border-bottom: 1px solid var(--surface-border); }
-    th { background: var(--surface-ground); font-weight: 600; font-size: 0.875rem; }
-    tbody tr:last-child td { border-bottom: none; }
   }
-  .no-lines { padding: 1rem; color: var(--text-color-secondary); font-size: 0.9rem; }
+
+  .no-lines {
+    padding: 1.25rem 1rem;
+    color: var(--text-color-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .invoice-line-card__numbers {
+      grid-template-columns: 1fr;
+    }
+  }
   .subtotal-row { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--surface-border); }
 
   /* Détail facture - modal design */

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { CardModule } from 'primeng/card';
 import { SelectModule } from 'primeng/select';
@@ -51,6 +52,7 @@ interface ProductForInvoice {
     FormsModule,
     ButtonModule,
     InputTextModule,
+    InputNumberModule,
     DialogModule,
     CardModule,
     SelectModule,

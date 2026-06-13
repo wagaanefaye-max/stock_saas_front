@@ -245,22 +245,27 @@
       <div class="lines-toolbar">
         <button pButton type="button" label="Ajouter une ligne" icon="pi pi-plus" class="p-button-outlined p-button-sm" (click)="addLine()"></button>
       </div>
-      <div class="lines-table-wrap">
-        <table class="lines-table" *ngIf="createForm.lines.length">
-          <thead>
-            <tr>
-              <th>Produit</th>
-              <th style="width: 90px">Quantité</th>
-              <th style="width: 110px">Prix unitaire</th>
-              <th style="width: 110px">Montant</th>
-              <th style="width: 40px"></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (line of createForm.lines; track $index) {
-            <tr [attr.data-index]="$index">
-              <td>
+      <div class="invoice-lines-wrap">
+        <div class="invoice-lines" *ngIf="createForm.lines.length">
+          @for (line of createForm.lines; track $index) {
+            <div class="invoice-line-card" [attr.data-index]="$index">
+              <div class="invoice-line-card__header">
+                <span class="invoice-line-card__title">Ligne {{ $index + 1 }}</span>
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-trash"
+                  class="p-button-text p-button-sm p-button-danger"
+                  (click)="removeLine($index)"
+                  title="Supprimer la ligne"
+                  aria-label="Supprimer la ligne">
+                </button>
+              </div>
+
+              <div class="invoice-line-card__product">
+                <label [for]="'create-product-' + $index">Produit *</label>
                 <p-select
+                  [inputId]="'create-product-' + $index"
                   [options]="productsForInvoice"
                   [(ngModel)]="line.productId"
                   (onClick)="loadProducts()"
@@ -271,21 +276,51 @@
                   appendTo="body"
                   styleClass="w-full">
                 </p-select>
-              </td>
-              <td>
-                <input type="number" pInputText [(ngModel)]="line.quantity" (ngModelChange)="updateLineAmount($index)" min="0" [attr.max]="line.availableQuantity" step="1" class="w-full" [placeholder]="line.availableQuantity != null ? 'Max ' + line.availableQuantity : 'Quantité'">
-              </td>
-              <td>
-                <input type="number" pInputText [(ngModel)]="line.unitPrice" (ngModelChange)="updateLineAmount($index)" min="0" step="0.01" class="w-full">
-              </td>
-              <td>{{ line.amount | number:'1.2-2' }} FCFA</td>
-              <td>
-                <button pButton type="button" icon="pi pi-trash" class="p-button-text p-button-sm p-button-danger" (click)="removeLine($index)" title="Supprimer"></button>
-              </td>
-            </tr>
-            }
-          </tbody>
-        </table>
+              </div>
+
+              <div class="invoice-line-card__numbers">
+                <div class="invoice-line-field invoice-line-field--qty">
+                  <label [for]="'create-qty-' + $index">Quantité *</label>
+                  <p-inputNumber
+                    [inputId]="'create-qty-' + $index"
+                    [(ngModel)]="line.quantity"
+                    (ngModelChange)="updateLineAmount($index)"
+                    [min]="1"
+                    [max]="line.availableQuantity ?? undefined"
+                    [showButtons]="true"
+                    [useGrouping]="false"
+                    placeholder="0"
+                    class="w-full"
+                    [style]="{ width: '100%' }">
+                  </p-inputNumber>
+                  <small *ngIf="line.availableQuantity != null" class="invoice-line-hint">
+                    Stock disponible : {{ line.availableQuantity | number:'1.0-0' }}
+                  </small>
+                </div>
+
+                <div class="invoice-line-field invoice-line-field--price">
+                  <label [for]="'create-price-' + $index">Prix unitaire (FCFA) *</label>
+                  <p-inputNumber
+                    [inputId]="'create-price-' + $index"
+                    [(ngModel)]="line.unitPrice"
+                    (ngModelChange)="updateLineAmount($index)"
+                    [min]="0"
+                    [maxFractionDigits]="2"
+                    mode="decimal"
+                    placeholder="0"
+                    class="w-full"
+                    [style]="{ width: '100%' }">
+                  </p-inputNumber>
+                </div>
+              </div>
+
+              <div class="invoice-line-card__amount">
+                <span class="invoice-line-card__amount-label">Montant ligne</span>
+                <strong class="invoice-line-card__amount-value">{{ line.amount | number:'1.2-2' }} FCFA</strong>
+              </div>
+            </div>
+          }
+        </div>
         <p *ngIf="!createForm.lines.length" class="no-lines">Aucune ligne. Cliquez sur « Ajouter une ligne ».</p>
       </div>
     </div>
@@ -338,46 +373,81 @@
       <div class="lines-toolbar">
         <button pButton type="button" label="Ajouter une ligne" icon="pi pi-plus" class="p-button-outlined p-button-sm" (click)="addEditLine()"></button>
       </div>
-      <div class="lines-table-wrap">
-        <table class="lines-table" *ngIf="editForm.lines.length">
-          <thead>
-            <tr>
-              <th>Produit</th>
-              <th style="width: 90px">Quantité</th>
-              <th style="width: 110px">Prix unitaire</th>
-              <th style="width: 110px">Montant</th>
-              <th style="width: 40px"></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (line of editForm.lines; track $index) {
-            <tr>
-              <td>
+      <div class="invoice-lines-wrap">
+        <div class="invoice-lines" *ngIf="editForm.lines.length">
+          @for (line of editForm.lines; track $index) {
+            <div class="invoice-line-card">
+              <div class="invoice-line-card__header">
+                <span class="invoice-line-card__title">Ligne {{ $index + 1 }}</span>
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-trash"
+                  class="p-button-text p-button-sm p-button-danger"
+                  (click)="removeEditLine($index)"
+                  title="Supprimer la ligne"
+                  aria-label="Supprimer la ligne">
+                </button>
+              </div>
+
+              <div class="invoice-line-card__product">
+                <label [for]="'edit-product-' + $index">Produit *</label>
                 <p-select
+                  [inputId]="'edit-product-' + $index"
                   [options]="productsForInvoice"
                   [(ngModel)]="line.productId"
                   optionLabel="productLabel"
                   optionValue="id"
-                  placeholder="Produit"
+                  placeholder="Choisir un produit"
                   (onChange)="onProductSelectEdit($index)"
                   appendTo="body"
                   styleClass="w-full">
                 </p-select>
-              </td>
-              <td>
-                <input type="number" pInputText [(ngModel)]="line.quantity" (ngModelChange)="updateLineAmountEdit($index)" min="0" [attr.max]="line.availableQuantity" step="1" class="w-full">
-              </td>
-              <td>
-                <input type="number" pInputText [(ngModel)]="line.unitPrice" (ngModelChange)="updateLineAmountEdit($index)" min="0" step="0.01" class="w-full">
-              </td>
-              <td>{{ line.amount | number:'1.2-2' }} FCFA</td>
-              <td>
-                <button pButton type="button" icon="pi pi-trash" class="p-button-text p-button-sm p-button-danger" (click)="removeEditLine($index)" title="Supprimer"></button>
-              </td>
-            </tr>
-            }
-          </tbody>
-        </table>
+              </div>
+
+              <div class="invoice-line-card__numbers">
+                <div class="invoice-line-field invoice-line-field--qty">
+                  <label [for]="'edit-qty-' + $index">Quantité *</label>
+                  <p-inputNumber
+                    [inputId]="'edit-qty-' + $index"
+                    [(ngModel)]="line.quantity"
+                    (ngModelChange)="updateLineAmountEdit($index)"
+                    [min]="1"
+                    [max]="line.availableQuantity ?? undefined"
+                    [showButtons]="true"
+                    [useGrouping]="false"
+                    placeholder="0"
+                    class="w-full"
+                    [style]="{ width: '100%' }">
+                  </p-inputNumber>
+                  <small *ngIf="line.availableQuantity != null" class="invoice-line-hint">
+                    Stock disponible : {{ line.availableQuantity | number:'1.0-0' }}
+                  </small>
+                </div>
+
+                <div class="invoice-line-field invoice-line-field--price">
+                  <label [for]="'edit-price-' + $index">Prix unitaire (FCFA) *</label>
+                  <p-inputNumber
+                    [inputId]="'edit-price-' + $index"
+                    [(ngModel)]="line.unitPrice"
+                    (ngModelChange)="updateLineAmountEdit($index)"
+                    [min]="0"
+                    [maxFractionDigits]="2"
+                    mode="decimal"
+                    placeholder="0"
+                    class="w-full"
+                    [style]="{ width: '100%' }">
+                  </p-inputNumber>
+                </div>
+              </div>
+
+              <div class="invoice-line-card__amount">
+                <span class="invoice-line-card__amount-label">Montant ligne</span>
+                <strong class="invoice-line-card__amount-value">{{ line.amount | number:'1.2-2' }} FCFA</strong>
+              </div>
+            </div>
+          }
+        </div>
         <p *ngIf="!editForm.lines.length" class="no-lines">Aucune ligne. Cliquez sur « Ajouter une ligne ».</p>
       </div>
     </div>
