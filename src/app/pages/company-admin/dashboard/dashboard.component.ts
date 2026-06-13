@@ -47,6 +47,16 @@ interface DashboardStats {
     quantity: number;
     warehouseName: string;
   }[];
+  paidRevenue?: number;
+  pendingRevenue?: number;
+  paidInvoicesCount?: number;
+  draftInvoicesCount?: number;
+  sentInvoicesCount?: number;
+  cancelledInvoicesCount?: number;
+  salesByMonth?: { monthKey: string; label: string; amount: number }[];
+  pendingInvoices?: DashboardInvoice[];
+  recentInvoices?: DashboardInvoice[];
+  lowStockItems?: DashboardProduct[];
 }
 
 interface DashboardStatCard {
@@ -69,7 +79,6 @@ interface DashboardStatCard {
 export class CompanyAdminDashboardComponent implements OnInit {
   loading = true;
 
-  invoices: DashboardInvoice[] = [];
   lowStockItems: DashboardProduct[] = [];
   recentInvoices: DashboardInvoice[] = [];
   pendingInvoices: DashboardInvoice[] = [];
@@ -125,20 +134,13 @@ export class CompanyAdminDashboardComponent implements OnInit {
     this.loading = true;
 
     forkJoin({
-      invoices: this.apiService.get<DashboardInvoice[]>('/invoices').pipe(catchError(() => of([]))),
-      products: this.apiService.get<DashboardProduct[]>('/products').pipe(catchError(() => of([]))),
       stats: this.apiService.get<DashboardStats>('/dashboard/stats').pipe(catchError(() => of(null))),
       subscription: this.subscriptionService.getStatus().pipe(catchError(() => of(null)))
     }).subscribe({
-      next: ({ invoices, products, stats, subscription }) => {
-        this.invoices = invoices || [];
+      next: ({ stats, subscription }) => {
         this.subscriptionStatus = subscription;
         this.applyStats(stats);
-        this.applyProducts(products || []);
-        this.computeInvoiceKpis();
         this.buildStatCards();
-        this.buildInvoiceLists();
-        this.buildSalesByMonthChart();
         this.buildStatusChart();
         this.buildMovementsChart(stats?.monthlyMovementsData || []);
         this.loading = false;
@@ -163,29 +165,59 @@ export class CompanyAdminDashboardComponent implements OnInit {
     this.monthlyMovements = stats.monthlyMovements || 0;
     this.stockAlerts = stats.alerts || 0;
     this.recentMovements = stats.recentMovements || [];
+
+    this.paidRevenue = Number(stats.paidRevenue) || 0;
+    this.pendingRevenue = Number(stats.pendingRevenue) || 0;
+    this.paidInvoices = stats.paidInvoicesCount || 0;
+    this.draftInvoices = stats.draftInvoicesCount || 0;
+    this.sentInvoices = stats.sentInvoicesCount || 0;
+    this.cancelledInvoices = stats.cancelledInvoicesCount || 0;
+
+    this.pendingInvoices = stats.pendingInvoices || [];
+    this.recentInvoices = stats.recentInvoices || [];
+    this.lowStockItems = (stats.lowStockItems || []).map(p => ({
+      id: p.id,
+      name: p.name,
+      stock: p.stock != null ? Number(p.stock) : null,
+      minThreshold: p.minThreshold != null ? Number(p.minThreshold) : null,
+      lowStock: true
+    }));
+    this.lowStockProducts = this.stockAlerts || this.lowStockItems.length;
+
+    this.buildSalesByMonthChart(stats.salesByMonth || []);
   }
 
-  private applyProducts(products: DashboardProduct[]): void {
-    const lowStock = products.filter(p => p.lowStock || this.isProductLowStock(p));
-    this.lowStockProducts = lowStock.length;
-    this.lowStockItems = lowStock
-      .sort((a, b) => (Number(a.stock) || 0) - (Number(b.stock) || 0))
-      .slice(0, 8);
-  }
+  private buildSalesByMonthChart(salesByMonth: NonNullable<DashboardStats['salesByMonth']>): void {
+    if (!salesByMonth.length) {
+      this.salesByMonthData = {
+        labels: [],
+        datasets: [
+          {
+            label: 'Ventes payées (FCFA)',
+            data: [],
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.2)',
+            tension: 0.3,
+            fill: true
+          }
+        ]
+      };
+      return;
+    }
 
-  private computeInvoiceKpis(): void {
-    this.paidInvoices = this.invoices.filter(i => i.status === 'PAID').length;
-    this.draftInvoices = this.invoices.filter(i => i.status === 'DRAFT').length;
-    this.sentInvoices = this.invoices.filter(i => i.status === 'SENT').length;
-    this.cancelledInvoices = this.invoices.filter(i => i.status === 'CANCELLED').length;
-
-    this.paidRevenue = this.invoices
-      .filter(i => i.status === 'PAID')
-      .reduce((sum, i) => sum + (Number(i.total) || 0), 0);
-
-    this.pendingRevenue = this.invoices
-      .filter(i => i.status === 'SENT')
-      .reduce((sum, i) => sum + (Number(i.total) || 0), 0);
+    this.salesByMonthData = {
+      labels: salesByMonth.map(m => m.label),
+      datasets: [
+        {
+          label: 'Ventes payées (FCFA)',
+          data: salesByMonth.map(m => Number(m.amount) || 0),
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37, 99, 235, 0.2)',
+          tension: 0.3,
+          fill: true
+        }
+      ]
+    };
   }
 
   private buildStatCards(): void {
@@ -253,55 +285,6 @@ export class CompanyAdminDashboardComponent implements OnInit {
         alert: alertCount > 0
       }
     ];
-  }
-
-  private buildInvoiceLists(): void {
-    const sorted = [...this.invoices].sort(
-      (a, b) => new Date(b.invoiceDate).getTime() - new Date(a.invoiceDate).getTime()
-    );
-    this.recentInvoices = sorted.slice(0, 5);
-    this.pendingInvoices = sorted
-      .filter(i => i.status === 'SENT' || i.status === 'DRAFT')
-      .slice(0, 5);
-  }
-
-  private buildSalesByMonthChart(): void {
-    const monthlyMap = new Map<string, number>();
-    const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      monthlyMap.set(key, 0);
-    }
-
-    this.invoices
-      .filter(i => i.status === 'PAID' && !!i.invoiceDate)
-      .forEach(i => {
-        const d = new Date(i.invoiceDate);
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        if (monthlyMap.has(key)) {
-          monthlyMap.set(key, (monthlyMap.get(key) || 0) + (Number(i.total) || 0));
-        }
-      });
-
-    const labels = Array.from(monthlyMap.keys()).map(k => {
-      const [y, m] = k.split('-');
-      return `${m}/${y.slice(2)}`;
-    });
-
-    this.salesByMonthData = {
-      labels,
-      datasets: [
-        {
-          label: 'Ventes payées (FCFA)',
-          data: Array.from(monthlyMap.values()),
-          borderColor: '#2563eb',
-          backgroundColor: 'rgba(37, 99, 235, 0.2)',
-          tension: 0.3,
-          fill: true
-        }
-      ]
-    };
   }
 
   private buildStatusChart(): void {
@@ -401,11 +384,5 @@ export class CompanyAdminDashboardComponent implements OnInit {
       case 'CANCELLED': return 'Annulée';
       default: return 'Brouillon';
     }
-  }
-
-  private isProductLowStock(product: DashboardProduct): boolean {
-    const min = Number(product.minThreshold) || 0;
-    const stock = Number(product.stock) || 0;
-    return min > 0 && stock <= min;
   }
 }
