@@ -309,7 +309,7 @@
           <dt>Créé le</dt>
           <dd>{{ formatDate(selectedProduct.createdAt) }}</dd>
         </div>
-        <div class="product-detail__row" *ngIf="selectedProduct.updatedAt">
+        <div class="product-detail__row" *ngIf="hasUpdatedAt(selectedProduct)">
           <dt>Modifié le</dt>
           <dd>{{ formatDate(selectedProduct.updatedAt) }}</dd>
         </div>

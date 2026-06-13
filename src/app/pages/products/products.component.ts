@@ -413,6 +413,12 @@ export class ProductsComponent implements OnInit {
     return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(Number(value) || 0) + ' F';
   }
 
+  hasUpdatedAt(product: { createdAt?: string | null; updatedAt?: string | null }): boolean {
+    if (!product.updatedAt) return false;
+    if (!product.createdAt) return true;
+    return new Date(product.updatedAt).getTime() > new Date(product.createdAt).getTime();
+  }
+
   saveProduct() {
     if (!this.product.name) {
       this.messageService.add({
