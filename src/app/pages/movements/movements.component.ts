@@ -90,6 +90,7 @@ export class MovementsComponent implements OnInit {
     this.loadAccessibleWarehouses();
     this.loadProducts();
     this.loadMovementTypes();
+    this.loadMovements({ first: 0, rows: this.rows });
 
     // Vérifier si on doit ouvrir le formulaire automatiquement
     this.route.queryParams.subscribe(params => {
@@ -164,9 +165,10 @@ export class MovementsComponent implements OnInit {
     if (this.globalFilter?.trim()) {
       params['search'] = this.globalFilter.trim();
     }
-    this.apiService.get<{ content: any[]; totalElements: number }>('/movements', params).subscribe({
+    this.apiService.get<{ content: any[]; totalElements: number } | any[]>('/movements', params).subscribe({
       next: (data) => {
-        this.movements = (data?.content ?? []).map(m => ({
+        const items = Array.isArray(data) ? data : (data?.content ?? []);
+        this.movements = items.map(m => ({
           id: m.id,
           date: m.date,
           product: m.productName,
@@ -184,7 +186,9 @@ export class MovementsComponent implements OnInit {
           justification: m.justification,
           createdAt: m.createdAt
         }));
-        this.totalMovements = data?.totalElements ?? 0;
+        this.totalMovements = Array.isArray(data) ? items.length : (data?.totalElements ?? items.length);
+        this.first = first;
+        this.rows = rows;
       },
       error: (error) => {
         console.error('Erreur lors du chargement des mouvements', error);
@@ -475,6 +479,7 @@ export class MovementsComponent implements OnInit {
         });
         this.displayDialog = false;
         this.movement = {};
+        this.first = 0;
         this.refreshMovements();
       },
       error: (error) => {

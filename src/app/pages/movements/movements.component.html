@@ -67,7 +67,7 @@
   </div>
 
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="movements.length === 0" class="mobile-list__empty">
+    <div *ngIf="totalMovements === 0" class="mobile-list__empty">
       <i class="pi pi-inbox"></i>
       <p>Aucun mouvement trouvé</p>
       <button pButton label="Nouveau mouvement" icon="pi pi-plus" class="p-button-sm" (click)="openNew()"></button>
