@@ -144,7 +144,11 @@
     </div>
 
     <ul *ngIf="products.length > 0" class="mobile-list__items">
-      <li *ngFor="let product of products; trackBy: trackByProductId" class="mobile-card">
+      <li
+        *ngFor="let product of products; trackBy: trackByProductId"
+        class="mobile-card mobile-card--clickable"
+        (click)="openDetail(product)"
+        [attr.aria-label]="'Voir le détail de ' + product.name">
         <div class="mobile-card__top">
           <div class="mobile-card__main">
             <span class="mobile-card__title">{{ product.name }}</span>
@@ -183,8 +187,17 @@
             <span class="mobile-card__stat-value">{{ product.category || '—' }}</span>
           </div>
         </div>
-        <div class="card-actions-bar" *ngIf="authService.isAdminEntreprise()">
+        <div class="card-actions-bar" (click)="$event.stopPropagation()">
           <button
+            pButton
+            icon="pi pi-eye"
+            class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
+            title="Voir le détail"
+            aria-label="Voir le détail"
+            (click)="openDetail(product)">
+          </button>
+          <button
+            *ngIf="authService.isAdminEntreprise()"
             pButton
             icon="pi pi-pencil"
             class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only"
@@ -193,6 +206,7 @@
             (click)="editProduct(product)">
           </button>
           <button
+            *ngIf="authService.isAdminEntreprise()"
             pButton
             icon="pi pi-trash"
             class="p-button-sm p-button-rounded p-button-icon-only card-actions-bar__danger"
@@ -225,6 +239,103 @@
     aria-label="Nouveau produit">
     <i class="pi pi-plus"></i>
   </button>
+
+  <p-dialog
+    styleClass="app-mobile-dialog"
+    [(visible)]="detailDialogVisible"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [breakpoints]="dialogBreakpoints"
+    [style]="dialogStyleDetail"
+    (onHide)="closeDetail()">
+    <ng-template pTemplate="header">
+      <span class="product-detail-title">
+        {{ selectedProduct?.name || 'Détail du produit' }}
+      </span>
+    </ng-template>
+
+    <div *ngIf="detailLoading" class="product-detail-loading">
+      <i class="pi pi-spin pi-spinner"></i>
+      <span>Chargement…</span>
+    </div>
+
+    <div *ngIf="selectedProduct && !detailLoading" class="app-dialog-detail product-detail">
+      <div class="product-detail__status-row">
+        <p-tag
+          [value]="selectedProduct.statusLabel || selectedProduct.status || 'N/A'"
+          [severity]="getSeverity(selectedProduct.statusLabel || selectedProduct.status)">
+        </p-tag>
+        <p-tag *ngIf="isLowStock(selectedProduct)" value="Stock bas" severity="warn"></p-tag>
+        <span class="product-detail__id">#{{ selectedProduct.id }}</span>
+      </div>
+
+      <dl class="product-detail__grid">
+        <div class="product-detail__row" *ngIf="selectedProduct.reference">
+          <dt>Référence</dt>
+          <dd><code>{{ selectedProduct.reference }}</code></dd>
+        </div>
+        <div class="product-detail__row" *ngIf="selectedProduct.sku">
+          <dt>Code (SKU)</dt>
+          <dd><code>{{ selectedProduct.sku }}</code></dd>
+        </div>
+        <div class="product-detail__row">
+          <dt>Catégorie</dt>
+          <dd>{{ selectedProduct.category || '—' }}</dd>
+        </div>
+        <div class="product-detail__row">
+          <dt>Stock</dt>
+          <dd [class.product-detail__value--danger]="isLowStock(selectedProduct) || !selectedProduct.stock">
+            {{ selectedProduct.stock || 0 }}
+          </dd>
+        </div>
+        <div class="product-detail__row">
+          <dt>Seuil minimum</dt>
+          <dd>{{ selectedProduct.minThreshold || 0 }}</dd>
+        </div>
+        <div class="product-detail__row" *ngIf="selectedProduct.warehouseName">
+          <dt>Entrepôt</dt>
+          <dd>{{ selectedProduct.warehouseName }}</dd>
+        </div>
+        <div class="product-detail__row">
+          <dt>Prix d'achat</dt>
+          <dd>{{ formatMoney(selectedProduct.purchasePrice) }}</dd>
+        </div>
+        <div class="product-detail__row">
+          <dt>Prix de vente</dt>
+          <dd>{{ formatMoney(selectedProduct.price) }}</dd>
+        </div>
+        <div class="product-detail__row">
+          <dt>Créé le</dt>
+          <dd>{{ formatDate(selectedProduct.createdAt) }}</dd>
+        </div>
+        <div class="product-detail__row" *ngIf="selectedProduct.updatedAt">
+          <dt>Modifié le</dt>
+          <dd>{{ formatDate(selectedProduct.updatedAt) }}</dd>
+        </div>
+      </dl>
+
+      <div class="product-detail__description" *ngIf="selectedProduct.description">
+        <span class="product-detail__description-label">Description</span>
+        <p>{{ selectedProduct.description }}</p>
+      </div>
+
+      <p *ngIf="isLossPricingFor(selectedProduct)" class="product-detail__warn">
+        Le prix de vente est inférieur au prix d'achat.
+      </p>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button pButton label="Fermer" icon="pi pi-times" class="p-button-text" (click)="closeDetail()"></button>
+      <button
+        *ngIf="authService.isAdminEntreprise() && selectedProduct"
+        pButton
+        label="Modifier"
+        icon="pi pi-pencil"
+        (click)="editFromDetail()">
+      </button>
+    </ng-template>
+  </p-dialog>
 
   <p-dialog
     [(visible)]="displayDialog"

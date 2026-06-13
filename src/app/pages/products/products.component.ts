@@ -18,6 +18,7 @@ import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
 import {
   APP_DIALOG_BREAKPOINTS,
+  APP_DIALOG_STYLE_DETAIL,
   APP_DIALOG_STYLE_LG,
   APP_DIALOG_STYLE_SM
 } from '../../utils/dialog-mobile.util';
@@ -46,6 +47,7 @@ import {
 export class ProductsComponent implements OnInit {
   readonly dialogStyle = APP_DIALOG_STYLE_LG;
   readonly dialogStyleSm = APP_DIALOG_STYLE_SM;
+  readonly dialogStyleDetail = APP_DIALOG_STYLE_DETAIL;
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
 
   products: any[] = [];
@@ -224,6 +226,9 @@ export class ProductsComponent implements OnInit {
 
   selectedProducts: any[] = [];
   displayDialog = false;
+  detailDialogVisible = false;
+  detailLoading = false;
+  selectedProduct: any | null = null;
   product: any = {};
   globalFilter = '';
 
@@ -320,6 +325,7 @@ export class ProductsComponent implements OnInit {
   }
 
   editProduct(product: any) {
+    this.closeDetail();
     this.loadWarehouses();
     this.apiService.get<any>(`/products/${product.id}`).subscribe({
       next: (p) => {
@@ -346,6 +352,65 @@ export class ProductsComponent implements OnInit {
         });
       }
     });
+  }
+
+  openDetail(product: { id: number }) {
+    this.detailDialogVisible = true;
+    this.detailLoading = true;
+    this.selectedProduct = null;
+
+    this.apiService.get<any>(`/products/${product.id}`).subscribe({
+      next: (p) => {
+        this.selectedProduct = {
+          ...p,
+          status: p.statusLabel || p.statusCode || 'N/A',
+          stock: p.stock ?? 0,
+          price: p.price ?? 0,
+          purchasePrice: p.purchasePrice ?? 0,
+          minThreshold: p.minThreshold ?? 0,
+          lowStock: !!p.lowStock
+        };
+        this.detailLoading = false;
+      },
+      error: () => {
+        this.detailLoading = false;
+        this.detailDialogVisible = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger le détail du produit',
+          life: 4000
+        });
+      }
+    });
+  }
+
+  closeDetail(): void {
+    this.detailDialogVisible = false;
+    this.selectedProduct = null;
+    this.detailLoading = false;
+  }
+
+  editFromDetail(): void {
+    if (!this.selectedProduct) return;
+    const product = { ...this.selectedProduct };
+    this.closeDetail();
+    this.editProduct(product);
+  }
+
+  formatDate(value: string | null | undefined): string {
+    if (!value) return '—';
+    return new Date(value).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  formatMoney(value: number | null | undefined): string {
+    return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(Number(value) || 0) + ' F';
   }
 
   saveProduct() {
@@ -474,8 +539,12 @@ export class ProductsComponent implements OnInit {
   }
 
   isLossPricing(): boolean {
-    const purchase = Number(this.product.purchasePrice ?? 0);
-    const selling = Number(this.product.price ?? 0);
+    return this.isLossPricingFor(this.product);
+  }
+
+  isLossPricingFor(product: { purchasePrice?: number; price?: number }): boolean {
+    const purchase = Number(product.purchasePrice ?? 0);
+    const selling = Number(product.price ?? 0);
     return purchase > 0 && selling >= 0 && selling < purchase;
   }
 
