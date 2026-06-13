@@ -245,99 +245,190 @@
     </ng-template>
   </p-dialog>
 
-  <!-- Dialog pour voir les détails d'un entrepôt avec ses produits -->
-  <p-dialog 
-    styleClass="app-mobile-dialog"
-    [(visible)]="displayDetailsDialog" 
+  <!-- Détail entrepôt -->
+  <p-dialog
+    styleClass="app-mobile-dialog warehouse-detail-dialog"
+    [(visible)]="displayDetailsDialog"
     [style]="dialogStyleDetail"
     [breakpoints]="dialogBreakpoints"
-    [header]="'Détails de l\'entrepôt: ' + (selectedWarehouseDetails?.name || '')"
     [modal]="true"
     [draggable]="false"
-    [resizable]="false">
+    [resizable]="false"
+    (onHide)="closeDetails()">
 
-    <div *ngIf="selectedWarehouseDetails" class="app-dialog-detail warehouse-details">
-      <!-- Informations de l'entrepôt -->
-      <p-card class="details-card">
-        <div class="details-section">
-          <h3 class="details-section-title">
-            <i class="pi pi-info-circle details-section-icon"></i>
-            Informations générales
-          </h3>
-          <div class="details-grid">
-            <div class="detail-item">
-              <span class="detail-label">Nom:</span>
-              <span class="detail-value">{{ selectedWarehouseDetails.name }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Région:</span>
-              <span class="detail-value">{{ selectedWarehouseDetails.region }}</span>
-            </div>
-            <div class="detail-item detail-item-full">
-              <span class="detail-label">Description:</span>
-              <span class="detail-value">{{ selectedWarehouseDetails.description || '-' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Statut:</span>
-              <p-tag 
-                [value]="selectedWarehouseDetails.statusLabel || selectedWarehouseDetails.status || 'N/A'" 
-                [severity]="getSeverity(selectedWarehouseDetails.statusLabel || selectedWarehouseDetails.status)">
-              </p-tag>
-            </div>
+    <ng-template pTemplate="header">
+      <span class="warehouse-detail-title">
+        {{ selectedWarehouseDetails?.name || 'Détail entrepôt' }}
+      </span>
+    </ng-template>
+
+    <div *ngIf="selectedWarehouseDetails" class="app-dialog-detail warehouse-detail">
+      <div class="warehouse-detail__hero">
+        <div class="warehouse-detail__hero-icon" aria-hidden="true">
+          <i class="pi pi-building"></i>
+        </div>
+        <div class="warehouse-detail__hero-body">
+          <p class="warehouse-detail__hero-region">
+            <i class="pi pi-map-marker"></i>
+            {{ selectedWarehouseDetails.region || '—' }}
+          </p>
+          <div class="warehouse-detail__hero-tags">
+            <p-tag
+              [value]="selectedWarehouseDetails.statusLabel || selectedWarehouseDetails.status || 'N/A'"
+              [severity]="getSeverity(selectedWarehouseDetails.statusLabel || selectedWarehouseDetails.status)">
+            </p-tag>
+            <span class="warehouse-detail__id">#{{ selectedWarehouseDetails.id }}</span>
           </div>
         </div>
-      </p-card>
+      </div>
 
-      <!-- Liste des produits -->
-      <p-card>
-        <div class="details-section">
-          <h3 class="details-section-title">
-            <i class="pi pi-box details-section-icon"></i>
-            Produits en stock ({{ warehouseProducts.length }})
+      <div class="warehouse-detail__kpis">
+        <div class="warehouse-detail__kpi">
+          <span class="warehouse-detail__kpi-value">{{ warehouseProducts.length }}</span>
+          <span class="warehouse-detail__kpi-label">Produits</span>
+        </div>
+        <div class="warehouse-detail__kpi">
+          <span class="warehouse-detail__kpi-value">{{ warehouseTotalQuantity | number:'1.0-0' }}</span>
+          <span class="warehouse-detail__kpi-label">Unités en stock</span>
+        </div>
+        <div class="warehouse-detail__kpi" [class.warehouse-detail__kpi--alert]="warehouseLowStockCount > 0">
+          <span class="warehouse-detail__kpi-value">{{ warehouseLowStockCount }}</span>
+          <span class="warehouse-detail__kpi-label">Alertes stock bas</span>
+        </div>
+      </div>
+
+      <dl class="warehouse-detail__grid">
+        <div class="warehouse-detail__row">
+          <dt>Région</dt>
+          <dd>{{ selectedWarehouseDetails.region || '—' }}</dd>
+        </div>
+        <div class="warehouse-detail__row">
+          <dt>Statut</dt>
+          <dd>
+            <p-tag
+              [value]="selectedWarehouseDetails.statusLabel || selectedWarehouseDetails.status || 'N/A'"
+              [severity]="getSeverity(selectedWarehouseDetails.statusLabel || selectedWarehouseDetails.status)">
+            </p-tag>
+          </dd>
+        </div>
+        <div class="warehouse-detail__row" *ngIf="selectedWarehouseDetails.createdAt">
+          <dt>Créé le</dt>
+          <dd>{{ formatDate(selectedWarehouseDetails.createdAt) }}</dd>
+        </div>
+        <div class="warehouse-detail__row" *ngIf="hasUpdatedAt(selectedWarehouseDetails)">
+          <dt>Modifié le</dt>
+          <dd>{{ formatDate(selectedWarehouseDetails.updatedAt) }}</dd>
+        </div>
+      </dl>
+
+      <div class="warehouse-detail__description" *ngIf="selectedWarehouseDetails.description">
+        <span class="warehouse-detail__description-label">Description</span>
+        <p>{{ selectedWarehouseDetails.description }}</p>
+      </div>
+
+      <section class="warehouse-detail__products" aria-labelledby="warehouse-products-heading">
+        <div class="warehouse-detail__products-header">
+          <h3 id="warehouse-products-heading" class="warehouse-detail__products-title">
+            <i class="pi pi-box"></i>
+            Produits en stock
           </h3>
-          
-          <div *ngIf="warehouseProducts.length === 0" class="empty-state empty-products">
-            <i class="pi pi-inbox empty-products-icon"></i>
-            <p>Aucun produit dans cet entrepôt</p>
-          </div>
+          <span class="warehouse-detail__products-count">{{ warehouseProducts.length }} article(s)</span>
+        </div>
 
-          <div class="dialog-table-wrap" *ngIf="warehouseProducts.length > 0">
-          <p-table 
-            [value]="warehouseProducts" 
-            [paginator]="true" 
-            [rows]="10"
-            [tableStyle]="{'min-width': '50rem'}"
-            [rowHover]="true">
-            
+        <div *ngIf="warehouseProductsLoading" class="warehouse-detail__loading">
+          <i class="pi pi-spin pi-spinner"></i>
+          <span>Chargement des produits…</span>
+        </div>
+
+        <div *ngIf="!warehouseProductsLoading && warehouseProducts.length === 0" class="warehouse-detail__empty">
+          <i class="pi pi-inbox"></i>
+          <p>Aucun produit dans cet entrepôt</p>
+          <span class="warehouse-detail__empty-hint">Les stocks apparaîtront après un mouvement d'entrée.</span>
+        </div>
+
+        <ul *ngIf="!warehouseProductsLoading && warehouseProducts.length > 0" class="warehouse-detail__product-list show-mobile-only">
+          <li
+            *ngFor="let product of warehouseProducts"
+            class="warehouse-detail__product-card"
+            [class.warehouse-detail__product-card--low]="product.lowStock">
+            <div class="warehouse-detail__product-top">
+              <div>
+                <strong class="warehouse-detail__product-name">{{ product.productName }}</strong>
+                <span class="warehouse-detail__product-meta">{{ product.sku }}</span>
+              </div>
+              <p-tag *ngIf="product.lowStock" value="Stock bas" severity="warn"></p-tag>
+            </div>
+            <div class="warehouse-detail__product-stats">
+              <div>
+                <span class="warehouse-detail__stat-label">Quantité</span>
+                <span class="warehouse-detail__stat-value" [class.warehouse-detail__stat-value--danger]="product.lowStock">
+                  {{ product.quantity | number:'1.0-0' }}
+                </span>
+              </div>
+              <div>
+                <span class="warehouse-detail__stat-label">Seuil min.</span>
+                <ng-container *ngIf="authService.isAdminEntreprise(); else readOnlyThreshold">
+                  <p-inputNumber
+                    [(ngModel)]="product.minThreshold"
+                    [min]="0"
+                    [showButtons]="true"
+                    buttonLayout="horizontal"
+                    [inputStyle]="{ width: '4rem' }">
+                  </p-inputNumber>
+                  <button
+                    pButton
+                    icon="pi pi-save"
+                    class="p-button-text p-button-sm warehouse-detail__save-threshold"
+                    pTooltip="Enregistrer"
+                    (click)="saveProductThreshold(product)">
+                  </button>
+                </ng-container>
+                <ng-template #readOnlyThreshold>
+                  <span class="warehouse-detail__stat-value">{{ product.minThreshold | number:'1.0-0' }}</span>
+                </ng-template>
+              </div>
+              <div>
+                <span class="warehouse-detail__stat-label">Prix</span>
+                <span class="warehouse-detail__stat-value">{{ formatMoney(product.price) }}</span>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+        <div class="warehouse-detail__table-wrap hide-mobile" *ngIf="!warehouseProductsLoading && warehouseProducts.length > 0">
+          <p-table
+            [value]="warehouseProducts"
+            [paginator]="warehouseProducts.length > 8"
+            [rows]="8"
+            [rowHover]="true"
+            styleClass="warehouse-detail-table">
+
             <ng-template pTemplate="header">
               <tr>
-                <th pSortableColumn="productReference">Référence <p-sortIcon field="productReference"></p-sortIcon></th>
-                <th pSortableColumn="productName">Produit <p-sortIcon field="productName"></p-sortIcon></th>
-                <th pSortableColumn="sku">SKU <p-sortIcon field="sku"></p-sortIcon></th>
+                <th>Réf.</th>
+                <th>Produit</th>
+                <th>SKU</th>
                 <th>Catégorie</th>
                 <th>Prix</th>
-                <th pSortableColumn="quantity">Quantité <p-sortIcon field="quantity"></p-sortIcon></th>
-                <th>Seuil min</th>
-                <th *ngIf="authService.isAdminEntreprise()">Actions</th>
+                <th>Qté</th>
+                <th>Seuil min.</th>
+                <th *ngIf="authService.isAdminEntreprise()"></th>
               </tr>
             </ng-template>
 
             <ng-template pTemplate="body" let-product>
               <tr [class.warehouse-product-row--low]="product.lowStock">
-                <td><code class="product-reference">{{ product.productReference || '-' }}</code></td>
+                <td><code class="warehouse-detail__ref">{{ product.productReference || '—' }}</code></td>
                 <td>
                   <strong>{{ product.productName }}</strong>
+                  <p-tag *ngIf="product.lowStock" value="Bas" severity="warn" class="warehouse-product-row__tag"></p-tag>
                 </td>
-                <td>{{ product.sku }}</td>
+                <td>{{ product.sku || '—' }}</td>
+                <td>{{ product.category || '—' }}</td>
+                <td>{{ formatMoney(product.price) }}</td>
                 <td>
-                  <span *ngIf="product.category">{{ product.category }}</span>
-                  <span *ngIf="!product.category" class="text-muted">-</span>
-                </td>
-                <td>{{ product.price | number:'1.0-0' }} FCFA</td>
-                <td>
-                  <span [class.text-danger]="product.lowStock">
-                    <strong>{{ product.quantity | number }}</strong>
-                    <p-tag *ngIf="product.lowStock" value="Bas" severity="warn" class="warehouse-product-row__tag"></p-tag>
+                  <span [class.warehouse-detail__stat-value--danger]="product.lowStock">
+                    <strong>{{ product.quantity | number:'1.0-0' }}</strong>
                   </span>
                 </td>
                 <td>
@@ -349,7 +440,7 @@
                     buttonLayout="horizontal"
                     [inputStyle]="{ width: '4.5rem' }">
                   </p-inputNumber>
-                  <span *ngIf="!authService.isAdminEntreprise()">{{ product.minThreshold | number }}</span>
+                  <span *ngIf="!authService.isAdminEntreprise()">{{ product.minThreshold | number:'1.0-0' }}</span>
                 </td>
                 <td *ngIf="authService.isAdminEntreprise()">
                   <button
@@ -363,18 +454,18 @@
               </tr>
             </ng-template>
           </p-table>
-          </div>
         </div>
-      </p-card>
+      </section>
     </div>
 
     <ng-template pTemplate="footer">
-      <button 
-        pButton 
-        label="Fermer" 
-        icon="pi pi-times" 
-        class="p-button-secondary"
-        (click)="displayDetailsDialog = false">
+      <button pButton label="Fermer" icon="pi pi-times" class="p-button-text" (click)="closeDetails()"></button>
+      <button
+        *ngIf="authService.isAdminEntreprise() && selectedWarehouseDetails"
+        pButton
+        label="Modifier l'entrepôt"
+        icon="pi pi-pencil"
+        (click)="editFromDetails()">
       </button>
     </ng-template>
   </p-dialog>

@@ -50,6 +50,7 @@ export class WarehousesComponent implements OnInit {
   warehouses: any[] = [];
   displayDialog = false;
   displayDetailsDialog = false;
+  warehouseProductsLoading = false;
   warehouse: any = {};
   selectedWarehouseDetails: any = null;
   warehouseProducts: any[] = [];
@@ -379,6 +380,56 @@ export class WarehousesComponent implements OnInit {
     this.loadWarehouseProducts(warehouse.id);
   }
 
+  closeDetails(): void {
+    this.displayDetailsDialog = false;
+    this.selectedWarehouseDetails = null;
+    this.warehouseProducts = [];
+    this.warehouseProductsLoading = false;
+  }
+
+  editFromDetails(): void {
+    if (!this.selectedWarehouseDetails || !this.authService.isAdminEntreprise()) {
+      return;
+    }
+    const warehouse = { ...this.selectedWarehouseDetails };
+    this.closeDetails();
+    this.editWarehouse(warehouse);
+  }
+
+  get warehouseLowStockCount(): number {
+    return this.warehouseProducts.filter(p => p.lowStock).length;
+  }
+
+  get warehouseTotalQuantity(): number {
+    return this.warehouseProducts.reduce(
+      (sum, p) => sum + (Number(p.quantity) || 0),
+      0
+    );
+  }
+
+  formatMoney(value: number | null | undefined): string {
+    const n = Number(value);
+    if (!Number.isFinite(n)) {
+      return '—';
+    }
+    return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(n) + ' F';
+  }
+
+  formatDate(value: string | null | undefined): string {
+    if (!value) {
+      return '—';
+    }
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-FR');
+  }
+
+  hasUpdatedAt(warehouse: { createdAt?: string; updatedAt?: string } | null): boolean {
+    if (!warehouse?.updatedAt || !warehouse?.createdAt) {
+      return false;
+    }
+    return new Date(warehouse.updatedAt).getTime() > new Date(warehouse.createdAt).getTime();
+  }
+
   saveProductThreshold(product: { productId: number; minThreshold?: number; lowStock?: boolean }) {
     if (!this.selectedWarehouseDetails?.id) {
       return;
@@ -412,14 +463,17 @@ export class WarehousesComponent implements OnInit {
 
   loadWarehouseProducts(warehouseId: number) {
     this.warehouseProducts = [];
+    this.warehouseProductsLoading = true;
     this.apiService.get<any[]>(`/warehouses/${warehouseId}/products`).subscribe({
       next: (products) => {
         this.warehouseProducts = (products || []).map(p => ({
           ...p,
           lowStock: !!p.lowStock
         }));
+        this.warehouseProductsLoading = false;
       },
       error: (error) => {
+        this.warehouseProductsLoading = false;
         console.error('Erreur lors du chargement des produits', error);
         this.messageService.add({
           severity: 'error',
