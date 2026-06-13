@@ -229,6 +229,48 @@ export class MovementsComponent implements OnInit {
     return movement.id ?? _index;
   }
 
+  normalizeMovementTypeCode(movement: { typeCode?: string; type?: string }): string {
+    const raw = (movement.typeCode || movement.type || '').toUpperCase();
+    if (raw.includes('ENTREE') || raw.includes('ENTRÉE')) return 'ENTREE';
+    if (raw.includes('SORTIE')) return 'SORTIE';
+    if (raw.includes('TRANSFERT')) return 'TRANSFERT';
+    if (raw.includes('AJUST')) return 'AJUSTEMENT';
+    return raw;
+  }
+
+  isTransferMovement(movement: { typeCode?: string; type?: string }): boolean {
+    return this.normalizeMovementTypeCode(movement) === 'TRANSFERT';
+  }
+
+  showDepartureWarehouse(movement: { typeCode?: string; type?: string }): boolean {
+    const code = this.normalizeMovementTypeCode(movement);
+    return code !== 'ENTREE';
+  }
+
+  showArrivalWarehouse(movement: { typeCode?: string; type?: string; warehouseDestination?: string | null }): boolean {
+    const code = this.normalizeMovementTypeCode(movement);
+    if (code === 'TRANSFERT') {
+      return !!movement.warehouseDestination;
+    }
+    return code === 'ENTREE' || code === 'AJUSTEMENT';
+  }
+
+  getDepartureWarehouseLabel(movement: { warehouse?: string | null }): string {
+    return movement.warehouse || '—';
+  }
+
+  getArrivalWarehouseLabel(movement: {
+    typeCode?: string;
+    type?: string;
+    warehouse?: string | null;
+    warehouseDestination?: string | null;
+  }): string {
+    if (this.isTransferMovement(movement)) {
+      return movement.warehouseDestination || '—';
+    }
+    return movement.warehouse || '—';
+  }
+
   loadAccessibleWarehouses() {
     this.apiService.get<any[]>('/warehouses/simple').subscribe({
       next: (data) => {

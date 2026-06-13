@@ -113,6 +113,7 @@ export class ProductsComponent implements OnInit {
           ...p,
           status: p.statusLabel || (p.stock && p.stock > 0 ? 'En stock' : 'Rupture'),
           stock: p.stock || 0,
+          warehouseStocks: p.warehouseStocks ?? [],
           price: p.price || 0,
           minThreshold: p.minThreshold ?? 0,
           lowStock: !!p.lowStock
@@ -365,6 +366,7 @@ export class ProductsComponent implements OnInit {
           ...p,
           status: p.statusLabel || p.statusCode || 'N/A',
           stock: p.stock ?? 0,
+          warehouseStocks: p.warehouseStocks ?? [],
           price: p.price ?? 0,
           purchasePrice: p.purchasePrice ?? 0,
           minThreshold: p.minThreshold ?? 0,

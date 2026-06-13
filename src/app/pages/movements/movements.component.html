@@ -92,9 +92,13 @@
               {{ movement.quantity > 0 ? '+' : '' }}{{ movement.quantity }}
             </span>
           </div>
-          <div class="mobile-card__stat">
-            <span class="mobile-card__stat-label">Entrepôt</span>
-            <span class="mobile-card__stat-value">{{ movement.warehouse || '—' }}</span>
+          <div class="mobile-card__stat" *ngIf="showDepartureWarehouse(movement)">
+            <span class="mobile-card__stat-label">Départ</span>
+            <span class="mobile-card__stat-value">{{ getDepartureWarehouseLabel(movement) }}</span>
+          </div>
+          <div class="mobile-card__stat" *ngIf="showArrivalWarehouse(movement)">
+            <span class="mobile-card__stat-label">Arrivée</span>
+            <span class="mobile-card__stat-value">{{ getArrivalWarehouseLabel(movement) }}</span>
           </div>
           <div class="mobile-card__stat mobile-card__stat--wide">
             <span class="mobile-card__stat-label">Par</span>
