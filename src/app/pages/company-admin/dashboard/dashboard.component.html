@@ -2,17 +2,8 @@
   <p-toast></p-toast>
 
   <header class="dashboard-header">
-    <div class="dashboard-header__main">
-      <h1>Bonjour, {{ companyName }}</h1>
-      <p class="dashboard-header__subtitle">Vue d'ensemble de votre activité commerciale et de votre stock</p>
-    </div>
-    <a
-      routerLink="/company-admin/invoices"
-      [queryParams]="{ new: '1' }"
-      class="dashboard-header__cta">
-      <i class="pi pi-plus"></i>
-      <span>Nouvelle facture</span>
-    </a>
+    <h1>Bonjour, {{ companyName }}</h1>
+    <p class="dashboard-header__subtitle">Vue d'ensemble de votre activité commerciale et de votre stock</p>
   </header>
 
   <section *ngIf="subscriptionStatus" class="subscription-banner" aria-label="Statut abonnement">
