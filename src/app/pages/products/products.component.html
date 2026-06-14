@@ -415,55 +415,68 @@
       </div>
 
       <div class="product-form__field">
-        <label for="product-quantity">Quantité initiale</label>
+        <label for="product-quantity">
+          Quantité initiale<span *ngIf="isCreatingProduct()" class="required"> *</span>
+        </label>
         <p-inputNumber
           inputId="product-quantity"
           [(ngModel)]="product.quantity"
-          [min]="0"
+          [min]="isCreatingProduct() ? 1 : 0"
           [showButtons]="true"
-          placeholder="0"
+          [placeholder]="isCreatingProduct() ? 'Min. 1' : '0'"
           class="w-full"
           [style]="{ width: '100%' }">
         </p-inputNumber>
       </div>
 
       <div class="product-form__field">
-        <label for="product-min-threshold">Seuil minimum (alerte stock bas)</label>
+        <label for="product-min-threshold">
+          Seuil minimum (alerte stock bas)<span *ngIf="isCreatingProduct()" class="required"> *</span>
+        </label>
         <p-inputNumber
           inputId="product-min-threshold"
           [(ngModel)]="product.minThreshold"
-          [min]="0"
+          [min]="isCreatingProduct() ? 1 : 0"
           [showButtons]="true"
-          placeholder="0"
+          [placeholder]="isCreatingProduct() ? 'Min. 1' : '0'"
           class="w-full"
           [style]="{ width: '100%' }">
         </p-inputNumber>
-        <p class="product-form__hint">0 = pas d'alerte. Ex. : 10 pour être alerté quand le stock atteint 10 ou moins.</p>
+        <p class="product-form__hint" *ngIf="isCreatingProduct()">
+          Minimum 1. Ex. : 10 pour être alerté quand le stock atteint 10 ou moins.
+        </p>
+        <p class="product-form__hint" *ngIf="!isCreatingProduct()">
+          0 = pas d'alerte. Ex. : 10 pour être alerté quand le stock atteint 10 ou moins.
+        </p>
       </div>
 
       <div class="product-form__field">
-        <label for="product-purchase-price">Prix d'achat (FCFA)</label>
+        <label for="product-purchase-price">
+          Prix d'achat (FCFA)<span *ngIf="isCreatingProduct()" class="required"> *</span>
+        </label>
         <p-inputNumber
           inputId="product-purchase-price"
           [(ngModel)]="product.purchasePrice"
-          [min]="0"
+          [min]="isCreatingProduct() ? 0.01 : 0"
           [maxFractionDigits]="2"
           mode="decimal"
-          placeholder="0"
+          [placeholder]="isCreatingProduct() ? 'Min. 0,01' : '0'"
           class="w-full"
           [style]="{ width: '100%' }">
         </p-inputNumber>
       </div>
 
       <div class="product-form__field">
-        <label for="product-price">Prix de vente (FCFA)</label>
+        <label for="product-price">
+          Prix de vente (FCFA)<span *ngIf="isCreatingProduct()" class="required"> *</span>
+        </label>
         <p-inputNumber
           inputId="product-price"
           [(ngModel)]="product.price"
-          [min]="0"
+          [min]="isCreatingProduct() ? 0.01 : 0"
           [maxFractionDigits]="2"
           mode="decimal"
-          placeholder="0"
+          [placeholder]="isCreatingProduct() ? 'Min. 0,01' : '0'"
           class="w-full"
           [style]="{ width: '100%' }">
         </p-inputNumber>

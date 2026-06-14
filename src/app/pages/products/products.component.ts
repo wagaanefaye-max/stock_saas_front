@@ -263,8 +263,10 @@ export class ProductsComponent implements OnInit {
 
   openNew() {
     this.product = {
-      quantity: 0,
-      minThreshold: 0
+      quantity: null,
+      minThreshold: null,
+      purchasePrice: null,
+      price: null
     };
     // Si les catégories sont déjà chargées, sélectionner GENERAL par défaut.
     if (this.categories.length > 0) {
@@ -431,13 +433,23 @@ export class ProductsComponent implements OnInit {
       });
       return;
     }
+
+    if (!this.product.id && !this.isCreateNumericFieldsValid()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation',
+        detail: 'La quantité initiale, le seuil minimum, le prix d\'achat et le prix de vente doivent être supérieurs à 0.',
+        life: 5000
+      });
+      return;
+    }
     
     const productData: any = {
       name: this.product.name,
       categoryCode: this.product.categoryCode || null,
       description: this.product.description || null,
-      price: this.product.price || 0,
-      purchasePrice: this.product.purchasePrice || 0,
+      price: this.product.price ?? 0,
+      purchasePrice: this.product.purchasePrice ?? 0,
       warehouseId: this.product.warehouseId || null,
       quantity: this.product.quantity != null ? this.product.quantity : 0,
       minThreshold: this.product.minThreshold != null ? this.product.minThreshold : 0
@@ -541,9 +553,31 @@ export class ProductsComponent implements OnInit {
   }
   
   isFormValid(): boolean {
-    const baseValid = !!this.product.name;
-    const quantityValid = this.product.quantity !== undefined && this.product.quantity !== null && this.product.quantity >= 0;
-    return baseValid && quantityValid;
+    if (!this.product.name?.trim()) {
+      return false;
+    }
+    if (this.product.id) {
+      return this.product.quantity !== undefined
+        && this.product.quantity !== null
+        && this.product.quantity >= 0;
+    }
+    return this.isCreateNumericFieldsValid();
+  }
+
+  isCreatingProduct(): boolean {
+    return !this.product.id;
+  }
+
+  private isPositiveNumber(value: unknown): boolean {
+    const n = Number(value);
+    return Number.isFinite(n) && n > 0;
+  }
+
+  private isCreateNumericFieldsValid(): boolean {
+    return this.isPositiveNumber(this.product.quantity)
+      && this.isPositiveNumber(this.product.minThreshold)
+      && this.isPositiveNumber(this.product.purchasePrice)
+      && this.isPositiveNumber(this.product.price);
   }
 
   isLossPricing(): boolean {
