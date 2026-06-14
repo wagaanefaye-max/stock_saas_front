@@ -23,37 +23,8 @@
   @media (max-width: 768px) {
     margin-bottom: 0.5rem;
 
-    &:has(+ .filter-panel),
-    &:has(+ .products-filter-panel) {
+    &:has(+ .filter-panel) {
       margin-bottom: 0;
-    }
-  }
-
-  &__search {
-    position: relative;
-    flex: 1 1 auto;
-    min-width: 0;
-    display: block;
-
-    > i,
-    > .pi {
-      position: absolute;
-      top: 50%;
-      left: 0.75rem;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    input,
-    .p-inputtext {
-      width: 100%;
-      padding: 0.5rem 0.65rem 0.5rem 2.35rem;
-      min-height: 42px;
-      border-radius: 10px;
-      font-size: 16px;
     }
   }
 
@@ -62,28 +33,6 @@
     gap: 0.35rem;
     flex-shrink: 0;
     align-items: stretch;
-  }
-
-  &__filter-btn {
-    min-width: 42px;
-    min-height: 42px;
-
-    @media (max-width: 768px) {
-      .p-button-label {
-        display: none;
-      }
-
-      &--active {
-        background: var(--nav-active-bg, rgba(37, 99, 235, 0.1));
-        border-color: var(--primary);
-        color: var(--primary);
-      }
-    }
-  }
-
-  &__chips {
-    width: 100%;
-    margin-bottom: 0.5rem;
   }
 }
 

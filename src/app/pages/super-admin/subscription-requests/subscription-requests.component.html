@@ -5,16 +5,14 @@
   </div>
 
   <div class="entity-filters">
-    <div class="mobile-toolbar show-mobile-only">
-      <div class="mobile-toolbar__chips list-filter-chips list-filter-chips--scroll">
-        <p-selectButton
-          [options]="statusFilterOptions"
-          [(ngModel)]="statusFilter"
-          optionLabel="label"
-          optionValue="value"
-          (ngModelChange)="onFilterChange()">
-        </p-selectButton>
-      </div>
+    <div class="mobile-toolbar__chips show-mobile-only list-filter-chips list-filter-chips--scroll">
+      <p-selectButton
+        [options]="statusFilterOptions"
+        [(ngModel)]="statusFilter"
+        optionLabel="label"
+        optionValue="value"
+        (ngModelChange)="onFilterChange()">
+      </p-selectButton>
     </div>
     <p-card class="table-card hide-mobile">
       <div class="list-toolbar list-toolbar--chips-only">

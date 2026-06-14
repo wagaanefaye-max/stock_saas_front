@@ -15,31 +15,40 @@
   </div>
 
   <div class="entity-filters">
-  <div class="mobile-toolbar">
-    <span class="mobile-toolbar__search p-input-icon-left">
-      <i class="pi pi-search"></i>
-      <input
-        type="text"
-        pInputText
-        [(ngModel)]="globalFilter"
-        (input)="onGlobalFilter()"
-        placeholder="Nom ou email…">
-    </span>
-    <div class="mobile-toolbar__actions">
-      <button
-        pButton
-        icon="pi pi-search"
-        class="p-button-secondary hide-mobile"
-        title="Rechercher">
-      </button>
-      <button
-        pButton
-        icon="pi pi-file-export"
-        label="Exporter"
-        class="p-button-secondary hide-mobile">
-      </button>
+    <div class="mobile-toolbar show-mobile-only">
+      <span class="p-input-icon-left mobile-toolbar__search">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          pInputText
+          [(ngModel)]="globalFilter"
+          (input)="onGlobalFilter()"
+          placeholder="Nom ou email…">
+      </span>
     </div>
-  </div>
+    <p-card class="table-card hide-mobile">
+      <div class="list-toolbar">
+        <div class="list-toolbar__primary">
+          <span class="p-input-icon-left list-toolbar__search">
+            <i class="pi pi-search"></i>
+            <input
+              type="text"
+              pInputText
+              [(ngModel)]="globalFilter"
+              (input)="onGlobalFilter()"
+              placeholder="Nom ou email…">
+          </span>
+        </div>
+        <div class="list-toolbar__actions">
+          <button
+            pButton
+            icon="pi pi-file-export"
+            label="Exporter"
+            class="p-button-outlined p-button-sm">
+          </button>
+        </div>
+      </div>
+    </p-card>
   </div>
 
   <!-- Vue cartes -->

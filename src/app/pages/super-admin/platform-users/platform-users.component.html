@@ -9,17 +9,32 @@
   </div>
 
   <div class="entity-filters">
-  <div class="mobile-toolbar">
-    <div class="mobile-toolbar__search">
-      <i class="pi pi-search"></i>
-      <input
-        type="text"
-        pInputText
-        [(ngModel)]="globalFilter"
-        (input)="onGlobalFilter()"
-        placeholder="Nom ou email…">
+    <div class="mobile-toolbar show-mobile-only">
+      <span class="p-input-icon-left mobile-toolbar__search">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          pInputText
+          [(ngModel)]="globalFilter"
+          (input)="onGlobalFilter()"
+          placeholder="Nom ou email…">
+      </span>
     </div>
-  </div>
+    <p-card class="table-card hide-mobile">
+      <div class="list-toolbar">
+        <div class="list-toolbar__primary">
+          <span class="p-input-icon-left list-toolbar__search">
+            <i class="pi pi-search"></i>
+            <input
+              type="text"
+              pInputText
+              [(ngModel)]="globalFilter"
+              (input)="onGlobalFilter()"
+              placeholder="Nom ou email…">
+          </span>
+        </div>
+      </div>
+    </p-card>
   </div>
 
   <div class="mobile-list show-mobile-only">

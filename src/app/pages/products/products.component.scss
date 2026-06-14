@@ -131,62 +131,7 @@
   }
 }
 
-/* Barre recherche + filtres */
-.products-toolbar {
-  display: flex;
-  align-items: stretch;
-  gap: 0.35rem;
-  margin-bottom: 0.65rem;
-
-  &__search {
-    position: relative;
-    flex: 1 1 auto;
-    min-width: 0;
-    display: block;
-
-    > i,
-    > .pi {
-      position: absolute;
-      top: 50%;
-      left: 0.75rem;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    input,
-    .p-inputtext {
-      width: 100%;
-      padding: 0.5rem 0.65rem 0.5rem 2.35rem;
-      min-height: 42px;
-      border-radius: 10px;
-      font-size: 16px;
-    }
-  }
-
-  &__actions {
-    display: flex;
-    gap: 0.35rem;
-    flex-shrink: 0;
-  }
-
-  &__filter-btn {
-    min-width: 42px;
-    min-height: 42px;
-
-  }
-
-  &__export-btn .p-button-label {
-    display: none;
-  }
-}
-
-.products-filter-panel {
-  margin-bottom: 0.65rem;
-  border-radius: 12px;
-}
+/* Barre recherche + filtres — styles globaux dans _list-filters.scss */
 
 .products-table-card {
   ::ng-deep .p-card-body {
@@ -443,44 +388,6 @@
     }
   }
 
-  .products-toolbar {
-    margin-bottom: 0.5rem;
-
-    &:has(+ .products-filter-panel) {
-      margin-bottom: 0;
-    }
-
-    &__filter-btn {
-      .p-button-label {
-        display: none;
-      }
-
-      &--active {
-        background: var(--nav-active-bg, rgba(37, 99, 235, 0.1));
-        border-color: var(--primary);
-        color: var(--primary);
-      }
-    }
-  }
-
-  .products-filter-panel {
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    padding: 0.65rem;
-
-    .filter-field label {
-      font-size: 0.7rem;
-    }
-
-    .filter-actions .p-button {
-      flex: 1;
-      min-height: 40px;
-      font-size: 0.8125rem;
-    }
-  }
-
   .product-form {
     gap: 0.75rem;
   }
@@ -491,16 +398,8 @@
 }
 
 @media (min-width: 769px) {
-  .products-toolbar__filter-btn .p-button-label {
+  .products-page__header-btn .p-button-label {
     display: inline;
-  }
-
-  .products-toolbar__export-btn .p-button-label {
-    display: inline;
-  }
-
-  .products-filter-panel {
-    margin-bottom: 1rem;
   }
 }
 

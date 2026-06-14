@@ -1,5 +1,65 @@
 /* Barres de filtres des listes — mobile + grands écrans */
 
+/* Recherche unifiée (barre mobile + toolbar desktop) */
+.list-toolbar__search,
+.mobile-toolbar__search {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
+
+  > i,
+  > .pi,
+  > .p-inputicon {
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    margin: 0;
+    padding: 0;
+    color: var(--text-muted, #6b7280);
+    font-size: 0.95rem;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  input,
+  .p-inputtext {
+    width: 100%;
+    padding: 0.45rem 0.65rem 0.45rem 2.35rem;
+    font-size: 16px; /* évite zoom iOS */
+    min-height: 42px;
+    border-radius: 10px;
+  }
+
+  .p-select,
+  .p-datepicker {
+    width: 100%;
+  }
+}
+
+/* Bouton panneau filtres avancés */
+.list-toolbar__filter-btn,
+.mobile-toolbar__filter-btn {
+  min-width: 42px;
+  min-height: 42px;
+
+  &--active {
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+}
+
+/* Plusieurs champs recherche empilés (ex. factures) */
+.mobile-toolbar:has(.mobile-toolbar__search + .mobile-toolbar__search),
+.list-toolbar__filters-row:has(.list-toolbar__search + .list-toolbar__search) {
+  flex-direction: column;
+  align-items: stretch;
+}
+
 .list-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -12,38 +72,6 @@
     flex: 1 1 220px;
     min-width: 0;
     width: 100%;
-  }
-
-  &__search {
-    position: relative;
-    display: block;
-    width: 100%;
-
-    /* PrimeNG 18 : p-iconfield — ancien span p-input-icon-left */
-    > i,
-    > .pi,
-    > .p-inputicon {
-      position: absolute;
-      top: 50%;
-      left: 0.75rem;
-      transform: translateY(-50%);
-      margin: 0;
-      padding: 0;
-      color: var(--text-muted, #6b7280);
-      font-size: 0.95rem;
-      line-height: 1;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    input,
-    .p-inputtext {
-      width: 100%;
-      /* padding explicite : le global .p-inputtext (mobile) écrase padding-inline-start */
-      padding: 0.45rem 0.65rem 0.45rem 2.35rem;
-      font-size: 16px; /* évite zoom iOS */
-      min-height: 42px;
-    }
   }
 
   &__filters-row {
@@ -99,8 +127,10 @@
 }
 
 /* Puces / segments (statut, type, rôle…) */
-.list-filter-chips {
+.list-filter-chips,
+.mobile-toolbar__chips {
   width: 100%;
+  margin-bottom: 0.5rem;
 
   .p-selectbutton {
     display: flex;
@@ -120,11 +150,18 @@
   }
 }
 
-.list-filter-chips--scroll {
+.list-filter-chips--scroll,
+.mobile-toolbar__chips.list-filter-chips--scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
   margin: 0 -0.25rem;
   padding: 0 0.25rem 0.15rem;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   .p-selectbutton {
     flex-wrap: nowrap;
@@ -212,7 +249,9 @@
     }
 
     &__search input,
-    &__search .p-inputtext {
+    &__search .p-inputtext,
+    .list-toolbar__search input,
+    .list-toolbar__search .p-inputtext {
       min-height: 2.5rem;
       padding: 0.45rem 0.75rem 0.45rem 2.35rem;
       font-size: 0.9rem;
@@ -289,7 +328,8 @@
     }
   }
 
-  .list-filter-chips {
+  .list-filter-chips,
+  .mobile-toolbar__chips {
     width: auto;
 
     .p-selectbutton {
@@ -319,7 +359,8 @@
     }
   }
 
-  .list-filter-chips--scroll {
+  .list-filter-chips--scroll,
+.mobile-toolbar__chips.list-filter-chips--scroll {
     overflow: visible;
     margin: 0;
     padding: 0;
@@ -381,12 +422,17 @@
     flex: 1 1 auto;
   }
 
-  .products-page .list-toolbar__primary {
-    max-width: min(22rem, 35vw);
+  .entity-filters .list-toolbar__primary:only-child,
+  .entity-filters .list-toolbar__primary:has(+ .list-toolbar__actions:empty) {
+    max-width: min(28rem, 42vw);
   }
 
   .p-card > .list-toolbar:first-child {
     margin-top: -0.25rem;
+  }
+
+  .list-toolbar__filter-btn .p-button-label {
+    display: inline;
   }
 }
 
@@ -438,10 +484,72 @@
       min-width: var(--app-touch-min, 44px);
       min-height: var(--app-touch-min, 44px);
     }
+  }
 
-    &__search > i,
-    &__search > .pi {
-      left: 0.75rem;
+  .list-toolbar__filter-btn,
+  .mobile-toolbar__filter-btn {
+    .p-button-label {
+      display: none;
+    }
+  }
+
+  .entity-filters .filter-panel {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    padding: 0.65rem;
+
+    .filter-field label {
+      font-size: 0.7rem;
+    }
+
+    .filter-actions .p-button {
+      flex: 1;
+      min-height: 40px;
+      font-size: 0.8125rem;
+    }
+  }
+
+  .entity-filters .list-toolbar:has(+ .filter-panel),
+  .entity-filters .mobile-toolbar:has(+ .filter-panel) {
+    margin-bottom: 0;
+  }
+
+  .entity-filters .list-toolbar + .filter-panel {
+    margin-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  .entity-filters .list-toolbar:has(.list-toolbar__actions:not(:empty)),
+  .entity-filters .mobile-toolbar:has(.mobile-toolbar__actions:not(:empty)) {
+    flex-direction: row !important;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0.35rem !important;
+    margin-bottom: 0.75rem;
+
+    &:has(+ .filter-panel) {
+      margin-bottom: 0;
+    }
+
+    .list-toolbar__primary {
+      flex: 1 1 auto;
+      width: auto !important;
+      min-width: 0;
+    }
+
+    .list-toolbar__actions,
+    .mobile-toolbar__actions {
+      width: auto !important;
+      flex: 0 0 auto;
+      margin-left: 0;
+      gap: 0.35rem;
+
+      .p-button {
+        flex: 0 0 auto;
+        min-height: 42px;
+        min-width: 42px;
+      }
     }
   }
 
@@ -510,50 +618,6 @@
     flex-direction: column;
     gap: 0.5rem;
     width: 100%;
-  }
-
-  .subscription-requests-page .list-toolbar {
-    .list-filter-chips--scroll {
-      order: 1;
-    }
-  }
-
-  /* Produits : recherche + boutons filtres sur une ligne, panneau collé */
-  .products-page .list-toolbar {
-    flex-direction: row !important;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    gap: 0.35rem !important;
-    margin-bottom: 0.75rem;
-
-    &:has(+ .filter-panel) {
-      margin-bottom: 0;
-    }
-
-    &__primary {
-      flex: 1 1 auto;
-      width: auto !important;
-      min-width: 0;
-    }
-
-    &__actions {
-      width: auto !important;
-      flex: 0 0 auto;
-      gap: 0.35rem;
-
-      .p-button {
-        flex: 0 0 auto;
-        min-height: 42px;
-        min-width: 42px;
-      }
-    }
-  }
-
-  .products-page .list-toolbar + .filter-panel {
-    margin-top: 0;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    padding-top: 0.65rem;
   }
 
   .reports-page .page-header .header-actions {

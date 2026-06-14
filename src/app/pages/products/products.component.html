@@ -30,8 +30,8 @@
         <button
           pButton
           [icon]="showFilterPanel ? 'pi pi-times' : 'pi pi-filter'"
-          class="p-button-outlined p-button-sm mobile-toolbar__filter-btn"
-          [class.mobile-toolbar__filter-btn--active]="showFilterPanel"
+          class="p-button-outlined p-button-sm list-toolbar__filter-btn"
+          [class.list-toolbar__filter-btn--active]="showFilterPanel"
           [attr.aria-label]="showFilterPanel ? 'Masquer les filtres' : 'Afficher les filtres'"
           (click)="showFilterPanel = !showFilterPanel">
         </button>
@@ -39,9 +39,9 @@
     </div>
 
     <p-card class="table-card hide-mobile">
-      <div class="list-toolbar products-toolbar">
+      <div class="list-toolbar">
         <div class="list-toolbar__primary">
-          <span class="p-input-icon-left list-toolbar__search products-toolbar__search">
+          <span class="p-input-icon-left list-toolbar__search">
             <i class="pi pi-search"></i>
             <input
               type="text"
@@ -56,15 +56,15 @@
             pButton
             [label]="showFilterPanel ? 'Masquer' : 'Filtres'"
             icon="pi pi-filter"
-            class="p-button-outlined p-button-sm products-toolbar__filter-btn"
-            [class.products-toolbar__filter-btn--active]="showFilterPanel"
+            class="p-button-outlined p-button-sm list-toolbar__filter-btn"
+            [class.list-toolbar__filter-btn--active]="showFilterPanel"
             (click)="showFilterPanel = !showFilterPanel">
           </button>
         </div>
       </div>
     </p-card>
 
-    <div *ngIf="showFilterPanel" class="filter-panel products-filter-panel">
+    <div *ngIf="showFilterPanel" class="filter-panel">
       <div class="filter-row">
         <div class="filter-field">
           <label>Nom</label>
