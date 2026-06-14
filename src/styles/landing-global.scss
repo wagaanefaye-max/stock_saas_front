@@ -251,10 +251,15 @@
 
 .landing-animate {
   opacity: 0;
-  animation: landing-fade-up 0.8s ease forwards;
+}
 
-  &--1 { animation-delay: 0.1s; }
-  &--2 { animation-delay: 0.35s; }
+.landing--revealed {
+  .landing-animate {
+    animation: landing-fade-up 0.8s ease forwards;
+
+    &--1 { animation-delay: 0.1s; }
+    &--2 { animation-delay: 0.35s; }
+  }
 }
 
 .reveal {

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChildren, QueryList } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -13,6 +13,7 @@ import { environment } from '../../../environments/environment';
 })
 export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChildren('reveal') revealElements!: QueryList<ElementRef<HTMLElement>>;
+  @ViewChild('heroChartCanvas') heroChartCanvas?: ElementRef<HTMLCanvasElement>;
 
   showSplash = true;
   splashExiting = false;
@@ -20,6 +21,9 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private splashTimers: ReturnType<typeof setTimeout>[] = [];
   private scrollObserver?: IntersectionObserver;
+  private chartRaf = 0;
+  private chartResizeObs?: ResizeObserver;
+  private readonly heroChartBase = [0.42, 0.58, 0.52, 0.74, 0.68, 0.82, 0.76, 0.88];
 
   readonly appName = 'Stock SaaS';
   readonly currentYear = new Date().getFullYear();
@@ -170,6 +174,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.splashTimers.forEach(clearTimeout);
     this.scrollObserver?.disconnect();
+    this.stopHeroChart();
     this.lockBodyScroll(false);
   }
 
@@ -189,7 +194,10 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
             this.showSplash = false;
             this.landingRevealed = true;
             this.lockBodyScroll(false);
-            setTimeout(() => this.initScrollReveal(), 50);
+            setTimeout(() => {
+              this.initScrollReveal();
+              this.initHeroChart();
+            }, 50);
           }, exitMs)
         );
       }, displayMs)
@@ -241,6 +249,128 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
       this.router.navigate(['/gestionnaire/dashboard']);
     } else {
       this.router.navigate(['/gestion/dashboard']);
+    }
+  }
+
+  private initHeroChart(): void {
+    const canvas = this.heroChartCanvas?.nativeElement;
+    if (!canvas || typeof window === 'undefined') {
+      return;
+    }
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const parent = canvas.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    const resize = (): void => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const width = parent.clientWidth;
+      const height = parent.clientHeight;
+      canvas.width = Math.max(1, Math.floor(width * dpr));
+      canvas.height = Math.max(1, Math.floor(height * dpr));
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+    };
+
+    resize();
+    this.chartResizeObs?.disconnect();
+    this.chartResizeObs = new ResizeObserver(resize);
+    this.chartResizeObs.observe(parent);
+
+    if (reducedMotion) {
+      this.drawHeroChart(canvas, this.heroChartBase, 0);
+      return;
+    }
+
+    let tick = 0;
+    const animate = (): void => {
+      tick += 0.018;
+      const data = this.heroChartBase.map((value, index) => {
+        const wave = Math.sin(tick + index * 0.75) * 0.035;
+        return Math.min(0.95, Math.max(0.25, value + wave));
+      });
+      this.drawHeroChart(canvas, data, tick);
+      this.chartRaf = requestAnimationFrame(animate);
+    };
+    animate();
+  }
+
+  private stopHeroChart(): void {
+    if (this.chartRaf) {
+      cancelAnimationFrame(this.chartRaf);
+      this.chartRaf = 0;
+    }
+    this.chartResizeObs?.disconnect();
+    this.chartResizeObs = undefined;
+  }
+
+  private drawHeroChart(canvas: HTMLCanvasElement, values: number[], tick: number): void {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return;
+    }
+
+    const dpr = canvas.width / (canvas.clientWidth || 1);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const padX = 8;
+    const padTop = 22;
+    const padBottom = 8;
+    const chartH = height - padTop - padBottom;
+    const chartW = width - padX * 2;
+
+    ctx.clearRect(0, 0, width, height);
+
+    const points = values.map((value, index) => ({
+      x: padX + (index / (values.length - 1)) * chartW,
+      y: padTop + chartH * (1 - value)
+    }));
+
+    const gradient = ctx.createLinearGradient(0, padTop, 0, height - padBottom);
+    gradient.addColorStop(0, 'rgba(37, 99, 235, 0.28)');
+    gradient.addColorStop(1, 'rgba(37, 99, 235, 0)');
+
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, height - padBottom);
+    points.forEach((point) => ctx.lineTo(point.x, point.y));
+    ctx.lineTo(points[points.length - 1].x, height - padBottom);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    ctx.beginPath();
+    points.forEach((point, index) => {
+      if (index === 0) {
+        ctx.moveTo(point.x, point.y);
+      } else {
+        ctx.lineTo(point.x, point.y);
+      }
+    });
+    ctx.strokeStyle = '#2563EB';
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    const last = points[points.length - 1];
+    ctx.beginPath();
+    ctx.arc(last.x, last.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#2563EB';
+    ctx.fill();
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    if (tick > 0) {
+      const pulse = 4 + Math.sin(tick * 2) * 1.5;
+      ctx.beginPath();
+      ctx.arc(last.x, last.y, pulse + 4, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(37, 99, 235, 0.25)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
     }
   }
 }
