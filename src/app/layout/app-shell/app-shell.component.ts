@@ -87,11 +87,7 @@ export class AppShellComponent implements OnInit, OnDestroy {
   get bottomNavItems(): AppNavItem[] {
     const primary = this.config.items.filter((i) => i.mobilePrimary);
     const fallback = primary.length > 0 ? primary : this.config.items;
-    const secondaryCount = this.config.items.filter((i) => !i.mobilePrimary).length;
-
-    if (secondaryCount === 0 && fallback.length <= 5) {
-      return fallback;
-    }
+    // Réserver une place pour le bouton Menu (déconnexion + pages restantes)
     return fallback.slice(0, 4);
   }
 

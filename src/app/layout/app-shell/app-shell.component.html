@@ -110,12 +110,11 @@
       <span class="app-bottom-nav__label">{{ navItem.mobileLabel || navItem.label }}</span>
     </a>
     <button
-      *ngIf="secondaryMobileItems.length > 0"
       type="button"
       class="app-bottom-nav__item app-bottom-nav__item--menu"
       [class.active]="mobileMenuOpen"
       (click)="openMobileMenu()"
-      aria-label="Ouvrir le menu complet">
+      aria-label="Ouvrir le menu et se déconnecter">
       <span class="app-bottom-nav__icon-wrap" aria-hidden="true">
         <i class="pi pi-bars"></i>
       </span>
