@@ -380,54 +380,54 @@
           <span class="warehouse-detail__empty-hint">Les stocks apparaîtront après un mouvement d'entrée.</span>
         </div>
 
-        <ul *ngIf="!warehouseProductsLoading && warehouseProducts.length > 0" class="warehouse-detail__product-list show-mobile-only">
-          <li
-            *ngFor="let product of warehouseProducts; trackBy: trackByProductId"
-            class="warehouse-detail__product-card"
-            [class.warehouse-detail__product-card--low]="product.lowStock">
-            <div class="warehouse-detail__product-top">
-              <div>
-                <strong class="warehouse-detail__product-name">{{ product.productName }}</strong>
-                <span class="warehouse-detail__product-meta">{{ product.sku }}</span>
-              </div>
-              <p-tag *ngIf="product.lowStock" value="Stock bas" severity="warn"></p-tag>
-            </div>
-            <div class="warehouse-detail__product-stats">
-              <div>
-                <span class="warehouse-detail__stat-label">Quantité</span>
-                <span class="warehouse-detail__stat-value" [class.warehouse-detail__stat-value--danger]="product.lowStock">
-                  {{ product.quantity | number:'1.0-0' }}
-                </span>
-              </div>
-              <div>
-                <span class="warehouse-detail__stat-label">Seuil min.</span>
-                <ng-container *ngIf="authService.isAdminEntreprise(); else readOnlyThreshold">
-                  <p-inputNumber
-                    [(ngModel)]="product.minThreshold"
-                    [min]="0"
-                    [showButtons]="true"
-                    buttonLayout="horizontal"
-                    [inputStyle]="{ width: '4rem' }">
-                  </p-inputNumber>
-                  <button
-                    pButton
-                    icon="pi pi-save"
-                    class="p-button-text p-button-sm warehouse-detail__save-threshold"
-                    pTooltip="Enregistrer"
-                    (click)="saveProductThreshold(product)">
-                  </button>
-                </ng-container>
-                <ng-template #readOnlyThreshold>
-                  <span class="warehouse-detail__stat-value">{{ product.minThreshold | number:'1.0-0' }}</span>
-                </ng-template>
-              </div>
-              <div>
-                <span class="warehouse-detail__stat-label">Prix</span>
-                <span class="warehouse-detail__stat-value">{{ formatMoney(product.price) }}</span>
-              </div>
-            </div>
-          </li>
-        </ul>
+<!--        <ul *ngIf="!warehouseProductsLoading && warehouseProducts.length > 0" class="warehouse-detail__product-list show-mobile-only">-->
+<!--          <li-->
+<!--            *ngFor="let product of warehouseProducts; trackBy: trackByProductId"-->
+<!--            class="warehouse-detail__product-card"-->
+<!--            [class.warehouse-detail__product-card&#45;&#45;low]="product.lowStock">-->
+<!--            <div class="warehouse-detail__product-top">-->
+<!--              <div>-->
+<!--                <strong class="warehouse-detail__product-name">{{ product.productName }}</strong>-->
+<!--                <span class="warehouse-detail__product-meta">{{ product.sku }}</span>-->
+<!--              </div>-->
+<!--              <p-tag *ngIf="product.lowStock" value="Stock bas" severity="warn"></p-tag>-->
+<!--            </div>-->
+<!--            <div class="warehouse-detail__product-stats">-->
+<!--              <div>-->
+<!--                <span class="warehouse-detail__stat-label">Quantité</span>-->
+<!--                <span class="warehouse-detail__stat-value" [class.warehouse-detail__stat-value&#45;&#45;danger]="product.lowStock">-->
+<!--                  {{ product.quantity | number:'1.0-0' }}-->
+<!--                </span>-->
+<!--              </div>-->
+<!--              <div>-->
+<!--                <span class="warehouse-detail__stat-label">Seuil min.</span>-->
+<!--                <ng-container *ngIf="authService.isAdminEntreprise(); else readOnlyThreshold">-->
+<!--                  <p-inputNumber-->
+<!--                    [(ngModel)]="product.minThreshold"-->
+<!--                    [min]="0"-->
+<!--                    [showButtons]="true"-->
+<!--                    buttonLayout="horizontal"-->
+<!--                    [inputStyle]="{ width: '4rem' }">-->
+<!--                  </p-inputNumber>-->
+<!--                  <button-->
+<!--                    pButton-->
+<!--                    icon="pi pi-save"-->
+<!--                    class="p-button-text p-button-sm warehouse-detail__save-threshold"-->
+<!--                    pTooltip="Enregistrer"-->
+<!--                    (click)="saveProductThreshold(product)">-->
+<!--                  </button>-->
+<!--                </ng-container>-->
+<!--                <ng-template #readOnlyThreshold>-->
+<!--                  <span class="warehouse-detail__stat-value">{{ product.minThreshold | number:'1.0-0' }}</span>-->
+<!--                </ng-template>-->
+<!--              </div>-->
+<!--              <div>-->
+<!--                <span class="warehouse-detail__stat-label">Prix</span>-->
+<!--                <span class="warehouse-detail__stat-value">{{ formatMoney(product.price) }}</span>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </li>-->
+<!--        </ul>-->
 
         <div class="warehouse-detail__table-wrap hide-mobile" *ngIf="!warehouseProductsLoading && warehouseProducts.length > 0">
           <p-table
