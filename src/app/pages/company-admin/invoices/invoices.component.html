@@ -508,6 +508,7 @@
     [modal]="true"
     [style]="dialogStyleDetail"
     [breakpoints]="dialogBreakpoints"
+    [contentStyle]="{ overflow: 'auto' }"
     [draggable]="false"
     [resizable]="false"
     [closable]="true"
@@ -594,7 +595,7 @@
           Détail des lignes
         </h3>
 
-        <div class="invoice-detail__lines-table dialog-table-wrap hide-mobile">
+        <div class="invoice-detail__lines-table dialog-table-wrap">
           <table class="invoice-detail__table">
             <thead>
               <tr>
@@ -605,32 +606,23 @@
               </tr>
             </thead>
             <tbody>
-              @for (line of selectedInvoice.lines; track line.id || $index) {
+              @if (selectedInvoice.lines.length) {
+                @for (line of selectedInvoice.lines; track line.id || $index) {
+                  <tr>
+                    <td class="col-desc">{{ line.description || line.productName || '—' }}</td>
+                    <td class="col-qty">{{ line.quantity | number:'1.0-2' }}</td>
+                    <td class="col-price">{{ line.unitPrice | number:'1.0-0' }}</td>
+                    <td class="col-amount">{{ line.amount | number:'1.0-0' }}</td>
+                  </tr>
+                }
+              } @else {
                 <tr>
-                  <td class="col-desc">{{ line.description || line.productName || '—' }}</td>
-                  <td class="col-qty">{{ line.quantity | number:'1.0-2' }}</td>
-                  <td class="col-price">{{ line.unitPrice | number:'1.0-0' }}</td>
-                  <td class="col-amount">{{ line.amount | number:'1.0-0' }}</td>
+                  <td colspan="4" class="invoice-detail__empty-lines">Aucune ligne sur cette facture</td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
-
-        <ul class="invoice-detail__lines-cards show-mobile-only">
-          @for (line of selectedInvoice.lines; track line.id || $index) {
-            <li class="invoice-detail__line-card">
-              <div class="invoice-detail__line-card-top">
-                <span class="invoice-detail__line-card-name">{{ line.description || line.productName || '—' }}</span>
-                <span class="invoice-detail__line-card-amount">{{ line.amount | number:'1.0-0' }} FCFA</span>
-              </div>
-              <div class="invoice-detail__line-card-meta">
-                <span>Qté {{ line.quantity | number:'1.0-2' }}</span>
-                <span>P.U. {{ line.unitPrice | number:'1.0-0' }} FCFA</span>
-              </div>
-            </li>
-          }
-        </ul>
       </section>
 
       <div class="invoice-detail__summary">
