@@ -503,9 +503,8 @@
 
   <!-- Détail facture -->
   <p-dialog
-    styleClass="app-mobile-dialog"
+    styleClass="app-mobile-dialog invoice-detail-dialog"
     [(visible)]="displayDetailDialog"
-    [header]="detailLoading ? 'Chargement…' : (selectedInvoice ? 'Facture ' + selectedInvoice.invoiceNumber : 'Détail facture')"
     [modal]="true"
     [style]="dialogStyleDetail"
     [breakpoints]="dialogBreakpoints"
@@ -513,98 +512,178 @@
     [resizable]="false"
     [closable]="true"
     (onHide)="onDetailDialogHide()">
+    <ng-template pTemplate="header">
+      <div class="invoice-detail-header">
+        <span class="invoice-detail-header__title">
+          {{ detailLoading ? 'Chargement…' : (selectedInvoice?.invoiceNumber || 'Détail facture') }}
+        </span>
+        <span class="invoice-detail-header__subtitle" *ngIf="selectedInvoice && !detailLoading">
+          Facture client · {{ selectedInvoice.currency || 'FCFA' }}
+        </span>
+      </div>
+    </ng-template>
+
     <div *ngIf="detailLoading" class="invoice-detail-loading" role="status" aria-live="polite" aria-label="Chargement de la facture">
       <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
       <span>Chargement de la facture…</span>
     </div>
+
     <div *ngIf="selectedInvoice && !detailLoading" class="app-dialog-detail invoice-detail">
-      <div class="detail-header">
-        <div class="detail-status">
-          <p-tag [value]="selectedInvoice.statusLabel" [severity]="getStatusSeverity(selectedInvoice.status)" styleClass="status-badge"></p-tag>
+      <div class="invoice-detail__hero">
+        <div class="invoice-detail__hero-icon" aria-hidden="true">
+          <i class="pi pi-file"></i>
         </div>
-        <div class="detail-meta-grid">
-          <div class="meta-item">
-            <span class="meta-label">Date facture</span>
-            <span class="meta-value">{{ formatDate(selectedInvoice.invoiceDate) }}</span>
+        <div class="invoice-detail__hero-body">
+          <div class="invoice-detail__hero-tags">
+            <p-tag
+              [value]="selectedInvoice.statusLabel"
+              [severity]="getStatusSeverity(selectedInvoice.status)"
+              styleClass="invoice-detail__status-tag">
+            </p-tag>
+            <span class="invoice-detail__id">#{{ selectedInvoice.id }}</span>
           </div>
-          <div class="meta-item" *ngIf="selectedInvoice.dueDate">
-            <span class="meta-label">Échéance</span>
-            <span class="meta-value">{{ formatDate(selectedInvoice.dueDate) }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Devise</span>
-            <span class="meta-value">{{ selectedInvoice.currency || 'FCFA' }}</span>
-          </div>
+          <p class="invoice-detail__hero-total">{{ formatMoney(selectedInvoice.total) }}</p>
         </div>
       </div>
 
-      <div class="detail-client-card">
-        <div class="client-card-header">
-          <i class="pi pi-user"></i>
-          <span>Client</span>
+      <div class="invoice-detail__kpis">
+        <div class="invoice-detail__kpi">
+          <span class="invoice-detail__kpi-value">{{ formatDate(selectedInvoice.invoiceDate) }}</span>
+          <span class="invoice-detail__kpi-label">Date facture</span>
         </div>
-        <div class="client-card-body">
-          <p class="client-name">{{ selectedInvoice.clientName }}</p>
-          <p class="client-line" *ngIf="selectedInvoice.clientEmail"><i class="pi pi-envelope"></i> {{ selectedInvoice.clientEmail }}</p>
-          <p class="client-line" *ngIf="selectedInvoice.clientPhone"><i class="pi pi-phone"></i> {{ selectedInvoice.clientPhone | phoneFormat }}</p>
-          <p class="client-line address" *ngIf="selectedInvoice.clientAddress"><i class="pi pi-map-marker"></i> {{ selectedInvoice.clientAddress }}</p>
+        <div class="invoice-detail__kpi" [class.invoice-detail__kpi--due]="selectedInvoice.status !== 'PAID' && selectedInvoice.dueDate">
+          <span class="invoice-detail__kpi-value">{{ formatDate(selectedInvoice.dueDate ?? null) }}</span>
+          <span class="invoice-detail__kpi-label">Échéance</span>
+        </div>
+        <div class="invoice-detail__kpi">
+          <span class="invoice-detail__kpi-value">{{ selectedInvoice.lines.length || 0 }}</span>
+          <span class="invoice-detail__kpi-label">Ligne(s)</span>
         </div>
       </div>
 
-      <div class="detail-lines-section">
-        <div class="lines-section-header">
-          <i class="pi pi-list"></i>
-          <span>Détail des lignes</span>
+      <section class="invoice-detail__section">
+        <h3 class="invoice-detail__section-title">
+          <i class="pi pi-user" aria-hidden="true"></i>
+          Client
+        </h3>
+        <div class="invoice-detail__client">
+          <p class="invoice-detail__client-name">{{ selectedInvoice.clientName || '—' }}</p>
+          <ul class="invoice-detail__contact-list">
+            <li *ngIf="selectedInvoice.clientEmail">
+              <i class="pi pi-envelope" aria-hidden="true"></i>
+              <span>{{ selectedInvoice.clientEmail }}</span>
+            </li>
+            <li *ngIf="selectedInvoice.clientPhone">
+              <i class="pi pi-phone" aria-hidden="true"></i>
+              <span>{{ selectedInvoice.clientPhone | phoneFormat }}</span>
+            </li>
+            <li *ngIf="selectedInvoice.clientAddress" class="invoice-detail__contact-address">
+              <i class="pi pi-map-marker" aria-hidden="true"></i>
+              <span>{{ selectedInvoice.clientAddress }}</span>
+            </li>
+            <li *ngIf="!selectedInvoice.clientEmail && !selectedInvoice.clientPhone && !selectedInvoice.clientAddress" class="invoice-detail__contact-empty">
+              Aucune coordonnée renseignée
+            </li>
+          </ul>
         </div>
-        <div class="detail-lines-wrap">
-          <table class="detail-lines">
+      </section>
+
+      <section class="invoice-detail__section">
+        <h3 class="invoice-detail__section-title">
+          <i class="pi pi-list" aria-hidden="true"></i>
+          Détail des lignes
+        </h3>
+
+        <div class="invoice-detail__lines-table dialog-table-wrap hide-mobile">
+          <table class="invoice-detail__table">
             <thead>
               <tr>
                 <th>Désignation</th>
                 <th class="col-qty">Qté</th>
-                <th class="col-price">P.U. (FCFA)</th>
-                <th class="col-amount">Montant (FCFA)</th>
+                <th class="col-price">P.U.</th>
+                <th class="col-amount">Montant</th>
               </tr>
             </thead>
             <tbody>
               @for (line of selectedInvoice.lines; track line.id || $index) {
                 <tr>
                   <td class="col-desc">{{ line.description || line.productName || '—' }}</td>
-                  <td class="col-qty">{{ line.quantity | number:'1.2-2' }}</td>
-                  <td class="col-price">{{ line.unitPrice | number:'1.2-2' }}</td>
-                  <td class="col-amount">{{ line.amount | number:'1.2-2' }}</td>
+                  <td class="col-qty">{{ line.quantity | number:'1.0-2' }}</td>
+                  <td class="col-price">{{ line.unitPrice | number:'1.0-0' }}</td>
+                  <td class="col-amount">{{ line.amount | number:'1.0-0' }}</td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
-      </div>
 
-      <div class="detail-total-card">
-        <span class="total-label">Total TTC</span>
-        <span class="total-value">{{ formatMoney(selectedInvoice.total) }}</span>
-      </div>
+        <ul class="invoice-detail__lines-cards show-mobile-only">
+          @for (line of selectedInvoice.lines; track line.id || $index) {
+            <li class="invoice-detail__line-card">
+              <div class="invoice-detail__line-card-top">
+                <span class="invoice-detail__line-card-name">{{ line.description || line.productName || '—' }}</span>
+                <span class="invoice-detail__line-card-amount">{{ line.amount | number:'1.0-0' }} FCFA</span>
+              </div>
+              <div class="invoice-detail__line-card-meta">
+                <span>Qté {{ line.quantity | number:'1.0-2' }}</span>
+                <span>P.U. {{ line.unitPrice | number:'1.0-0' }} FCFA</span>
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
 
-      <div class="detail-notes-card" *ngIf="selectedInvoice.notes">
-        <div class="notes-header">
-          <i class="pi pi-comment"></i>
-          <span>Notes</span>
+      <div class="invoice-detail__summary">
+        <div class="invoice-detail__summary-row" *ngIf="selectedInvoice.subtotal != null">
+          <span>Sous-total</span>
+          <span>{{ formatMoney(selectedInvoice.subtotal) }}</span>
         </div>
-        <p class="notes-content">{{ selectedInvoice.notes }}</p>
+        <div class="invoice-detail__summary-row" *ngIf="selectedInvoice.taxAmount">
+          <span>TVA</span>
+          <span>{{ formatMoney(selectedInvoice.taxAmount) }}</span>
+        </div>
+        <div class="invoice-detail__summary-row invoice-detail__summary-row--total">
+          <span>Total TTC</span>
+          <strong>{{ formatMoney(selectedInvoice.total) }}</strong>
+        </div>
+      </div>
+
+      <div class="invoice-detail__notes" *ngIf="selectedInvoice.notes">
+        <span class="invoice-detail__notes-label">Notes</span>
+        <p>{{ selectedInvoice.notes }}</p>
       </div>
     </div>
+
     <ng-template pTemplate="footer">
-      <button
-        pButton
-        label="Envoyer WhatsApp"
-        icon="pi pi-whatsapp"
-        class="p-button-success p-button-outlined"
-        [disabled]="detailLoading || !selectedInvoice || !hasClientPhone(selectedInvoice)"
-        (click)="selectedInvoice && sendInvoiceToWhatsApp(selectedInvoice)">
-      </button>
-      <button pButton label="Imprimer" icon="pi pi-print" class="p-button-outlined" [disabled]="detailLoading || !selectedInvoice" (click)="selectedInvoice && printInvoice(selectedInvoice)"></button>
-      <button pButton label="Télécharger" icon="pi pi-download" class="p-button-outlined" [disabled]="detailLoading || !selectedInvoice" (click)="selectedInvoice && downloadPdf(selectedInvoice)"></button>
-      <button pButton label="Fermer" icon="pi pi-times" class="p-button-text" (click)="displayDetailDialog = false"></button>
+      <div class="invoice-detail-footer">
+        <div class="invoice-detail-footer__actions">
+          <button
+            pButton
+            label="WhatsApp"
+            icon="pi pi-whatsapp"
+            class="p-button-success p-button-outlined p-button-sm"
+            [disabled]="detailLoading || !selectedInvoice || !hasClientPhone(selectedInvoice)"
+            (click)="selectedInvoice && sendInvoiceToWhatsApp(selectedInvoice)">
+          </button>
+          <button
+            pButton
+            label="Imprimer"
+            icon="pi pi-print"
+            class="p-button-outlined p-button-sm"
+            [disabled]="detailLoading || !selectedInvoice"
+            (click)="selectedInvoice && printInvoice(selectedInvoice)">
+          </button>
+          <button
+            pButton
+            label="Télécharger"
+            icon="pi pi-download"
+            class="p-button-outlined p-button-sm"
+            [disabled]="detailLoading || !selectedInvoice"
+            (click)="selectedInvoice && downloadPdf(selectedInvoice)">
+          </button>
+        </div>
+        <button pButton label="Fermer" icon="pi pi-times" class="p-button-text p-button-sm" (click)="displayDetailDialog = false"></button>
+      </div>
     </ng-template>
   </p-dialog>
 </div>
