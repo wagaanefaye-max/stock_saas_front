@@ -110,28 +110,28 @@ export class SuperAdminDashboardComponent implements OnInit {
             value: formatNumber(data.activeCompanies || 0),
             icon: 'pi pi-building',
             color: 'var(--primary)',
-            change: data.companiesChange || '0'
+            change: data.companiesChange || 'Aucune nouvelle ce mois'
           },
           {
             title: 'Utilisateurs totaux',
             value: formatNumber(data.totalUsers || 0),
             icon: 'pi pi-users',
             color: 'var(--secondary)',
-            change: data.usersChange || '0%'
+            change: data.usersChange || 'Aucun nouveau ce mois'
           },
           {
             title: 'Revenus mensuels',
             value: data.monthlyRevenue || '0 FCFA',
             icon: 'pi pi-money-bill',
             color: 'var(--warning)',
-            change: data.revenueChange || '0%'
+            change: data.revenueChange || 'Stable'
           },
           {
-            title: 'Tickets support',
+            title: 'Souscriptions en attente',
             value: formatNumber(data.supportTickets || 0),
-            icon: 'pi pi-ticket',
+            icon: 'pi pi-clock',
             color: 'var(--danger)',
-            change: data.ticketsChange || '0'
+            change: data.ticketsChange || 'Stable'
           }
         ];
         
