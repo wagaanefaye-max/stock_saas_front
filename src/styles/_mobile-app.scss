@@ -46,7 +46,7 @@ body {
 
   @media (max-width: 768px) {
     padding: var(--app-mobile-pad);
-    padding-top: 0;
+    padding-top: calc(0.65rem + env(safe-area-inset-top, 0px));
     padding-bottom: calc(var(--app-bottom-nav-height) + 0.5rem);
     font-size: var(--app-mobile-text);
   }
