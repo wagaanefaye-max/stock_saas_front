@@ -82,6 +82,7 @@ export class InvoicesComponent implements OnInit {
   displayCreateDialog = false;
   displayEditDialog = false;
   displayDetailDialog = false;
+  detailLoading = false;
   selectedInvoice: Invoice | null = null;
   /** ID de la facture en cours d'édition (brouillon uniquement) */
   editingInvoiceId: number | null = null;
@@ -543,19 +544,27 @@ export class InvoicesComponent implements OnInit {
 
   viewInvoice(inv: any) {
     this.selectedInvoice = null;
+    this.detailLoading = true;
     this.displayDetailDialog = true;
     this.cdr.markForCheck();
     this.apiService.get<any>(`/invoices/${inv.id}`).subscribe({
       next: (data) => {
         this.selectedInvoice = data;
+        this.detailLoading = false;
         this.cdr.markForCheck();
       },
       error: () => {
         this.displayDetailDialog = false;
+        this.detailLoading = false;
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger la facture', life: 5000 });
         this.cdr.markForCheck();
       }
     });
+  }
+
+  onDetailDialogHide(): void {
+    this.selectedInvoice = null;
+    this.detailLoading = false;
   }
 
   downloadPdf(inv: any) {

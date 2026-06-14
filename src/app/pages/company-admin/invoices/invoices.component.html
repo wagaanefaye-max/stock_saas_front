@@ -505,15 +505,19 @@
   <p-dialog
     styleClass="app-mobile-dialog"
     [(visible)]="displayDetailDialog"
-    [header]="selectedInvoice ? 'Facture ' + selectedInvoice.invoiceNumber : 'Détail facture'"
+    [header]="detailLoading ? 'Chargement…' : (selectedInvoice ? 'Facture ' + selectedInvoice.invoiceNumber : 'Détail facture')"
     [modal]="true"
     [style]="dialogStyleDetail"
     [breakpoints]="dialogBreakpoints"
     [draggable]="false"
     [resizable]="false"
     [closable]="true"
-    (onHide)="selectedInvoice = null">
-    <div *ngIf="selectedInvoice" class="app-dialog-detail invoice-detail">
+    (onHide)="onDetailDialogHide()">
+    <div *ngIf="detailLoading" class="invoice-detail-loading" role="status" aria-live="polite" aria-label="Chargement de la facture">
+      <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+      <span>Chargement de la facture…</span>
+    </div>
+    <div *ngIf="selectedInvoice && !detailLoading" class="app-dialog-detail invoice-detail">
       <div class="detail-header">
         <div class="detail-status">
           <p-tag [value]="selectedInvoice.statusLabel" [severity]="getStatusSeverity(selectedInvoice.status)" styleClass="status-badge"></p-tag>
@@ -595,11 +599,11 @@
         label="Envoyer WhatsApp"
         icon="pi pi-whatsapp"
         class="p-button-success p-button-outlined"
-        [disabled]="!selectedInvoice || !hasClientPhone(selectedInvoice)"
+        [disabled]="detailLoading || !selectedInvoice || !hasClientPhone(selectedInvoice)"
         (click)="selectedInvoice && sendInvoiceToWhatsApp(selectedInvoice)">
       </button>
-      <button pButton label="Imprimer" icon="pi pi-print" class="p-button-outlined" (click)="selectedInvoice && printInvoice(selectedInvoice)"></button>
-      <button pButton label="Télécharger" icon="pi pi-download" class="p-button-outlined" (click)="selectedInvoice && downloadPdf(selectedInvoice)"></button>
+      <button pButton label="Imprimer" icon="pi pi-print" class="p-button-outlined" [disabled]="detailLoading || !selectedInvoice" (click)="selectedInvoice && printInvoice(selectedInvoice)"></button>
+      <button pButton label="Télécharger" icon="pi pi-download" class="p-button-outlined" [disabled]="detailLoading || !selectedInvoice" (click)="selectedInvoice && downloadPdf(selectedInvoice)"></button>
       <button pButton label="Fermer" icon="pi pi-times" class="p-button-text" (click)="displayDetailDialog = false"></button>
     </ng-template>
   </p-dialog>

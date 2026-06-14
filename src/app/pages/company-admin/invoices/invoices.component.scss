@@ -190,6 +190,22 @@
   }
   .subtotal-row { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--surface-border); }
 
+  .invoice-detail-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    min-height: 12rem;
+    padding: 2rem 1rem;
+    color: var(--text-color-secondary);
+    font-size: 0.95rem;
+
+    .pi-spinner {
+      font-size: 1.25rem;
+      color: var(--primary-color);
+    }
+  }
+
   /* Détail facture - modal design */
   .invoice-detail {
     padding: 0.25rem 0;
