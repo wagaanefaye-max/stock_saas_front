@@ -81,6 +81,15 @@
 
     <main class="app-main">
       <header class="app-mobile-header show-mobile-only">
+        <div class="app-mobile-header__slot app-mobile-header__slot--start">
+          <button
+            type="button"
+            class="app-mobile-header__action"
+            (click)="openCommandPalette()"
+            aria-label="Rechercher une page">
+            <i class="pi pi-search" aria-hidden="true"></i>
+          </button>
+        </div>
         <div class="app-mobile-header__brand">
           <span class="app-mobile-header__logo" aria-hidden="true">
             <img src="/assets/logo.jpg" alt="" class="app-mobile-header__logo-img" />
@@ -90,14 +99,7 @@
             <span class="app-mobile-header__role">{{ config.roleBadge }}</span>
           </div>
         </div>
-        <div class="app-mobile-header__actions">
-          <button
-            type="button"
-            class="app-mobile-header__action"
-            (click)="openCommandPalette()"
-            aria-label="Rechercher une page">
-            <i class="pi pi-search" aria-hidden="true"></i>
-          </button>
+        <div class="app-mobile-header__slot app-mobile-header__slot--end">
           <button
             type="button"
             class="app-mobile-header__action app-mobile-header__avatar"
