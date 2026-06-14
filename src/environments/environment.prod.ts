@@ -6,6 +6,7 @@ export const environment = {
   apiUrl: '/api',
   appName: 'Stock SaaS',
   appVersion: '1.0.0',
+  siteUrl: 'https://sen-stocksaas.com',
   enableLogging: false,
   landingContact: {
     whatsapp: '221701234567',

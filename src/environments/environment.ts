@@ -6,6 +6,7 @@ export const environment = {
   apiUrl: 'http://localhost:8080/api',
   appName: 'Stock SaaS',
   appVersion: '1.0.0',
+  siteUrl: 'http://localhost:4200',
   enableLogging: true,
   landingContact: {
     whatsapp: '221701234567',
