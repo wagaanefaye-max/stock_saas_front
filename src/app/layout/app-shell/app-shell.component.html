@@ -80,12 +80,34 @@
     </aside>
 
     <main class="app-main">
-      <div class="app-main-topbar show-mobile-only">
-        <button type="button" class="app-command-trigger app-command-trigger--mobile" (click)="openCommandPalette()">
-          <i class="pi pi-search" aria-hidden="true"></i>
-          <span>Rechercher une page…</span>
-        </button>
-      </div>
+      <header class="app-mobile-header show-mobile-only">
+        <div class="app-mobile-header__brand">
+          <span class="app-mobile-header__logo" aria-hidden="true">
+            <img src="/assets/logo.jpg" alt="" class="app-mobile-header__logo-img" />
+          </span>
+          <div class="app-mobile-header__titles">
+            <span class="app-mobile-header__app-name">Stock SaaS</span>
+            <span class="app-mobile-header__role">{{ config.roleBadge }}</span>
+          </div>
+        </div>
+        <div class="app-mobile-header__actions">
+          <button
+            type="button"
+            class="app-mobile-header__action"
+            (click)="openCommandPalette()"
+            aria-label="Rechercher une page">
+            <i class="pi pi-search" aria-hidden="true"></i>
+          </button>
+          <button
+            type="button"
+            class="app-mobile-header__action app-mobile-header__avatar"
+            *ngIf="authService.getCurrentUser() as user"
+            (click)="openMobileMenu()"
+            [attr.aria-label]="'Menu · ' + user.name">
+            {{ user.name.charAt(0) || '?' }}
+          </button>
+        </div>
+      </header>
       <router-outlet></router-outlet>
     </main>
   </div>
@@ -132,7 +154,15 @@
     (onHide)="mobileMenuQuery = ''">
     <div class="mobile-menu-drawer__inner">
       <div class="mobile-menu-drawer__header">
-        <h2 class="mobile-menu-drawer__title">Navigation</h2>
+        <div class="mobile-menu-drawer__header-brand">
+          <span class="app-mobile-header__logo app-mobile-header__logo--drawer" aria-hidden="true">
+            <img src="/assets/logo.jpg" alt="" class="app-mobile-header__logo-img" />
+          </span>
+          <div>
+            <h2 class="mobile-menu-drawer__title">Menu</h2>
+            <span class="mobile-menu-drawer__subtitle">{{ config.roleBadge }}</span>
+          </div>
+        </div>
         <button type="button" class="mobile-menu-drawer__close" (click)="closeMobileMenu()" aria-label="Fermer">
           <i class="pi pi-times"></i>
         </button>
