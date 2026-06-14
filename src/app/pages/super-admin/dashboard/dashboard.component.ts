@@ -6,11 +6,12 @@ import { RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
-import { catchError, of } from 'rxjs';
+import { catchError, finalize, of } from 'rxjs';
 
 type SubscriptionChartFilter = 'ALL' | 'APPROVED' | 'REJECTED';
 
@@ -24,12 +25,13 @@ interface MonthlySubscriptionPoint {
 @Component({
   selector: 'app-super-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, CardModule, ChartModule, SelectButtonModule, ToastModule],
+  imports: [CommonModule, FormsModule, RouterModule, CardModule, ChartModule, SelectButtonModule, TagModule, ToastModule],
   providers: [MessageService],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
 export class SuperAdminDashboardComponent implements OnInit {
+  loading = true;
   stats: any[] = [];
   recentCompanies: any[] = [];
 
@@ -52,6 +54,10 @@ export class SuperAdminDashboardComponent implements OnInit {
     private apiService: ApiService,
     private messageService: MessageService
   ) {}
+
+  get adminName(): string {
+    return this.authService.getCurrentUser()?.name?.split(' ')[0] || '';
+  }
 
   ngOnInit() {
     this.refreshChartOptions();
@@ -89,6 +95,9 @@ export class SuperAdminDashboardComponent implements OnInit {
             revenueChange: '0%',
             ticketsChange: '0'
           });
+        }),
+        finalize(() => {
+          this.loading = false;
         })
       )
       .subscribe(data => {
@@ -293,6 +302,26 @@ export class SuperAdminDashboardComponent implements OnInit {
     this.subscriptionChartOptions = {
       ...buildBarChartOptions({ showLegend: true, beginAtZero: true })
     };
+  }
+
+  formatDate(value: string | null | undefined): string {
+    if (!value) return '—';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
+  getStatusSeverity(status: string | null | undefined): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
+    const normalized = (status || '').toLowerCase();
+    if (normalized.includes('actif') || normalized.includes('active')) return 'success';
+    if (normalized.includes('essai') || normalized.includes('trial')) return 'info';
+    if (normalized.includes('inactif') || normalized.includes('suspend')) return 'warn';
+    if (normalized.includes('expir') || normalized.includes('supprim')) return 'danger';
+    return 'secondary';
   }
 }
 

@@ -1,149 +1,157 @@
-<div class="super-admin-dashboard">
+<div class="super-admin-dashboard platform-dashboard">
   <p-toast></p-toast>
 
   <header class="dashboard-header">
-    <h1>Plateforme</h1>
-    <p class="dashboard-header__subtitle">Vue d'ensemble — entreprises, abonnements et utilisateurs</p>
+    <h1>Bonjour{{ adminName ? ', ' + adminName : '' }}</h1>
+    <p class="dashboard-header__subtitle">Vue d'ensemble de la plateforme — entreprises, abonnements et utilisateurs</p>
   </header>
 
-  <section class="main-actions" aria-label="Actions principales">
-    <a routerLink="/super-admin/companies" class="main-action-card main-action-companies dashboard-cta-primary">
-      <div class="main-action-icon">
-        <i class="pi pi-briefcase"></i>
-      </div>
-      <div class="main-action-text">
-        <span class="main-action-label">Entreprises</span>
-        <span class="main-action-hint">Gérer les comptes clients</span>
-      </div>
-      <i class="pi pi-chevron-right dashboard-cta-arrow" aria-hidden="true"></i>
-    </a>
+  <div *ngIf="loading" class="dashboard-loading" aria-live="polite">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Chargement du tableau de bord…</span>
+  </div>
 
-    <div class="main-actions-row">
-      <a routerLink="/super-admin/subscription-requests" class="main-action-card main-action-subscriptions">
-        <div class="main-action-icon">
+  <ng-container *ngIf="!loading">
+    <section class="dashboard-section" aria-label="Indicateurs clés">
+      <div class="dashboard-section__head">
+        <h2>Indicateurs clés</h2>
+      </div>
+      <div class="stats-grid">
+        <div *ngFor="let stat of stats" class="stat-card">
+          <div class="stat-icon" [style.background-color]="stat.color + '18'">
+            <i [class]="stat.icon" [style.color]="stat.color"></i>
+          </div>
+          <div class="stat-content">
+            <p class="stat-title">{{ stat.title }}</p>
+            <h3 class="stat-value">{{ stat.value }}</h3>
+            <span class="stat-change" *ngIf="stat.change">{{ stat.change }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-section" aria-label="Actions rapides">
+      <div class="dashboard-section__head">
+        <h2>Actions rapides</h2>
+      </div>
+      <nav class="quick-actions">
+        <a routerLink="/super-admin/companies" class="quick-action quick-action--primary">
+          <i class="pi pi-building"></i>
+          <span>Entreprises</span>
+        </a>
+        <a routerLink="/super-admin/subscription-requests" class="quick-action">
           <i class="pi pi-credit-card"></i>
-        </div>
-        <span class="main-action-label">Souscriptions</span>
-      </a>
-
-      <a routerLink="/super-admin/platform-users" class="main-action-card main-action-users">
-        <div class="main-action-icon">
+          <span>Souscriptions</span>
+        </a>
+        <a routerLink="/super-admin/platform-users" class="quick-action">
           <i class="pi pi-users"></i>
+          <span>Utilisateurs</span>
+        </a>
+        <a routerLink="/super-admin/platform-settings" class="quick-action">
+          <i class="pi pi-cog"></i>
+          <span>Paramètres</span>
+        </a>
+      </nav>
+    </section>
+
+    <section class="dashboard-section" aria-label="Analyses">
+      <div class="dashboard-section__head">
+        <h2>Analyses</h2>
+      </div>
+
+      <div class="analytics-grid">
+        <p-card class="analytics-card analytics-card--wide">
+          <div class="analytics-card__header">
+            <div>
+              <h3>Souscriptions par mois</h3>
+              <p class="analytics-card__hint">Demandes validées et rejetées sur 6 mois</p>
+            </div>
+            <p-selectButton
+              [options]="subscriptionFilterOptions"
+              [(ngModel)]="subscriptionFilter"
+              optionLabel="label"
+              optionValue="value"
+              (ngModelChange)="onSubscriptionFilterChange()">
+            </p-selectButton>
+          </div>
+          <div class="chart-wrap chart-wrap--tall">
+            <p-chart type="bar" [data]="subscriptionChartData" [options]="subscriptionChartOptions"></p-chart>
+          </div>
+        </p-card>
+
+        <p-card class="analytics-card">
+          <h3>Évolution des entreprises</h3>
+          <p class="analytics-card__hint">Nouvelles inscriptions par mois</p>
+          <div class="chart-wrap chart-wrap--medium">
+            <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+          </div>
+        </p-card>
+
+        <p-card class="analytics-card analytics-card--donut">
+          <h3>Répartition par plan</h3>
+          <p class="analytics-card__hint">Répartition actuelle des abonnements</p>
+          <div class="chart-wrap chart-wrap--donut">
+            <p-chart type="doughnut" [data]="planChartData" [options]="planChartOptions"></p-chart>
+          </div>
+        </p-card>
+      </div>
+    </section>
+
+    <section class="dashboard-section dashboard-section--last" aria-label="Entreprises récentes">
+      <p-card class="recent-card">
+        <div class="recent-card__header">
+          <div>
+            <h3>Entreprises récentes</h3>
+            <p class="recent-card__hint">Dernières sociétés inscrites sur la plateforme</p>
+          </div>
+          <a routerLink="/super-admin/companies" class="recent-card__link">
+            Voir tout
+            <i class="pi pi-arrow-right"></i>
+          </a>
         </div>
-        <span class="main-action-label">Utilisateurs</span>
-      </a>
-    </div>
-  </section>
 
-  <nav class="secondary-actions" aria-label="Raccourcis">
-    <a routerLink="/super-admin/companies" class="secondary-link">
-      <i class="pi pi-building"></i>
-      <span>Entreprises</span>
-    </a>
-    <a routerLink="/super-admin/subscription-requests" class="secondary-link">
-      <i class="pi pi-wallet"></i>
-      <span>Abonnements</span>
-    </a>
-    <a routerLink="/super-admin/platform-users" class="secondary-link">
-      <i class="pi pi-user"></i>
-      <span>Utilisateurs</span>
-    </a>
-    <a routerLink="/super-admin/platform-settings" class="secondary-link">
-      <i class="pi pi-cog"></i>
-      <span>Paramètres</span>
-    </a>
-  </nav>
-
-  <section class="stats-grid" aria-label="Statistiques">
-    <div *ngFor="let stat of stats" class="stat-card">
-      <div class="stat-icon" [style.background-color]="stat.color + '20'">
-        <i [class]="stat.icon" [style.color]="stat.color"></i>
-      </div>
-      <div class="stat-content">
-        <p class="stat-title">{{ stat.title }}</p>
-        <h2 class="stat-value">{{ stat.value }}</h2>
-        <span class="stat-change">{{ stat.change }}</span>
-      </div>
-    </div>
-  </section>
-
-  <section class="charts-grid" aria-label="Graphiques">
-    <p-card class="chart-card chart-card--full">
-      <div class="chart-card__header">
-        <h3>Souscriptions par mois</h3>
-        <p-selectButton
-          [options]="subscriptionFilterOptions"
-          [(ngModel)]="subscriptionFilter"
-          optionLabel="label"
-          optionValue="value"
-          (ngModelChange)="onSubscriptionFilterChange()">
-        </p-selectButton>
-      </div>
-      <div class="chart-wrap chart-wrap--tall">
-        <p-chart type="bar" [data]="subscriptionChartData" [options]="subscriptionChartOptions"></p-chart>
-      </div>
-    </p-card>
-
-    <p-card class="chart-card">
-      <h3>Évolution des entreprises</h3>
-      <div class="chart-wrap chart-wrap--tall">
-        <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
-      </div>
-    </p-card>
-
-    <p-card class="chart-card">
-      <h3>Répartition par plan</h3>
-      <div class="chart-wrap chart-wrap--donut">
-        <p-chart type="doughnut" [data]="planChartData" [options]="planChartOptions"></p-chart>
-      </div>
-    </p-card>
-  </section>
-
-  <p-card class="recent-card">
-    <div class="recent-card__header">
-      <h3>Entreprises récentes</h3>
-      <a routerLink="/super-admin/companies" class="recent-card__link">Voir tout</a>
-    </div>
-
-    <div *ngIf="recentCompanies.length === 0" class="recent-empty text-muted">
-      Aucune entreprise récente
-    </div>
-
-    <ul class="recent-list" *ngIf="recentCompanies.length > 0">
-      <li *ngFor="let company of recentCompanies" class="recent-item">
-        <div class="recent-item__main">
-          <span class="recent-item__name">{{ company.name }}</span>
-          <span class="badge badge-success">{{ company.status }}</span>
+        <div *ngIf="recentCompanies.length === 0" class="recent-empty">
+          <i class="pi pi-building"></i>
+          <p>Aucune entreprise récente</p>
         </div>
-        <p class="recent-item__email">{{ company.email }}</p>
-        <div class="recent-item__meta">
-          <span class="badge badge-primary">{{ company.plan }}</span>
-          <span class="recent-item__date">{{ company.createdAt }}</span>
-        </div>
-      </li>
-    </ul>
 
-    <div class="recent-table-desktop" *ngIf="recentCompanies.length > 0">
-      <table>
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Email</th>
-            <th>Plan</th>
-            <th>Date</th>
-            <th>Statut</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let company of recentCompanies">
-            <td>{{ company.name }}</td>
-            <td>{{ company.email }}</td>
-            <td><span class="badge badge-primary">{{ company.plan }}</span></td>
-            <td>{{ company.createdAt }}</td>
-            <td><span class="badge badge-success">{{ company.status }}</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </p-card>
+        <ul class="recent-list show-mobile-only" *ngIf="recentCompanies.length > 0">
+          <li *ngFor="let company of recentCompanies" class="recent-item">
+            <div class="recent-item__main">
+              <span class="recent-item__name">{{ company.name }}</span>
+              <p-tag [value]="company.status" [severity]="getStatusSeverity(company.status)"></p-tag>
+            </div>
+            <p class="recent-item__email">{{ company.email }}</p>
+            <div class="recent-item__meta">
+              <p-tag [value]="company.plan" severity="info"></p-tag>
+              <span class="recent-item__date">{{ formatDate(company.createdAt) }}</span>
+            </div>
+          </li>
+        </ul>
+
+        <div class="recent-table hide-mobile" *ngIf="recentCompanies.length > 0">
+          <table>
+            <thead>
+              <tr>
+                <th>Entreprise</th>
+                <th>Email</th>
+                <th>Plan</th>
+                <th>Inscription</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let company of recentCompanies">
+                <td class="recent-table__name">{{ company.name }}</td>
+                <td>{{ company.email }}</td>
+                <td><p-tag [value]="company.plan" severity="info"></p-tag></td>
+                <td>{{ formatDate(company.createdAt) }}</td>
+                <td><p-tag [value]="company.status" [severity]="getStatusSeverity(company.status)"></p-tag></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </p-card>
+    </section>
+  </ng-container>
 </div>
