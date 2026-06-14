@@ -53,11 +53,13 @@
   }
 }
 
-/* Plusieurs champs recherche empilés (ex. factures) */
-.mobile-toolbar:has(.mobile-toolbar__search + .mobile-toolbar__search),
-.list-toolbar__filters-row:has(.list-toolbar__search + .list-toolbar__search) {
-  flex-direction: column;
-  align-items: stretch;
+/* Plusieurs champs recherche empilés (ex. factures) — mobile uniquement */
+@media (max-width: 768px) {
+  .mobile-toolbar:has(.mobile-toolbar__search + .mobile-toolbar__search),
+  .list-toolbar__filters-row:has(.list-toolbar__search + .list-toolbar__search) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .list-toolbar {
@@ -137,6 +139,10 @@
     flex-wrap: wrap;
     gap: 0.35rem;
     width: 100%;
+    padding: 0.2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
   }
 
   .p-button {
@@ -146,7 +152,16 @@
     padding: 0.4rem 0.3rem;
     font-size: 0.7rem;
     justify-content: center;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent;
+    color: var(--text-muted);
+  }
+
+  .p-button.p-highlight {
+    background: var(--primary) !important;
+    color: #fff !important;
   }
 }
 
@@ -422,6 +437,27 @@
     flex: 1 1 auto;
   }
 
+  .invoices-page .list-toolbar__filters--invoices {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    width: auto;
+
+    .list-toolbar__search {
+      flex: 0 1 11rem;
+      min-width: 8.5rem;
+      max-width: 13rem;
+    }
+
+    .list-filter-chips {
+      flex: 0 0 auto;
+      margin-left: auto;
+      width: auto;
+      margin-bottom: 0;
+    }
+  }
+
   .entity-filters .list-toolbar__primary:only-child,
   .entity-filters .list-toolbar__primary:has(+ .list-toolbar__actions:empty) {
     max-width: min(28rem, 42vw);
@@ -618,6 +654,32 @@
     flex-direction: column;
     gap: 0.5rem;
     width: 100%;
+  }
+
+  .invoices-page .list-filter-chips {
+    .p-selectbutton {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.35rem;
+    }
+
+    .p-button {
+      flex: unset;
+      min-width: 0;
+      width: 100%;
+      font-size: 0.75rem;
+      min-height: 40px;
+    }
+  }
+
+  .invoices-page .entity-filters > .list-toolbar__actions.show-mobile-only {
+    margin-bottom: 0.75rem;
+
+    .p-button {
+      width: 100%;
+      justify-content: center;
+      min-height: 40px;
+    }
   }
 
   .reports-page .page-header .header-actions {

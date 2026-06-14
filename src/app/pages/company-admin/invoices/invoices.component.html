@@ -11,7 +11,7 @@
 
   <div class="entity-filters">
     <div class="mobile-toolbar show-mobile-only">
-      <span class="mobile-toolbar__search p-input-icon-left">
+      <span class="p-input-icon-left mobile-toolbar__search">
         <i class="pi pi-hashtag"></i>
         <input
           type="text"
@@ -20,7 +20,7 @@
           (ngModelChange)="loadInvoices()"
           placeholder="N° facture">
       </span>
-      <span class="mobile-toolbar__search p-input-icon-left">
+      <span class="p-input-icon-left mobile-toolbar__search">
         <i class="pi pi-user"></i>
         <input
           type="text"
@@ -30,7 +30,7 @@
           placeholder="Client">
       </span>
     </div>
-    <div class="mobile-toolbar__chips show-mobile-only list-filter-chips list-filter-chips--scroll">
+    <div class="mobile-toolbar__chips show-mobile-only list-filter-chips">
       <p-selectButton
         [options]="statusFilterOptions"
         [(ngModel)]="statusFilter"
@@ -39,31 +39,36 @@
         (ngModelChange)="loadInvoices()">
       </p-selectButton>
     </div>
+    <div class="list-toolbar__actions show-mobile-only" *ngIf="hasActiveFilters">
+      <button
+        pButton
+        label="Réinitialiser les filtres"
+        icon="pi pi-filter-slash"
+        class="p-button-outlined p-button-sm"
+        (click)="resetInvoiceFilters()">
+      </button>
+    </div>
     <p-card class="table-card hide-mobile">
       <div class="list-toolbar">
-        <div class="list-toolbar__primary">
-          <div class="list-toolbar__filters-row">
-            <span class="p-input-icon-left list-toolbar__search">
-              <i class="pi pi-hashtag"></i>
-              <input
-                type="text"
-                pInputText
-                [(ngModel)]="invoiceNumberFilter"
-                (ngModelChange)="loadInvoices()"
-                placeholder="N° facture">
-            </span>
-            <span class="p-input-icon-left list-toolbar__search">
-              <i class="pi pi-user"></i>
-              <input
-                type="text"
-                pInputText
-                [(ngModel)]="clientNameFilter"
-                (ngModelChange)="loadInvoices()"
-                placeholder="Client">
-            </span>
-          </div>
-        </div>
-        <div class="list-toolbar__filters list-toolbar__filters--inline">
+        <div class="list-toolbar__filters list-toolbar__filters--inline list-toolbar__filters--invoices">
+          <span class="p-input-icon-left list-toolbar__search">
+            <i class="pi pi-hashtag"></i>
+            <input
+              type="text"
+              pInputText
+              [(ngModel)]="invoiceNumberFilter"
+              (ngModelChange)="loadInvoices()"
+              placeholder="N° facture">
+          </span>
+          <span class="p-input-icon-left list-toolbar__search">
+            <i class="pi pi-user"></i>
+            <input
+              type="text"
+              pInputText
+              [(ngModel)]="clientNameFilter"
+              (ngModelChange)="loadInvoices()"
+              placeholder="Client">
+          </span>
           <div class="list-filter-chips">
             <p-selectButton
               [options]="statusFilterOptions"
@@ -73,6 +78,15 @@
               (ngModelChange)="loadInvoices()">
             </p-selectButton>
           </div>
+        </div>
+        <div class="list-toolbar__actions" *ngIf="hasActiveFilters">
+          <button
+            pButton
+            label="Réinitialiser"
+            icon="pi pi-filter-slash"
+            class="p-button-outlined p-button-sm"
+            (click)="resetInvoiceFilters()">
+          </button>
         </div>
       </div>
     </p-card>
