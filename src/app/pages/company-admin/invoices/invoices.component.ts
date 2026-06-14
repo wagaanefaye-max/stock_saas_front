@@ -247,8 +247,12 @@ export class InvoicesComponent implements OnInit {
           price: Number(p.price) || 0,
           productLabel: `${p.name} - ${p.reference || '-'} - ${Number(p.stock) || 0}`
         }));
+        this.cdr.markForCheck();
       },
-      error: () => { this.productsForInvoice = []; }
+      error: () => {
+        this.productsForInvoice = [];
+        this.cdr.markForCheck();
+      }
     });
   }
 
@@ -273,9 +277,11 @@ export class InvoicesComponent implements OnInit {
           this.clients = [...this.clients, ...list];
         }
         this.clientsTotal = total;
+        this.cdr.markForCheck();
       },
       error: () => {
         if (page === 0) this.clients = [];
+        this.cdr.markForCheck();
       }
     });
   }
@@ -382,9 +388,11 @@ export class InvoicesComponent implements OnInit {
           error: () => { this.productsForInvoice = []; }
         });
         this.displayEditDialog = true;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger la facture', life: 5000 });
+        this.cdr.markForCheck();
       }
     });
   }
@@ -536,13 +544,16 @@ export class InvoicesComponent implements OnInit {
   viewInvoice(inv: any) {
     this.selectedInvoice = null;
     this.displayDetailDialog = true;
+    this.cdr.markForCheck();
     this.apiService.get<any>(`/invoices/${inv.id}`).subscribe({
       next: (data) => {
         this.selectedInvoice = data;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.displayDetailDialog = false;
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger la facture', life: 5000 });
+        this.cdr.markForCheck();
       }
     });
   }
