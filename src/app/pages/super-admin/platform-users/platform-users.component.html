@@ -30,7 +30,7 @@
     </div>
 
     <ul *ngIf="users.length > 0" class="mobile-list__items">
-      <li *ngFor="let user of users" class="mobile-card">
+      <li *ngFor="let user of users; trackBy: trackByUserId" class="mobile-card">
         <div class="mobile-card__top">
           <div class="mobile-card__main">
             <span class="mobile-card__title">{{ user.name }}</span>

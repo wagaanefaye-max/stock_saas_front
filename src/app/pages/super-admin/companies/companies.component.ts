@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -17,7 +17,7 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
 import { ApiService } from '../../../services/api.service';
-import { Subject, catchError, debounceTime, of, takeUntil, throwError } from 'rxjs';
+import { Subject, catchError, debounceTime, finalize, of, takeUntil, throwError } from 'rxjs';
 import {
   APP_DIALOG_BREAKPOINTS,
   APP_DIALOG_STYLE_LG,
@@ -80,7 +80,8 @@ interface PageResponse {
   ],
   providers: [MessageService],
   templateUrl: './companies.component.html',
-  styleUrl: './companies.component.scss'
+  styleUrl: './companies.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CompaniesComponent implements OnInit, OnDestroy {
   readonly dialogStyle = APP_DIALOG_STYLE_WIDE;
@@ -130,7 +131,8 @@ export class CompaniesComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -166,6 +168,7 @@ export class CompaniesComponent implements OnInit, OnDestroy {
           } as PageResponse);
         })
       )
+      .pipe(finalize(() => this.cdr.markForCheck()))
       .subscribe(response => {
         this.companies = response.content;
         this.totalRecords = response.totalElements;
@@ -465,5 +468,8 @@ export class CompaniesComponent implements OnInit, OnDestroy {
     });
   }
 
+  trackByCompanyId(_index: number, company: { id?: number }): number {
+    return company.id ?? _index;
+  }
 }
 

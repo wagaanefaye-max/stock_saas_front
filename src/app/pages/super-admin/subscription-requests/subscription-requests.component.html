@@ -48,7 +48,7 @@
 
     <ul *ngIf="requests.length > 0" class="mobile-list__items">
       <li
-        *ngFor="let row of requests"
+        *ngFor="let row of requests; trackBy: trackByRequestId"
         class="mobile-card"
         [class.mobile-card--pending]="row.requestStatus === 'PENDING'">
         <div class="mobile-card__top">
@@ -203,7 +203,7 @@
         <div class="reject-presets__chips">
           <button
             type="button"
-            *ngFor="let preset of rejectPresets"
+            *ngFor="let preset of rejectPresets; trackBy: trackByPresetKey"
             class="reject-preset-chip"
             [class.active]="rejectPresetKey === preset.key"
             (click)="selectRejectPreset(preset)">

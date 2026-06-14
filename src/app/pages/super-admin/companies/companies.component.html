@@ -51,7 +51,7 @@
     </div>
 
     <ul *ngIf="companies.length > 0" class="mobile-list__items">
-      <li *ngFor="let company of companies" class="mobile-card">
+      <li *ngFor="let company of companies; trackBy: trackByCompanyId" class="mobile-card">
         <div class="mobile-card__top">
           <div class="company-logo-cell company-logo-cell--mobile">
             <img

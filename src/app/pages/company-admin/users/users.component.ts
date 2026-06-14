@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -14,7 +14,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
 import { UserRole } from '../../../models/user.model';
-import { catchError, of, throwError } from 'rxjs';
+import { catchError, finalize, of, throwError } from 'rxjs';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_LG } from '../../../utils/dialog-mobile.util';
 
 interface User {
@@ -58,7 +58,8 @@ interface PageResponse {
   ],
   providers: [MessageService],
   templateUrl: './users.component.html',
-  styleUrl: './users.component.scss'
+  styleUrl: './users.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CompanyUsersComponent implements OnInit {
   readonly dialogStyle = APP_DIALOG_STYLE_LG;
@@ -91,7 +92,8 @@ export class CompanyUsersComponent implements OnInit {
     public authService: AuthService,
     private apiService: ApiService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -121,6 +123,7 @@ export class CompanyUsersComponent implements OnInit {
           } as PageResponse);
         })
       )
+      .pipe(finalize(() => this.cdr.markForCheck()))
       .subscribe(response => {
         this.users = response.content ?? [];
         this.totalRecords = response.totalElements ?? 0;
@@ -366,5 +369,9 @@ export class CompanyUsersComponent implements OnInit {
     }
     
     return true;
+  }
+
+  trackByUserId(_index: number, user: { id?: number }): number {
+    return user.id ?? _index;
   }
 }

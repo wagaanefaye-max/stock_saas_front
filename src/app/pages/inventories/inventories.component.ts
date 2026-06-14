@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -15,6 +15,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ApiService } from '../../services/api.service';
+import { finalize } from 'rxjs';
 import {
   APP_DIALOG_BREAKPOINTS,
   APP_DIALOG_STYLE,
@@ -51,7 +52,8 @@ interface InventoriesPageResponse {
   ],
   providers: [MessageService],
   templateUrl: './inventories.component.html',
-  styleUrl: './inventories.component.scss'
+  styleUrl: './inventories.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InventoriesComponent implements OnInit {
   readonly dialogStyle = APP_DIALOG_STYLE;
@@ -92,7 +94,8 @@ export class InventoriesComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -101,7 +104,9 @@ export class InventoriesComponent implements OnInit {
   }
 
   loadWarehouses() {
-    this.apiService.get<any[]>('/warehouses/simple').subscribe({
+    this.apiService.get<any[]>('/warehouses/simple')
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (data) => {
         this.warehouses = (data || []).map((w: any) => ({ id: w.id, name: w.name }));
         this.warehouseFilterOptions = [
@@ -126,7 +131,9 @@ export class InventoriesComponent implements OnInit {
     };
     if (this.warehouseFilter != null) params['warehouseId'] = this.warehouseFilter;
     if (this.statusFilter !== 'ALL') params['status'] = this.statusFilter;
-    this.apiService.get<InventoriesPageResponse>('/inventories', params).subscribe({
+    this.apiService.get<InventoriesPageResponse>('/inventories', params)
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (response) => {
         this.inventories = (response.content || []).map(inv => ({
           id: inv.id,
@@ -385,4 +392,7 @@ export class InventoriesComponent implements OnInit {
     return Number(counted) - Number(theoretical);
   }
 
+  trackByInventoryId(_index: number, inv: { id?: number }): number {
+    return inv.id ?? _index;
+  }
 }

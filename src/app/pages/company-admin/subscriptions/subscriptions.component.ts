@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
@@ -25,7 +25,8 @@ const ACCEPTED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
   imports: [CommonModule, FormsModule, ToastModule, DialogModule, ButtonModule],
   providers: [MessageService],
   templateUrl: './subscriptions.component.html',
-  styleUrl: './subscriptions.component.scss'
+  styleUrl: './subscriptions.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
   @ViewChild('proofInput') proofInput?: ElementRef<HTMLInputElement>;
@@ -57,7 +58,8 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
 
   constructor(
     private subscriptionService: SubscriptionService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -77,6 +79,7 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
       history: this.subscriptionService.getHistory().pipe(catchError(() => of([]))),
       paymentQr: this.subscriptionService.getPaymentQrAvailability().pipe(catchError(() => of({ wave: false, orangeMoney: false })))
     })
+      .pipe(finalize(() => this.cdr.markForCheck()))
       .subscribe({
         next: ({ status, durations, history, paymentQr }) => {
           this.status = status;
@@ -379,5 +382,17 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
 
   formatAmount(value: number): string {
     return new Intl.NumberFormat('fr-FR').format(value) + ' F';
+  }
+
+  trackByDurationCode(_index: number, d: { code?: string }): string {
+    return d.code ?? String(_index);
+  }
+
+  trackByPaymentProviderCode(_index: number, p: { code?: string }): string {
+    return p.code ?? String(_index);
+  }
+
+  trackBySubscriptionId(_index: number, row: { id?: number }): number {
+    return row.id ?? _index;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -16,7 +16,7 @@ import { ToastModule } from 'primeng/toast';
 import { UserRole } from '../../../models/user.model';
 import { ApiService } from '../../../services/api.service';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
-import { catchError, of } from 'rxjs';
+import { catchError, finalize, of } from 'rxjs';
 
 interface User {
   id: number;
@@ -61,7 +61,8 @@ interface PageResponse {
   ],
   providers: [MessageService],
   templateUrl: './platform-users.component.html',
-  styleUrl: './platform-users.component.scss'
+  styleUrl: './platform-users.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PlatformUsersComponent implements OnInit {
   users: User[] = [];
@@ -88,7 +89,8 @@ export class PlatformUsersComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -103,7 +105,8 @@ export class PlatformUsersComponent implements OnInit {
         catchError(error => {
           console.error('Erreur lors du chargement des entreprises:', error);
           return of({ content: [] });
-        })
+        }),
+        finalize(() => this.cdr.markForCheck())
       )
       .subscribe(response => {
         this.companies = response.content || [];
@@ -133,6 +136,7 @@ export class PlatformUsersComponent implements OnInit {
           } as PageResponse);
         })
       )
+      .pipe(finalize(() => this.cdr.markForCheck()))
       .subscribe(response => {
         this.users = response.content;
         this.totalRecords = response.totalElements;
@@ -333,6 +337,10 @@ export class PlatformUsersComponent implements OnInit {
           });
       }
     });
+  }
+
+  trackByUserId(_index: number, user: { id?: number }): number {
+    return user.id ?? _index;
   }
 }
 

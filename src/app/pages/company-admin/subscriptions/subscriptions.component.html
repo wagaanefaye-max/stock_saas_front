@@ -29,7 +29,7 @@
             <button
               type="button"
               class="chip"
-              *ngFor="let d of durations"
+              *ngFor="let d of durations; trackBy: trackByDurationCode"
               [class.chip--active]="selectedDuration?.code === d.code"
               (click)="selectDuration(d)">
               <span class="chip-label">{{ d.label }}</span>
@@ -47,7 +47,7 @@
             <button
               type="button"
               class="chip chip--pay"
-              *ngFor="let p of paymentProviders"
+              *ngFor="let p of paymentProviders; trackBy: trackByPaymentProviderCode"
               [class.chip--active]="selectedPaymentProvider.code === p.code && isPaymentProviderEnabled(p)"
               [class.chip--wave]="p.code === 'WAVE'"
               [class.chip--orange]="p.code === 'ORANGE_MONEY'"
@@ -138,7 +138,7 @@
       <button
         type="button"
         class="history-item"
-        *ngFor="let row of history"
+        *ngFor="let row of history; trackBy: trackBySubscriptionId"
         (click)="openDetail(row)"
         [attr.aria-label]="'Voir le détail de la souscription ' + row.durationLabel">
         <div class="history-item__content">

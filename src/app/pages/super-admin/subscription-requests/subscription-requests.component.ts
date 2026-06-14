@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
@@ -34,7 +34,8 @@ type StatusFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';
   ],
   providers: [MessageService],
   templateUrl: './subscription-requests.component.html',
-  styleUrl: './subscription-requests.component.scss'
+  styleUrl: './subscription-requests.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
   requests: SubscriptionRecord[] = [];
@@ -84,7 +85,8 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
     private subscriptionService: SubscriptionService,
     private subscriptionBadgeService: SuperAdminSubscriptionBadgeService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -99,6 +101,7 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
     const status = this.statusFilter === 'ALL' ? undefined : this.statusFilter;
     this.subscriptionService
       .getAllRequests(this.page, this.rows, status)
+      .pipe(finalize(() => this.cdr.markForCheck()))
       .subscribe({
         next: (response) => {
           this.requests = response.content;
@@ -330,5 +333,13 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
 
   formatAmount(value: number): string {
     return new Intl.NumberFormat('fr-FR').format(value) + ' FCFA';
+  }
+
+  trackByRequestId(_index: number, row: { id?: number }): number {
+    return row.id ?? _index;
+  }
+
+  trackByPresetKey(_index: number, preset: { key?: string }): string {
+    return preset.key ?? String(_index);
   }
 }
