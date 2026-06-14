@@ -12,11 +12,12 @@ import { SelectModule } from 'primeng/select';
 import { PasswordModule } from 'primeng/password';
 import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
 import { UserRole } from '../../../models/user.model';
 import { ApiService } from '../../../services/api.service';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
 import { catchError, finalize, of } from 'rxjs';
+import { EmptyStateComponent } from '../../../components/shared/empty-state.component';
+import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 
 interface User {
   id: number;
@@ -57,9 +58,9 @@ interface PageResponse {
     SelectModule,
     PasswordModule,
     PaginatorModule,
-    ToastModule,
+    EmptyStateComponent,
+    ListSkeletonComponent
   ],
-  providers: [MessageService],
   templateUrl: './platform-users.component.html',
   styleUrl: './platform-users.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -70,6 +71,8 @@ export class PlatformUsersComponent implements OnInit {
   displayDialog = false;
   user: any = {};
   globalFilter = '';
+  listLoading = true;
+  listLoadError = false;
   readonly dialogStyle = APP_DIALOG_STYLE;
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
   roles = [
@@ -115,32 +118,42 @@ export class PlatformUsersComponent implements OnInit {
 
   loadUsers() {
     const search = this.globalFilter && this.globalFilter.trim() ? this.globalFilter.trim() : undefined;
+    this.listLoading = true;
+    this.listLoadError = false;
+    this.cdr.markForCheck();
 
     this.apiService.get<PageResponse>(`/users?page=${this.page}&size=${this.size}${search ? `&search=${encodeURIComponent(search)}` : ''}`)
-      .pipe(
-        catchError(error => {
+      .pipe(finalize(() => {
+        this.listLoading = false;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
+        next: (response) => {
+          this.users = response.content;
+          this.totalRecords = response.totalElements;
+        },
+        error: (error) => {
+          this.listLoadError = true;
+          this.users = [];
+          this.totalRecords = 0;
           console.error('Erreur lors du chargement des utilisateurs:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Erreur',
             detail: 'Impossible de charger les utilisateurs'
           });
-          return of({
-            content: [],
-            page: 0,
-            size: this.size,
-            totalElements: 0,
-            totalPages: 0,
-            first: true,
-            last: true
-          } as PageResponse);
-        })
-      )
-      .pipe(finalize(() => this.cdr.markForCheck()))
-      .subscribe(response => {
-        this.users = response.content;
-        this.totalRecords = response.totalElements;
+        }
       });
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!this.globalFilter?.trim();
+  }
+
+  resetFilters(): void {
+    this.globalFilter = '';
+    this.page = 0;
+    this.loadUsers();
   }
 
   onPageChange(event: any) {

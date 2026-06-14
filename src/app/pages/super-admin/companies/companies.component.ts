@@ -13,7 +13,6 @@ import { ToggleButtonModule } from 'primeng/togglebutton';
 import { TooltipModule } from 'primeng/tooltip';
 import { DividerModule } from 'primeng/divider';
 import { PaginatorModule } from 'primeng/paginator';
-import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
 import { ApiService } from '../../../services/api.service';
@@ -23,6 +22,8 @@ import {
   APP_DIALOG_STYLE_LG,
   APP_DIALOG_STYLE_WIDE
 } from '../../../utils/dialog-mobile.util';
+import { EmptyStateComponent } from '../../../components/shared/empty-state.component';
+import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 
 interface Company {
   id: number;
@@ -74,11 +75,11 @@ interface PageResponse {
     ToggleButtonModule,
     TooltipModule,
     DividerModule,
-    ToastModule,
     PaginatorModule,
-    PhoneFormatDirective
+    PhoneFormatDirective,
+    EmptyStateComponent,
+    ListSkeletonComponent
   ],
-  providers: [MessageService],
   templateUrl: './companies.component.html',
   styleUrl: './companies.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -93,6 +94,8 @@ export class CompaniesComponent implements OnInit, OnDestroy {
   displayDialog = false;
   company: any = {};
   globalFilter = '';
+  listLoading = true;
+  listLoadError = false;
   private search$ = new Subject<void>();
   private destroy$ = new Subject<void>();
   statuses = [
@@ -147,32 +150,42 @@ export class CompaniesComponent implements OnInit, OnDestroy {
 
   loadCompanies() {
     const search = this.globalFilter && this.globalFilter.trim() ? this.globalFilter.trim() : undefined;
+    this.listLoading = true;
+    this.listLoadError = false;
+    this.cdr.markForCheck();
 
     this.apiService.get<PageResponse>(`/companies?page=${this.page}&size=${this.size}${search ? `&search=${encodeURIComponent(search)}` : ''}`)
-      .pipe(
-        catchError(error => {
+      .pipe(finalize(() => {
+        this.listLoading = false;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
+        next: (response) => {
+          this.companies = response.content;
+          this.totalRecords = response.totalElements;
+        },
+        error: (error) => {
+          this.listLoadError = true;
+          this.companies = [];
+          this.totalRecords = 0;
           console.error('Erreur lors du chargement des entreprises:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Erreur',
             detail: 'Impossible de charger les entreprises'
           });
-          return of({
-            content: [],
-            page: 0,
-            size: this.size,
-            totalElements: 0,
-            totalPages: 0,
-            first: true,
-            last: true
-          } as PageResponse);
-        })
-      )
-      .pipe(finalize(() => this.cdr.markForCheck()))
-      .subscribe(response => {
-        this.companies = response.content;
-        this.totalRecords = response.totalElements;
+        }
       });
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!this.globalFilter?.trim();
+  }
+
+  resetFilters(): void {
+    this.globalFilter = '';
+    this.page = 0;
+    this.loadCompanies();
   }
 
   onPageChange(event: any) {

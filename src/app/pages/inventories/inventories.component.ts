@@ -10,7 +10,6 @@ import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
-import { ToastModule } from 'primeng/toast';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -21,6 +20,8 @@ import {
   APP_DIALOG_STYLE,
   APP_DIALOG_STYLE_DETAIL
 } from '../../utils/dialog-mobile.util';
+import { EmptyStateComponent } from '../../components/shared/empty-state.component';
+import { ListSkeletonComponent } from '../../components/shared/list-skeleton.component';
 
 interface InventoriesPageResponse {
   content: any[];
@@ -46,11 +47,11 @@ interface InventoriesPageResponse {
     InputNumberModule,
     DatePickerModule,
     TextareaModule,
-    ToastModule,
     SelectButtonModule,
     PaginatorModule,
+    EmptyStateComponent,
+    ListSkeletonComponent
   ],
-  providers: [MessageService],
   templateUrl: './inventories.component.html',
   styleUrl: './inventories.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -62,6 +63,8 @@ export class InventoriesComponent implements OnInit {
 
   inventories: any[] = [];
   warehouses: any[] = [];
+  listLoading = true;
+  listLoadError = false;
   /** Options pour le filtre entrepôt (Tous + liste des entrepôts) */
   warehouseFilterOptions: { label: string; value: number | null }[] = [];
   /** Filtres envoyés au backend */
@@ -131,8 +134,14 @@ export class InventoriesComponent implements OnInit {
     };
     if (this.warehouseFilter != null) params['warehouseId'] = this.warehouseFilter;
     if (this.statusFilter !== 'ALL') params['status'] = this.statusFilter;
+    this.listLoading = true;
+    this.listLoadError = false;
+    this.cdr.markForCheck();
     this.apiService.get<InventoriesPageResponse>('/inventories', params)
-      .pipe(finalize(() => this.cdr.markForCheck()))
+      .pipe(finalize(() => {
+        this.listLoading = false;
+        this.cdr.markForCheck();
+      }))
       .subscribe({
       next: (response) => {
         this.inventories = (response.content || []).map(inv => ({
@@ -152,6 +161,9 @@ export class InventoriesComponent implements OnInit {
         this.first = response.page * response.size;
       },
       error: () => {
+        this.listLoadError = true;
+        this.inventories = [];
+        this.totalRecords = 0;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
@@ -159,6 +171,18 @@ export class InventoriesComponent implements OnInit {
         });
       }
     });
+  }
+
+  get hasActiveFilters(): boolean {
+    return this.warehouseFilter != null || this.statusFilter !== 'ALL';
+  }
+
+  resetFilters(): void {
+    this.warehouseFilter = null;
+    this.statusFilter = 'ALL';
+    this.page = 0;
+    this.first = 0;
+    this.loadInventories();
   }
 
   onFilterChange() {

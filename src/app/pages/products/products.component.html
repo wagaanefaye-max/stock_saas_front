@@ -1,5 +1,4 @@
 <div class="products-page mobile-page entity-page">
-  <p-toast></p-toast>
 
   <header class="page-header products-page__header">
     <div class="products-page__header-text">
@@ -130,20 +129,36 @@
   </div>
 
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="products.length === 0" class="mobile-list__empty">
-      <i class="pi pi-box"></i>
-      <p>Aucun produit</p>
-      <button
-        *ngIf="authService.isAdminEntreprise()"
-        pButton
-        label="Nouveau produit"
-        icon="pi pi-plus"
-        class="p-button-sm"
-        (click)="openNew()">
-      </button>
-    </div>
+    <app-list-skeleton *ngIf="listLoading" [count]="4"></app-list-skeleton>
 
-    <ul *ngIf="products.length > 0" class="mobile-list__items">
+    <app-empty-state
+      *ngIf="!listLoading && listLoadError"
+      icon="pi pi-exclamation-triangle"
+      message="Impossible de charger les produits."
+      actionLabel="Réessayer"
+      actionIcon="pi pi-refresh"
+      (action)="refreshProducts()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && products.length === 0 && hasActiveFilters"
+      icon="pi pi-filter-slash"
+      message="Aucun produit ne correspond à vos filtres."
+      actionLabel="Réinitialiser les filtres"
+      actionIcon="pi pi-refresh"
+      (action)="resetFilters()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && products.length === 0 && !hasActiveFilters"
+      icon="pi pi-box"
+      message="Aucun produit pour le moment. Commencez par ajouter votre premier article."
+      [actionLabel]="authService.isAdminEntreprise() ? 'Nouveau produit' : ''"
+      actionIcon="pi pi-plus"
+      (action)="openNew()">
+    </app-empty-state>
+
+    <ul *ngIf="!listLoading && !listLoadError && products.length > 0" class="mobile-list__items">
       <li
         *ngFor="let product of products; trackBy: trackByProductId"
         class="mobile-card mobile-card--clickable"
@@ -226,7 +241,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="totalProducts > 0"
+      *ngIf="!listLoading && !listLoadError && totalProducts > 0"
       class="mobile-list__paginator entity-paginator"
       [rows]="rows"
       [totalRecords]="totalProducts"

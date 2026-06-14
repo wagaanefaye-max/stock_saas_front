@@ -1,7 +1,6 @@
 import { Component, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
@@ -22,8 +21,7 @@ const ACCEPTED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 @Component({
   selector: 'app-company-subscriptions',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastModule, DialogModule, ButtonModule],
-  providers: [MessageService],
+  imports: [CommonModule, FormsModule, DialogModule, ButtonModule],
   templateUrl: './subscriptions.component.html',
   styleUrl: './subscriptions.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

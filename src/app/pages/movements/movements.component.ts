@@ -13,13 +13,14 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
-import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
 import { finalize } from 'rxjs';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_SM, APP_DIALOG_STYLE_XL } from '../../utils/dialog-mobile.util';
+import { EmptyStateComponent } from '../../components/shared/empty-state.component';
+import { ListSkeletonComponent } from '../../components/shared/list-skeleton.component';
 @Component({
   selector: 'app-movements',
   standalone: true,
@@ -37,10 +38,10 @@ import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_SM, APP_DIALOG_STYLE_XL } from
     SelectButtonModule,
     DatePickerModule,
     TextareaModule,
-    ToastModule,
-    PaginatorModule
+    PaginatorModule,
+    EmptyStateComponent,
+    ListSkeletonComponent
   ],
-  providers: [MessageService],
   templateUrl: './movements.component.html',
   styleUrl: './movements.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -54,6 +55,8 @@ export class MovementsComponent implements OnInit {
   totalMovements = 0;
   rows = 10;
   first = 0;
+  listLoading = true;
+  listLoadError = false;
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
   selectedMovements: any[] = [];
   globalFilter = '';
@@ -170,8 +173,14 @@ export class MovementsComponent implements OnInit {
     if (this.globalFilter?.trim()) {
       params['search'] = this.globalFilter.trim();
     }
+    this.listLoading = true;
+    this.listLoadError = false;
+    this.cdr.markForCheck();
     this.apiService.get<{ content: any[]; totalElements: number } | any[]>('/movements', params)
-      .pipe(finalize(() => this.cdr.markForCheck()))
+      .pipe(finalize(() => {
+        this.listLoading = false;
+        this.cdr.markForCheck();
+      }))
       .subscribe({
       next: (data) => {
         const items = Array.isArray(data) ? data : (data?.content ?? []);
@@ -198,6 +207,9 @@ export class MovementsComponent implements OnInit {
         this.rows = rows;
       },
       error: (error) => {
+        this.listLoadError = true;
+        this.movements = [];
+        this.totalMovements = 0;
         console.error('Erreur lors du chargement des mouvements', error);
         this.messageService.add({
           severity: 'error',
@@ -209,13 +221,24 @@ export class MovementsComponent implements OnInit {
     });
   }
 
+  get hasActiveFilters(): boolean {
+    return !!(this.globalFilter?.trim() || (this.typeFilter && this.typeFilter !== 'ALL'));
+  }
+
+  resetFilters(): void {
+    this.globalFilter = '';
+    this.typeFilter = 'ALL';
+    this.first = 0;
+    this.loadMovements({ first: 0, rows: this.rows });
+  }
+
   onMovementsLazyLoad(event: any) {
     this.first = event.first ?? 0;
     this.rows = event.rows ?? this.rows;
     this.loadMovements({ first: this.first, rows: this.rows });
   }
 
-  private refreshMovements() {
+  refreshMovements() {
     this.loadMovements({ first: this.first, rows: this.rows });
   }
 

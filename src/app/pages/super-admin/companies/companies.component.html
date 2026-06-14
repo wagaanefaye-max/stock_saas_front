@@ -1,5 +1,4 @@
 <div class="companies-page mobile-page entity-page">
-  <p-toast></p-toast>
 
   <div class="page-header">
     <div>
@@ -45,12 +44,36 @@
 
   <!-- Vue cartes -->
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="companies.length === 0" class="mobile-list__empty">
-      <i class="pi pi-building"></i>
-      <p>Aucune entreprise trouvée</p>
-    </div>
+    <app-list-skeleton *ngIf="listLoading" [count]="4"></app-list-skeleton>
 
-    <ul *ngIf="companies.length > 0" class="mobile-list__items">
+    <app-empty-state
+      *ngIf="!listLoading && listLoadError"
+      icon="pi pi-exclamation-triangle"
+      message="Impossible de charger les entreprises."
+      actionLabel="Réessayer"
+      actionIcon="pi pi-refresh"
+      (action)="loadCompanies()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && companies.length === 0 && hasActiveFilters"
+      icon="pi pi-filter-slash"
+      message="Aucune entreprise ne correspond à votre recherche."
+      actionLabel="Réinitialiser la recherche"
+      actionIcon="pi pi-refresh"
+      (action)="resetFilters()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && companies.length === 0 && !hasActiveFilters"
+      icon="pi pi-building"
+      message="Aucune entreprise inscrite pour le moment."
+      actionLabel="Nouvelle entreprise"
+      actionIcon="pi pi-plus"
+      (action)="openNew()">
+    </app-empty-state>
+
+    <ul *ngIf="!listLoading && !listLoadError && companies.length > 0" class="mobile-list__items">
       <li *ngFor="let company of companies; trackBy: trackByCompanyId" class="mobile-card">
         <div class="mobile-card__top">
           <div class="company-logo-cell company-logo-cell--mobile">
@@ -115,7 +138,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="totalRecords > 0"
+      *ngIf="!listLoading && !listLoadError && totalRecords > 0"
       class="mobile-list__paginator entity-paginator"
       [rows]="size"
       [totalRecords]="totalRecords"

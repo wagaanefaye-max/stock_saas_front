@@ -4,15 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, InputTextModule, ButtonModule, ToastModule],
-  providers: [MessageService],
+  imports: [CommonModule, FormsModule, RouterModule, InputTextModule, ButtonModule],
   styleUrl: './forgot-password.component.scss',
   templateUrl: './forgot-password.component.html'
 })

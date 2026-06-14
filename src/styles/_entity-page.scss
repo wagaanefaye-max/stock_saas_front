@@ -215,6 +215,13 @@
       font-size: 0.9375rem;
       max-width: 24rem;
     }
+
+    &__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
   }
 }
 
@@ -275,6 +282,13 @@
 @keyframes list-skeleton-shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list-skeleton__line,
+  .list-skeleton__stat {
+    animation: none !important;
+  }
 }
 
 .card-actions-bar {

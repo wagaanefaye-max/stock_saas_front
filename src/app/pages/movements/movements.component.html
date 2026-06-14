@@ -1,5 +1,4 @@
 <div class="movements-page mobile-page entity-page">
-  <p-toast></p-toast>
 
   <div class="page-header">
     <div>
@@ -67,13 +66,36 @@
   </div>
 
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="totalMovements === 0" class="mobile-list__empty">
-      <i class="pi pi-inbox"></i>
-      <p>Aucun mouvement trouvé</p>
-      <button pButton label="Nouveau mouvement" icon="pi pi-plus" class="p-button-sm" (click)="openNew()"></button>
-    </div>
+    <app-list-skeleton *ngIf="listLoading" [count]="4"></app-list-skeleton>
 
-    <ul *ngIf="movements.length > 0" class="mobile-list__items">
+    <app-empty-state
+      *ngIf="!listLoading && listLoadError"
+      icon="pi pi-exclamation-triangle"
+      message="Impossible de charger les mouvements."
+      actionLabel="Réessayer"
+      actionIcon="pi pi-refresh"
+      (action)="refreshMovements()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && totalMovements === 0 && hasActiveFilters"
+      icon="pi pi-filter-slash"
+      message="Aucun mouvement ne correspond à vos filtres."
+      actionLabel="Réinitialiser les filtres"
+      actionIcon="pi pi-refresh"
+      (action)="resetFilters()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && totalMovements === 0 && !hasActiveFilters"
+      icon="pi pi-arrows-h"
+      message="Aucun mouvement pour le moment. Enregistrez votre premier mouvement de stock."
+      actionLabel="Nouveau mouvement"
+      actionIcon="pi pi-plus"
+      (action)="openNew()">
+    </app-empty-state>
+
+    <ul *ngIf="!listLoading && !listLoadError && movements.length > 0" class="mobile-list__items">
       <li *ngFor="let movement of movements; trackBy: trackByMovementId" class="mobile-card">
         <div class="mobile-card__top">
           <div class="mobile-card__main">
@@ -109,7 +131,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="totalMovements > 0"
+      *ngIf="!listLoading && !listLoadError && totalMovements > 0"
       class="mobile-list__paginator entity-paginator"
       [rows]="rows"
       [totalRecords]="totalMovements"

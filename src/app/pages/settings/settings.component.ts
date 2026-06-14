@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { InputSwitchModule } from 'primeng/inputswitch';
-import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { PhoneFormatDirective } from '../../directives/phone-format.directive';
 import { ApiService } from '../../services/api.service';
@@ -40,10 +39,8 @@ interface NotificationSettings {
     InputTextModule,
     ButtonModule,
     InputSwitchModule,
-    ToastModule,
     PhoneFormatDirective
   ],
-  providers: [MessageService],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
 })

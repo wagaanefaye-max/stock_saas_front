@@ -8,7 +8,6 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { CardModule } from 'primeng/card';
 import { SelectModule } from 'primeng/select';
-import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -24,6 +23,8 @@ import {
   APP_DIALOG_STYLE_LG,
   APP_DIALOG_STYLE_DETAIL
 } from '../../../utils/dialog-mobile.util';
+import { EmptyStateComponent } from '../../../components/shared/empty-state.component';
+import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 
 interface InvoiceLineRow {
   productId: number | null;
@@ -57,20 +58,22 @@ interface ProductForInvoice {
     DialogModule,
     CardModule,
     SelectModule,
-    ToastModule,
     TagModule,
     SelectButtonModule,
     CheckboxModule,
     PhoneFormatPipe,
-    PaginatorModule
+    PaginatorModule,
+    EmptyStateComponent,
+    ListSkeletonComponent
   ],
-  providers: [MessageService],
   templateUrl: './invoices.component.html',
   styleUrl: './invoices.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InvoicesComponent implements OnInit {
   invoices: Invoice[] = [];
+  listLoading = true;
+  listLoadError = false;
   readonly dialogStyle = APP_DIALOG_STYLE_LG;
   readonly dialogStyleDetail = APP_DIALOG_STYLE_DETAIL;
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
@@ -145,6 +148,9 @@ export class InvoicesComponent implements OnInit {
   }
 
   loadInvoices() {
+    this.listLoading = true;
+    this.listLoadError = false;
+    this.cdr.markForCheck();
     const statusParam =
       this.statusFilter === 'ALL'
         ? null
@@ -159,16 +165,36 @@ export class InvoicesComponent implements OnInit {
     };
 
     this.apiService.get<Invoice[]>('/invoices', params)
-      .pipe(finalize(() => this.cdr.markForCheck()))
+      .pipe(finalize(() => {
+        this.listLoading = false;
+        this.cdr.markForCheck();
+      }))
       .subscribe({
       next: (data) => {
         this.invoices = data || [];
         this.mobileFirst = 0;
       },
       error: () => {
+        this.listLoadError = true;
+        this.invoices = [];
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les factures', life: 5000 });
       }
     });
+  }
+
+  resetInvoiceFilters(): void {
+    this.invoiceNumberFilter = '';
+    this.clientNameFilter = '';
+    this.statusFilter = 'ALL';
+    this.loadInvoices();
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!(
+      this.invoiceNumberFilter?.trim() ||
+      this.clientNameFilter?.trim() ||
+      this.statusFilter !== 'ALL'
+    );
   }
 
   /** La liste est déjà filtrée par le backend. */

@@ -1,0 +1,56 @@
+<section class="onboarding-checklist" aria-label="Guide de démarrage">
+  <div class="onboarding-checklist__header">
+    <div class="onboarding-checklist__intro">
+      <span class="onboarding-checklist__eyebrow">
+        <i class="pi pi-compass" aria-hidden="true"></i>
+        Premiers pas
+      </span>
+      <h2>{{ allDone ? 'Bravo, vous êtes prêt !' : 'Configurez votre espace' }}</h2>
+      <p>
+        {{ allDone
+          ? 'Les étapes essentielles sont terminées. Vous pouvez masquer ce guide.'
+          : 'Suivez cette checklist pour démarrer rapidement avec Stock SaaS.' }}
+      </p>
+    </div>
+    <button
+      type="button"
+      pButton
+      class="p-button-text p-button-sm onboarding-checklist__dismiss"
+      icon="pi pi-times"
+      label="Masquer"
+      (click)="onDismiss()"
+      aria-label="Masquer le guide de démarrage">
+    </button>
+  </div>
+
+  <div class="onboarding-checklist__progress" role="progressbar" [attr.aria-valuenow]="progressPercent" aria-valuemin="0" aria-valuemax="100">
+    <div class="onboarding-checklist__progress-track">
+      <div class="onboarding-checklist__progress-fill" [style.width.%]="progressPercent"></div>
+    </div>
+    <span class="onboarding-checklist__progress-label">{{ completedCount }}/{{ steps.length }} terminé{{ completedCount > 1 ? 's' : '' }}</span>
+  </div>
+
+  <ol class="onboarding-checklist__steps">
+    <li
+      *ngFor="let step of steps; trackBy: trackByStepId"
+      class="onboarding-step"
+      [class.onboarding-step--done]="step.done">
+      <div class="onboarding-step__status" aria-hidden="true">
+        <i [class]="step.done ? 'pi pi-check' : 'pi pi-circle'"></i>
+      </div>
+      <div class="onboarding-step__content">
+        <strong>{{ step.title }}</strong>
+        <span>{{ step.description }}</span>
+      </div>
+      <a
+        *ngIf="!step.done"
+        [routerLink]="step.routerLink"
+        [queryParams]="step.queryParams || null"
+        class="onboarding-step__action">
+        Commencer
+        <i class="pi pi-arrow-right" aria-hidden="true"></i>
+      </a>
+      <span *ngIf="step.done" class="onboarding-step__done-label">Fait</span>
+    </li>
+  </ol>
+</section>

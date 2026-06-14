@@ -7,7 +7,6 @@ import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TagModule } from 'primeng/tag';
-import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
@@ -26,8 +25,7 @@ interface MonthlySubscriptionPoint {
 @Component({
   selector: 'app-super-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, CardModule, ChartModule, SelectButtonModule, TagModule, ToastModule],
-  providers: [MessageService],
+  imports: [CommonModule, FormsModule, RouterModule, CardModule, ChartModule, SelectButtonModule, TagModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

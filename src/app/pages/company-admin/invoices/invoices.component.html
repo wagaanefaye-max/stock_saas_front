@@ -1,5 +1,4 @@
 <div class="invoices-page mobile-page entity-page">
-  <p-toast></p-toast>
   <div class="page-header">
     <div>
       <h1>Factures</h1>
@@ -80,13 +79,36 @@
   </div>
 
   <div class="mobile-list show-mobile-only">
-      <div *ngIf="filteredInvoices.length === 0" class="mobile-list__empty">
-        <i class="pi pi-file"></i>
-        <p>Aucune facture</p>
-        <button pButton label="Créer une facture" icon="pi pi-plus" class="p-button-sm" (click)="openCreateDialog()"></button>
-      </div>
+      <app-list-skeleton *ngIf="listLoading" [count]="4"></app-list-skeleton>
 
-      <ul *ngIf="filteredInvoices.length > 0" class="mobile-list__items">
+      <app-empty-state
+        *ngIf="!listLoading && listLoadError"
+        icon="pi pi-exclamation-triangle"
+        message="Impossible de charger les factures."
+        actionLabel="Réessayer"
+        actionIcon="pi pi-refresh"
+        (action)="loadInvoices()">
+      </app-empty-state>
+
+      <app-empty-state
+        *ngIf="!listLoading && !listLoadError && filteredInvoices.length === 0 && hasActiveFilters"
+        icon="pi pi-filter-slash"
+        message="Aucune facture ne correspond à vos filtres."
+        actionLabel="Réinitialiser les filtres"
+        actionIcon="pi pi-refresh"
+        (action)="resetInvoiceFilters()">
+      </app-empty-state>
+
+      <app-empty-state
+        *ngIf="!listLoading && !listLoadError && filteredInvoices.length === 0 && !hasActiveFilters"
+        icon="pi pi-file"
+        message="Aucune facture pour le moment. Créez votre première facture client."
+        actionLabel="Créer une facture"
+        actionIcon="pi pi-plus"
+        (action)="openCreateDialog()">
+      </app-empty-state>
+
+      <ul *ngIf="!listLoading && !listLoadError && filteredInvoices.length > 0" class="mobile-list__items">
         <li *ngFor="let inv of paginatedInvoices; trackBy: trackByInvoiceId" class="mobile-card">
           <div class="mobile-card__top">
             <div class="mobile-card__main">
@@ -174,7 +196,7 @@
       </ul>
 
       <p-paginator
-        *ngIf="filteredInvoices.length > 0"
+        *ngIf="!listLoading && !listLoadError && filteredInvoices.length > 0"
         class="mobile-list__paginator entity-paginator"
         [rows]="mobileRows"
         [totalRecords]="filteredInvoices.length"

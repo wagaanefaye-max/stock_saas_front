@@ -34,5 +34,31 @@
     "@angular/compiler-cli": "^18.0.0",
     "@types/node": "^20.10.0",
     "typescript": "~5.4.0"
+  },
+  "overrides": {
+    "ajv": "8.18.0",
+    "brace-expansion": "2.0.3",
+    "esbuild": "0.28.1",
+    "fast-uri": "3.1.2",
+    "follow-redirects": "1.16.0",
+    "immutable": "4.3.8",
+    "ip-address": "10.2.0",
+    "minimatch": "9.0.7",
+    "node-forge": "1.4.0",
+    "path-to-regexp": "0.1.13",
+    "picomatch": "4.0.4",
+    "postcss": "8.5.15",
+    "qs": "6.15.2",
+    "rollup": "4.62.0",
+    "serialize-javascript": "7.0.5",
+    "shell-quote": "1.8.4",
+    "tar": "7.5.16",
+    "tmp": "0.2.7",
+    "uuid": "11.1.1",
+    "vite": "6.4.3",
+    "@vitejs/plugin-basic-ssl": "2.3.0",
+    "webpack": "5.107.2",
+    "webpack-dev-server": "5.2.5",
+    "ws": "8.21.0"
   }
 }

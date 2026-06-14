@@ -6,7 +6,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { PasswordModule } from 'primeng/password';
 import { CardModule } from 'primeng/card';
-import { ToastModule } from 'primeng/toast';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
@@ -23,10 +22,8 @@ import { getErrorMessage } from '../../utils/error-message.util';
     ButtonModule,
     PasswordModule,
     CardModule,
-    ToastModule,
     ProgressBarModule
   ],
-  providers: [MessageService],
   templateUrl: './verify-account.component.html',
   styleUrl: './verify-account.component.scss'
 })

@@ -1,5 +1,4 @@
 <div class="inventories-page mobile-page entity-page">
-  <p-toast></p-toast>
 
   <div class="page-header">
     <div>
@@ -73,13 +72,36 @@
   </div>
 
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="inventories.length === 0" class="mobile-list__empty">
-      <i class="pi pi-clipboard"></i>
-      <p>Aucun inventaire</p>
-      <p class="text-muted small">Créez un inventaire pour un entrepôt pour lancer un comptage.</p>
-    </div>
+    <app-list-skeleton *ngIf="listLoading" [count]="4"></app-list-skeleton>
 
-    <ul *ngIf="inventories.length > 0" class="mobile-list__items">
+    <app-empty-state
+      *ngIf="!listLoading && listLoadError"
+      icon="pi pi-exclamation-triangle"
+      message="Impossible de charger les inventaires."
+      actionLabel="Réessayer"
+      actionIcon="pi pi-refresh"
+      (action)="loadInventories()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && inventories.length === 0 && hasActiveFilters"
+      icon="pi pi-filter-slash"
+      message="Aucun inventaire ne correspond à vos filtres."
+      actionLabel="Réinitialiser les filtres"
+      actionIcon="pi pi-refresh"
+      (action)="resetFilters()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && inventories.length === 0 && !hasActiveFilters"
+      icon="pi pi-clipboard"
+      message="Aucun inventaire pour le moment. Créez un inventaire pour lancer un comptage."
+      actionLabel="Nouvel inventaire"
+      actionIcon="pi pi-plus"
+      (action)="openCreate()">
+    </app-empty-state>
+
+    <ul *ngIf="!listLoading && !listLoadError && inventories.length > 0" class="mobile-list__items">
       <li *ngFor="let inv of inventories; trackBy: trackByInventoryId" class="mobile-card">
         <div class="mobile-card__top">
           <div class="mobile-card__main">
@@ -112,7 +134,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="totalRecords > 0"
+      *ngIf="!listLoading && !listLoadError && totalRecords > 0"
       class="mobile-list__paginator entity-paginator"
       [rows]="size"
       [totalRecords]="totalRecords"

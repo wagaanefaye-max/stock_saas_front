@@ -9,7 +9,6 @@ import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -23,6 +22,8 @@ import {
   APP_DIALOG_STYLE_LG,
   APP_DIALOG_STYLE_SM
 } from '../../utils/dialog-mobile.util';
+import { EmptyStateComponent } from '../../components/shared/empty-state.component';
+import { ListSkeletonComponent } from '../../components/shared/list-skeleton.component';
 @Component({
   selector: 'app-products',
   standalone: true,
@@ -36,12 +37,12 @@ import {
     TagModule,
     SelectModule,
     InputNumberModule,
-    ToastModule,
     TooltipModule,
     DatePickerModule,
-    PaginatorModule
+    PaginatorModule,
+    EmptyStateComponent,
+    ListSkeletonComponent
   ],
-  providers: [MessageService],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -56,6 +57,8 @@ export class ProductsComponent implements OnInit {
   totalProducts = 0;
   rows = 10;
   first = 0;
+  listLoading = true;
+  listLoadError = false;
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
   /** Filtres de recherche (envoyés à l'API) */
@@ -99,6 +102,9 @@ export class ProductsComponent implements OnInit {
     const first = event?.first ?? this.first;
     const rows = event?.rows ?? this.rows;
     const page = first / rows;
+    this.listLoading = true;
+    this.listLoadError = false;
+    this.cdr.markForCheck();
     const params: Record<string, string | number | undefined> = {
       page,
       size: rows
@@ -111,7 +117,10 @@ export class ProductsComponent implements OnInit {
     if (this.filterDateTo) params['dateTo'] = this.formatDateForApi(this.filterDateTo);
 
     this.apiService.get<{ content: any[]; totalElements: number }>('/products', params)
-      .pipe(finalize(() => this.cdr.markForCheck()))
+      .pipe(finalize(() => {
+        this.listLoading = false;
+        this.cdr.markForCheck();
+      }))
       .subscribe({
       next: (data) => {
         this.products = (data?.content ?? []).map(p => ({
@@ -126,6 +135,9 @@ export class ProductsComponent implements OnInit {
         this.totalProducts = data?.totalElements ?? 0;
       },
       error: (error) => {
+        this.listLoadError = true;
+        this.products = [];
+        this.totalProducts = 0;
         console.error('Erreur lors du chargement des produits', error);
         this.messageService.add({
           severity: 'error',
@@ -143,12 +155,23 @@ export class ProductsComponent implements OnInit {
     this.loadProducts({ first: this.first, rows: this.rows });
   }
 
-  private refreshProducts() {
+  refreshProducts() {
     this.loadProducts({ first: this.first, rows: this.rows });
   }
 
   trackByProductId(_index: number, product: { id?: number }): number {
     return product.id ?? _index;
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!(
+      this.filterName?.trim() ||
+      this.filterReference?.trim() ||
+      this.filterSku?.trim() ||
+      this.filterCategoryCode ||
+      this.filterDateFrom ||
+      this.filterDateTo
+    );
   }
 
   private formatDateForApi(d: Date): string {

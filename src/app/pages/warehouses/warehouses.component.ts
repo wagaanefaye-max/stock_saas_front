@@ -11,7 +11,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { ToolbarModule } from 'primeng/toolbar';
-import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -23,6 +22,8 @@ import {
   APP_DIALOG_STYLE,
   APP_DIALOG_STYLE_DETAIL
 } from '../../utils/dialog-mobile.util';
+import { EmptyStateComponent } from '../../components/shared/empty-state.component';
+import { ListSkeletonComponent } from '../../components/shared/list-skeleton.component';
 
 @Component({
   selector: 'app-warehouses',
@@ -39,11 +40,11 @@ import {
     InputNumberModule,
     SelectModule,
     ToolbarModule,
-    ToastModule,
     PaginatorModule,
     TooltipModule,
+    EmptyStateComponent,
+    ListSkeletonComponent
   ],
-  providers: [MessageService],
   templateUrl: './warehouses.component.html',
   styleUrl: './warehouses.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -53,6 +54,8 @@ export class WarehousesComponent implements OnInit {
   displayDialog = false;
   displayDetailsDialog = false;
   warehouseProductsLoading = false;
+  listLoading = true;
+  listLoadError = false;
   warehouse: any = {};
   selectedWarehouseDetails: any = null;
   warehouseProducts: any[] = [];
@@ -103,8 +106,14 @@ export class WarehousesComponent implements OnInit {
   }
 
   loadWarehouses() {
+    this.listLoading = true;
+    this.listLoadError = false;
+    this.cdr.markForCheck();
     this.apiService.get<any[]>('/warehouses')
-      .pipe(finalize(() => this.cdr.markForCheck()))
+      .pipe(finalize(() => {
+        this.listLoading = false;
+        this.cdr.markForCheck();
+      }))
       .subscribe({
       next: (warehouses) => {
         this.warehouses = warehouses.map(w => ({
@@ -113,6 +122,8 @@ export class WarehousesComponent implements OnInit {
         }));
       },
       error: (error) => {
+        this.listLoadError = true;
+        this.warehouses = [];
         console.error('Erreur lors du chargement des entrepôts', error);
         this.messageService.add({
           severity: 'error',
@@ -122,6 +133,15 @@ export class WarehousesComponent implements OnInit {
         });
       }
     });
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!this.globalFilter?.trim();
+  }
+
+  resetFilters(): void {
+    this.globalFilter = '';
+    this.first = 0;
   }
 
   get filteredWarehouses(): any[] {

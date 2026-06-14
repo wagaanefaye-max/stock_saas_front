@@ -3,6 +3,7 @@ import { PlatformStatusService } from './services/platform-status.service';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
 import { APP_CONFIRM_BREAKPOINTS, APP_CONFIRM_STYLE } from './utils/dialog-mobile.util';
 import { LoadingService } from './services/loading.service';
 import { GlobalLoadingComponent } from './components/shared/global-loading.component';
@@ -13,10 +14,12 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, ConfirmDialogModule, GlobalLoadingComponent, AppUpdateBannerComponent],
+  imports: [RouterOutlet, CommonModule, ConfirmDialogModule, ToastModule, GlobalLoadingComponent, AppUpdateBannerComponent],
   template: `
     <div class="app-container">
       <router-outlet></router-outlet>
+
+      <p-toast position="top-right" styleClass="app-global-toast"></p-toast>
 
       <p-confirmDialog
         styleClass="app-confirm-dialog"

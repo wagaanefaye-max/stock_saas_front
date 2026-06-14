@@ -4,7 +4,7 @@ import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideServiceWorker } from '@angular/service-worker';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { PRIMENG_FR } from './app/config/primeng-fr.translation';
@@ -18,6 +18,7 @@ bootstrapApplication(AppComponent, {
     provideAnimations(),
     provideHttpClient(withInterceptors([authInterceptor])),
     ConfirmationService,
+    MessageService,
     providePrimeNG({
       translation: PRIMENG_FR,
       theme: {

@@ -1,5 +1,4 @@
 <div class="subscription-requests-page mobile-page entity-page">
-  <p-toast></p-toast>
 
   <div class="page-header">
     <h1>Souscriptions</h1>
@@ -41,12 +40,33 @@
   </div>
 
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="requests.length === 0" class="mobile-list__empty">
-      <i class="pi pi-inbox"></i>
-      <p>Aucune souscription pour ce filtre.</p>
-    </div>
+    <app-list-skeleton *ngIf="listLoading" [count]="4"></app-list-skeleton>
 
-    <ul *ngIf="requests.length > 0" class="mobile-list__items">
+    <app-empty-state
+      *ngIf="!listLoading && listLoadError"
+      icon="pi pi-exclamation-triangle"
+      message="Impossible de charger les souscriptions."
+      actionLabel="Réessayer"
+      actionIcon="pi pi-refresh"
+      (action)="loadRequests()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && requests.length === 0 && hasActiveFilters"
+      icon="pi pi-filter-slash"
+      message="Aucune souscription ne correspond à ce filtre."
+      actionLabel="Réinitialiser les filtres"
+      actionIcon="pi pi-refresh"
+      (action)="resetFilters()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && requests.length === 0 && !hasActiveFilters"
+      icon="pi pi-inbox"
+      message="Aucune demande de souscription pour le moment.">
+    </app-empty-state>
+
+    <ul *ngIf="!listLoading && !listLoadError && requests.length > 0" class="mobile-list__items">
       <li
         *ngFor="let row of requests; trackBy: trackByRequestId"
         class="mobile-card"
@@ -115,7 +135,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="totalRecords > 0"
+      *ngIf="!listLoading && !listLoadError && totalRecords > 0"
       class="mobile-list__paginator entity-paginator"
       [rows]="rows"
       [totalRecords]="totalRecords"

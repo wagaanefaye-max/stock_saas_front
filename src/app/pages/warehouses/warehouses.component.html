@@ -1,5 +1,4 @@
 <div class="warehouses-page mobile-page entity-page">
-  <p-toast></p-toast>
   
   <div class="page-header">
     <div>
@@ -48,13 +47,36 @@
     </div>
 
     <div class="mobile-list show-mobile-only">
-      <div *ngIf="filteredWarehouses.length === 0" class="mobile-list__empty">
-        <i class="pi pi-inbox"></i>
-        <p>Aucun entrepôt trouvé</p>
-        <button pButton label="Nouvel entrepôt" icon="pi pi-plus" class="p-button-sm" (click)="openNew()"></button>
-      </div>
+      <app-list-skeleton *ngIf="listLoading" [count]="4"></app-list-skeleton>
 
-      <ul *ngIf="filteredWarehouses.length > 0" class="mobile-list__items">
+      <app-empty-state
+        *ngIf="!listLoading && listLoadError"
+        icon="pi pi-exclamation-triangle"
+        message="Impossible de charger les entrepôts."
+        actionLabel="Réessayer"
+        actionIcon="pi pi-refresh"
+        (action)="loadWarehouses()">
+      </app-empty-state>
+
+      <app-empty-state
+        *ngIf="!listLoading && !listLoadError && filteredWarehouses.length === 0 && hasActiveFilters"
+        icon="pi pi-filter-slash"
+        message="Aucun entrepôt ne correspond à votre recherche."
+        actionLabel="Réinitialiser la recherche"
+        actionIcon="pi pi-refresh"
+        (action)="resetFilters()">
+      </app-empty-state>
+
+      <app-empty-state
+        *ngIf="!listLoading && !listLoadError && filteredWarehouses.length === 0 && !hasActiveFilters"
+        icon="pi pi-building"
+        message="Aucun entrepôt pour le moment. Créez votre premier dépôt."
+        [actionLabel]="authService.isAdminEntreprise() ? 'Nouvel entrepôt' : ''"
+        actionIcon="pi pi-plus"
+        (action)="openNew()">
+      </app-empty-state>
+
+      <ul *ngIf="!listLoading && !listLoadError && filteredWarehouses.length > 0" class="mobile-list__items">
         <li *ngFor="let warehouse of paginatedWarehouses; trackBy: trackByWarehouseId" class="mobile-card">
           <div class="mobile-card__top">
             <div class="mobile-card__main">
@@ -110,7 +132,7 @@
       </ul>
 
       <p-paginator
-        *ngIf="filteredWarehouses.length > 0"
+        *ngIf="!listLoading && !listLoadError && filteredWarehouses.length > 0"
         class="mobile-list__paginator entity-paginator"
         [rows]="rows"
         [totalRecords]="filteredWarehouses.length"
@@ -125,12 +147,24 @@
 
   <!-- Gestionnaires / utilisateurs -->
   <div *ngIf="!authService.isAdminEntreprise()" class="mobile-list show-mobile-only">
-    <div *ngIf="warehouses.length === 0" class="mobile-list__empty">
-      <i class="pi pi-inbox"></i>
-      <p>Aucun entrepôt disponible</p>
-    </div>
+    <app-list-skeleton *ngIf="listLoading" [count]="4"></app-list-skeleton>
 
-    <ul *ngIf="warehouses.length > 0" class="mobile-list__items">
+    <app-empty-state
+      *ngIf="!listLoading && listLoadError"
+      icon="pi pi-exclamation-triangle"
+      message="Impossible de charger les entrepôts."
+      actionLabel="Réessayer"
+      actionIcon="pi pi-refresh"
+      (action)="loadWarehouses()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && warehouses.length === 0"
+      icon="pi pi-building"
+      message="Aucun entrepôt disponible pour le moment.">
+    </app-empty-state>
+
+    <ul *ngIf="!listLoading && !listLoadError && warehouses.length > 0" class="mobile-list__items">
       <li *ngFor="let warehouse of paginatedWarehousesNonAdmin; trackBy: trackByWarehouseId" class="mobile-card">
         <div class="mobile-card__top">
           <div class="mobile-card__main">
@@ -162,7 +196,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="warehouses.length > 0"
+      *ngIf="!listLoading && !listLoadError && warehouses.length > 0"
       class="mobile-list__paginator entity-paginator"
       [rows]="rows"
       [totalRecords]="warehouses.length"

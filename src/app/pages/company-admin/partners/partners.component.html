@@ -1,5 +1,4 @@
 <div class="partners-page mobile-page entity-page">
-  <p-toast></p-toast>
 
   <div class="page-header">
     <div>
@@ -69,13 +68,36 @@
   </div>
 
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="partners.length === 0" class="mobile-list__empty">
-      <i class="pi pi-users"></i>
-      <p>Aucun partenaire (client ou fournisseur)</p>
-      <button pButton label="Nouveau partenaire" icon="pi pi-plus" class="p-button-sm" (click)="openNew()"></button>
-    </div>
+    <app-list-skeleton *ngIf="listLoading" [count]="4"></app-list-skeleton>
 
-    <ul *ngIf="partners.length > 0" class="mobile-list__items">
+    <app-empty-state
+      *ngIf="!listLoading && listLoadError"
+      icon="pi pi-exclamation-triangle"
+      message="Impossible de charger les partenaires."
+      actionLabel="Réessayer"
+      actionIcon="pi pi-refresh"
+      (action)="refreshPartners()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && partners.length === 0 && hasActiveFilters"
+      icon="pi pi-filter-slash"
+      message="Aucun partenaire ne correspond à vos filtres."
+      actionLabel="Réinitialiser les filtres"
+      actionIcon="pi pi-refresh"
+      (action)="resetFilters()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && partners.length === 0 && !hasActiveFilters"
+      icon="pi pi-users"
+      message="Aucun partenaire pour le moment. Ajoutez vos clients et fournisseurs."
+      actionLabel="Nouveau partenaire"
+      actionIcon="pi pi-plus"
+      (action)="openNew()">
+    </app-empty-state>
+
+    <ul *ngIf="!listLoading && !listLoadError && partners.length > 0" class="mobile-list__items">
       <li *ngFor="let p of partners; trackBy: trackByPartnerId" class="mobile-card">
         <div class="mobile-card__top">
           <div class="mobile-card__main">
@@ -116,7 +138,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="totalPartners > 0"
+      *ngIf="!listLoading && !listLoadError && totalPartners > 0"
       class="mobile-list__paginator entity-paginator"
       [rows]="rows"
       [totalRecords]="totalPartners"

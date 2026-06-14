@@ -7,7 +7,6 @@ import { ToggleButtonModule } from 'primeng/togglebutton';
 import { DividerModule } from 'primeng/divider';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextarea } from 'primeng/inputtextarea';
-import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { catchError, finalize, of } from 'rxjs';
 import { ApiService } from '../../../services/api.service';
@@ -39,10 +38,8 @@ const MAX_QR_BYTES = 5 * 1024 * 1024;
     ToggleButtonModule,
     DividerModule,
     InputNumberModule,
-    InputTextarea,
-    ToastModule
+    InputTextarea
   ],
-  providers: [MessageService],
   templateUrl: './platform-settings.component.html',
   styleUrl: './platform-settings.component.scss'
 })

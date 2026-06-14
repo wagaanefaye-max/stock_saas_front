@@ -289,6 +289,66 @@ textarea:not(.p-inputtext) {
   color: var(--warning);
 }
 
+/* Erreurs inline (auth + formulaires) */
+.field-error {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--danger);
+}
+
+.form-group--invalid {
+  label {
+    color: var(--danger);
+  }
+
+  .p-inputtext,
+  input.p-inputtext,
+  .p-password input,
+  .p-select,
+  input[type='email']:not(.p-inputtext),
+  input[type='text']:not(.p-inputtext),
+  input[type='tel']:not(.p-inputtext) {
+    border-color: var(--danger);
+
+    &:enabled:focus,
+    &:focus-visible,
+    &.p-focus {
+      border-color: var(--danger);
+      box-shadow: var(--input-shadow), 0 0 0 3px color-mix(in srgb, var(--danger) 20%, transparent);
+    }
+  }
+}
+
+.auth-form-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+
+  i {
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+  }
+
+  &--error {
+    background: rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    color: #991b1b;
+  }
+
+  &--success {
+    background: rgba(22, 163, 74, 0.1);
+    border: 1px solid rgba(22, 163, 74, 0.25);
+    color: #166534;
+  }
+}
+
 /* Mobile : 16px pour éviter le zoom iOS */
 @media (max-width: 768px) {
   .p-inputtext,

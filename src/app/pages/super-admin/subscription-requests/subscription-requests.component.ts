@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
-import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -14,6 +13,8 @@ import { finalize } from 'rxjs';
 import { SubscriptionRecord, SubscriptionService } from '../../../services/subscription.service';
 import { SuperAdminSubscriptionBadgeService } from '../../../services/super-admin-subscription-badge.service';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE } from '../../../utils/dialog-mobile.util';
+import { EmptyStateComponent } from '../../../components/shared/empty-state.component';
+import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 
 type StatusFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -26,13 +27,13 @@ type StatusFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';
     CardModule,
     ButtonModule,
     TagModule,
-    ToastModule,
     DialogModule,
     InputTextarea,
     SelectButtonModule,
-    PaginatorModule
+    PaginatorModule,
+    EmptyStateComponent,
+    ListSkeletonComponent
   ],
-  providers: [MessageService],
   templateUrl: './subscription-requests.component.html',
   styleUrl: './subscription-requests.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -40,6 +41,8 @@ type StatusFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';
 export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
   requests: SubscriptionRecord[] = [];
   totalRecords = 0;
+  listLoading = true;
+  listLoadError = false;
   statusFilter: StatusFilter = 'ALL';
   statusFilterOptions: { label: string; value: StatusFilter }[] = [];
   proofPreviewUrl: string | null = null;
@@ -99,9 +102,15 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
 
   loadRequests(): void {
     const status = this.statusFilter === 'ALL' ? undefined : this.statusFilter;
+    this.listLoading = true;
+    this.listLoadError = false;
+    this.cdr.markForCheck();
     this.subscriptionService
       .getAllRequests(this.page, this.rows, status)
-      .pipe(finalize(() => this.cdr.markForCheck()))
+      .pipe(finalize(() => {
+        this.listLoading = false;
+        this.cdr.markForCheck();
+      }))
       .subscribe({
         next: (response) => {
           this.requests = response.content;
@@ -116,13 +125,28 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
           this.subscriptionBadgeService.setPendingCount(response.totalPending ?? 0);
           this.updateFilterOptions();
         },
-        error: (err) =>
+        error: (err) => {
+          this.listLoadError = true;
+          this.requests = [];
+          this.totalRecords = 0;
           this.messageService.add({
             severity: 'error',
             summary: 'Erreur',
             detail: err?.error?.message || 'Chargement impossible'
-          })
+          });
+        }
       });
+  }
+
+  get hasActiveFilters(): boolean {
+    return this.statusFilter !== 'ALL';
+  }
+
+  resetFilters(): void {
+    this.statusFilter = 'ALL';
+    this.page = 0;
+    this.first = 0;
+    this.loadRequests();
   }
 
   onFilterChange(): void {

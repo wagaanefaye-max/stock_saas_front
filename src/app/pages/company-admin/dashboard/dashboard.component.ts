@@ -2,7 +2,6 @@ import { Component, ChangeDetectionStrategy, ChangeDetectorRef, HostListener, On
 import { buildDoughnutChartOptions, buildLineChartOptions } from '../../../utils/chart-options.util';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { TagModule } from 'primeng/tag';
@@ -13,6 +12,11 @@ import { ApiService } from '../../../services/api.service';
 import { RequestCacheService } from '../../../services/request-cache.service';
 import { AuthService } from '../../../services/auth.service';
 import { SubscriptionService, SubscriptionStatus } from '../../../services/subscription.service';
+import { OnboardingService } from '../../../services/onboarding.service';
+import {
+  OnboardingChecklistComponent,
+  OnboardingStepView
+} from '../../../components/shared/onboarding-checklist.component';
 
 interface DashboardInvoice {
   id: number;
@@ -72,8 +76,7 @@ interface DashboardStatCard {
 @Component({
   selector: 'app-company-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, ToastModule, CardModule, ChartModule, TagModule],
-  providers: [MessageService],
+  imports: [CommonModule, RouterModule, CardModule, ChartModule, TagModule, OnboardingChecklistComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -87,6 +90,8 @@ export class CompanyAdminDashboardComponent implements OnInit {
   recentMovements: DashboardStats['recentMovements'] = [];
 
   subscriptionStatus: SubscriptionStatus | null = null;
+  showOnboarding = false;
+  onboardingSteps: OnboardingStepView[] = [];
 
   totalProducts = 0;
   totalWarehouses = 0;
@@ -115,6 +120,7 @@ export class CompanyAdminDashboardComponent implements OnInit {
     private apiService: ApiService,
     private authService: AuthService,
     private subscriptionService: SubscriptionService,
+    private onboardingService: OnboardingService,
     private requestCache: RequestCacheService,
     private messageService: MessageService,
     private cdr: ChangeDetectorRef
@@ -144,25 +150,39 @@ export class CompanyAdminDashboardComponent implements OnInit {
     this.loading = true;
     this.cdr.markForCheck();
 
+    const includeOnboarding = this.onboardingService.shouldShowForAdmin();
+
     forkJoin({
       stats: this.requestCache.get('company-admin-dashboard-stats', () =>
         this.apiService.get<DashboardStats>('/dashboard/stats').pipe(catchError(() => of(null)))
       ),
       subscription: this.requestCache.get('company-admin-subscription-status', () =>
         this.subscriptionService.getStatus().pipe(catchError(() => of(null)))
-      )
+      ),
+      partners: includeOnboarding
+        ? this.apiService.get<{ totalElements: number }>('/partners', { page: 0, size: 1 }).pipe(
+            catchError(() => of({ totalElements: 0 }))
+          )
+        : of({ totalElements: 0 })
     })
       .pipe(finalize(() => {
         this.loading = false;
         this.cdr.markForCheck();
       }))
       .subscribe({
-      next: ({ stats, subscription }) => {
+      next: ({ stats, subscription, partners }) => {
         this.subscriptionStatus = subscription;
         this.applyStats(stats);
         this.buildStatCards();
         this.buildStatusChart();
         this.buildMovementsChart(stats?.monthlyMovementsData || []);
+        if (includeOnboarding) {
+          this.buildOnboardingSteps(stats, partners?.totalElements ?? 0);
+          this.showOnboarding = true;
+        } else {
+          this.showOnboarding = false;
+          this.onboardingSteps = [];
+        }
         this.cdr.markForCheck();
       },
       error: () => {
@@ -437,6 +457,62 @@ export class CompanyAdminDashboardComponent implements OnInit {
       case 'CANCELLED': return 'Annulée';
       default: return 'Brouillon';
     }
+  }
+
+  dismissOnboarding(): void {
+    this.onboardingService.dismiss();
+    this.showOnboarding = false;
+    this.cdr.markForCheck();
+  }
+
+  private buildOnboardingSteps(stats: DashboardStats | null, partnersTotal: number): void {
+    const warehouses = stats?.totalWarehouses ?? 0;
+    const products = stats?.totalProducts ?? 0;
+    const teamMembers = stats?.activeUsers ?? 0;
+    const invoices =
+      (stats?.paidInvoicesCount ?? 0) +
+      (stats?.draftInvoicesCount ?? 0) +
+      (stats?.sentInvoicesCount ?? 0);
+
+    this.onboardingSteps = [
+      {
+        id: 'warehouse',
+        title: 'Créer un entrepôt',
+        description: 'Définissez au moins un dépôt pour gérer votre stock.',
+        routerLink: '/company-admin/warehouses',
+        queryParams: { action: 'new' },
+        done: warehouses >= 1
+      },
+      {
+        id: 'product',
+        title: 'Ajouter un produit',
+        description: 'Constituez votre catalogue avec vos articles.',
+        routerLink: '/company-admin/products',
+        queryParams: { action: 'new' },
+        done: products >= 1
+      },
+      {
+        id: 'partner',
+        title: 'Ajouter un client',
+        description: 'Enregistrez un client pour facturer plus vite.',
+        routerLink: '/company-admin/partners',
+        done: partnersTotal >= 1
+      },
+      {
+        id: 'invoice',
+        title: 'Créer une facture',
+        description: 'Émettez votre première facture client.',
+        routerLink: '/company-admin/invoices',
+        done: invoices >= 1
+      },
+      {
+        id: 'team',
+        title: 'Inviter un gestionnaire',
+        description: 'Donnez accès à un collaborateur pour le stock.',
+        routerLink: '/company-admin/users',
+        done: teamMembers >= 2
+      }
+    ];
   }
 
   trackByStatTitle(_index: number, stat: { title: string }): string {

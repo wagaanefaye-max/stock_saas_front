@@ -1,5 +1,4 @@
 <div class="register-container">
-  <p-toast></p-toast>
 
   <a routerLink="/" class="register-back-home">
     <i class="pi pi-arrow-left" aria-hidden="true"></i>
@@ -51,7 +50,12 @@
           <p>Remplissez les informations ci-dessous</p>
         </div>
 
-        <form (ngSubmit)="register()" class="register-form">
+        <div *ngIf="errorMessage" class="auth-form-alert auth-form-alert--error" role="alert">
+          <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <form (ngSubmit)="register()" class="register-form" novalidate>
           <!-- Step 1: Informations entreprise -->
           <div *ngIf="currentStep === 1" class="form-step">
             <h3 class="step-title">
@@ -59,68 +63,80 @@
               Informations de l'entreprise
             </h3>
             
-            <div class="form-group">
+            <div class="form-group" [class.form-group--invalid]="fieldErrors.companyName">
               <label for="companyName">
                 Nom de l'entreprise *
               </label>
-              <input 
+              <input
                 id="companyName"
-                type="text" 
-                pInputText 
-                [(ngModel)]="companyName" 
+                type="text"
+                pInputText
+                [(ngModel)]="companyName"
                 name="companyName"
                 placeholder="Ex: Mon Entreprise SARL"
                 class="w-full"
+                [attr.aria-invalid]="fieldErrors.companyName ? 'true' : null"
+                (input)="clearFieldError('companyName')"
                 required>
+              <span *ngIf="fieldErrors.companyName" class="field-error" role="alert">{{ fieldErrors.companyName }}</span>
             </div>
 
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-group" [class.form-group--invalid]="fieldErrors.companyEmail">
                 <label for="companyEmail">
                   Email de l'entreprise *
                 </label>
-                <input 
+                <input
                   id="companyEmail"
-                  type="email" 
-                  pInputText 
-                  [(ngModel)]="companyEmail" 
+                  type="email"
+                  pInputText
+                  [(ngModel)]="companyEmail"
                   name="companyEmail"
                   placeholder="contact@entreprise.com"
                   class="w-full"
+                  [attr.aria-invalid]="fieldErrors.companyEmail ? 'true' : null"
+                  (input)="clearFieldError('companyEmail')"
                   required>
+                <span *ngIf="fieldErrors.companyEmail" class="field-error" role="alert">{{ fieldErrors.companyEmail }}</span>
               </div>
 
-              <div class="form-group">
+              <div class="form-group" [class.form-group--invalid]="fieldErrors.companyPhone">
                 <label for="companyPhone">
                   Téléphone *
                 </label>
-                <input 
+                <input
                   id="companyPhone"
-                  type="tel" 
-                  pInputText 
-                  [(ngModel)]="companyPhone" 
+                  type="tel"
+                  pInputText
+                  [(ngModel)]="companyPhone"
                   name="companyPhone"
                   placeholder="78 900 88 77"
                   class="w-full"
                   appPhoneFormat
                   maxlength="12"
+                  [attr.aria-invalid]="fieldErrors.companyPhone ? 'true' : null"
+                  (input)="clearFieldError('companyPhone')"
                   required>
+                <span *ngIf="fieldErrors.companyPhone" class="field-error" role="alert">{{ fieldErrors.companyPhone }}</span>
               </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" [class.form-group--invalid]="fieldErrors.companyAddress">
               <label for="companyAddress">
                 Adresse *
               </label>
-              <input 
+              <input
                 id="companyAddress"
-                type="text" 
-                pInputText 
-                [(ngModel)]="companyAddress" 
+                type="text"
+                pInputText
+                [(ngModel)]="companyAddress"
                 name="companyAddress"
                 placeholder="123 Rue Example"
                 class="w-full"
+                [attr.aria-invalid]="fieldErrors.companyAddress ? 'true' : null"
+                (input)="clearFieldError('companyAddress')"
                 required>
+              <span *ngIf="fieldErrors.companyAddress" class="field-error" role="alert">{{ fieldErrors.companyAddress }}</span>
             </div>
 
             <div class="form-group">
@@ -139,22 +155,25 @@
                 required>
             </div>
             
-            <div class="form-group">
+            <div class="form-group" [class.form-group--invalid]="fieldErrors.companyRegion">
               <label for="companyRegion">
                 Région *
               </label>
-              <p-select 
+              <p-select
                 id="companyRegion"
-                [(ngModel)]="companyRegion" 
-                [options]="regions" 
+                [(ngModel)]="companyRegion"
+                [options]="regions"
                 placeholder="Sélectionner une région"
                 class="w-full"
                 name="companyRegion"
+                [attr.aria-invalid]="fieldErrors.companyRegion ? 'true' : null"
+                (onChange)="clearFieldError('companyRegion')"
                 required>
               </p-select>
+              <span *ngIf="fieldErrors.companyRegion" class="field-error" role="alert">{{ fieldErrors.companyRegion }}</span>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" [class.form-group--invalid]="fieldErrors.companyLogo">
               <label for="companyLogo">
                 Logo de l'entreprise
                 <span class="optional-badge">(Optionnel)</span>
@@ -186,6 +205,7 @@
                   </button>
                 </div>
               </div>
+              <span *ngIf="fieldErrors.companyLogo" class="field-error" role="alert">{{ fieldErrors.companyLogo }}</span>
             </div>
 
           </div>
@@ -198,50 +218,59 @@
             </h3>
             
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-group" [class.form-group--invalid]="fieldErrors.adminFirstName">
                 <label for="adminFirstName">
                   Prénom *
                 </label>
-                <input 
+                <input
                   id="adminFirstName"
-                  type="text" 
-                  pInputText 
-                  [(ngModel)]="adminFirstName" 
+                  type="text"
+                  pInputText
+                  [(ngModel)]="adminFirstName"
                   name="adminFirstName"
                   placeholder="Jean"
                   class="w-full"
+                  [attr.aria-invalid]="fieldErrors.adminFirstName ? 'true' : null"
+                  (input)="clearFieldError('adminFirstName')"
                   required>
+                <span *ngIf="fieldErrors.adminFirstName" class="field-error" role="alert">{{ fieldErrors.adminFirstName }}</span>
               </div>
 
-              <div class="form-group">
+              <div class="form-group" [class.form-group--invalid]="fieldErrors.adminLastName">
                 <label for="adminLastName">
                   Nom *
                 </label>
-                <input 
+                <input
                   id="adminLastName"
-                  type="text" 
-                  pInputText 
-                  [(ngModel)]="adminLastName" 
+                  type="text"
+                  pInputText
+                  [(ngModel)]="adminLastName"
                   name="adminLastName"
                   placeholder="Dupont"
                   class="w-full"
+                  [attr.aria-invalid]="fieldErrors.adminLastName ? 'true' : null"
+                  (input)="clearFieldError('adminLastName')"
                   required>
+                <span *ngIf="fieldErrors.adminLastName" class="field-error" role="alert">{{ fieldErrors.adminLastName }}</span>
               </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" [class.form-group--invalid]="fieldErrors.adminEmail">
               <label for="adminEmail">
                 Email administrateur *
               </label>
-              <input 
+              <input
                 id="adminEmail"
-                type="email" 
-                pInputText 
-                [(ngModel)]="adminEmail" 
+                type="email"
+                pInputText
+                [(ngModel)]="adminEmail"
                 name="adminEmail"
                 placeholder="admin@entreprise.com"
                 class="w-full"
+                [attr.aria-invalid]="fieldErrors.adminEmail ? 'true' : null"
+                (input)="clearFieldError('adminEmail')"
                 required>
+              <span *ngIf="fieldErrors.adminEmail" class="field-error" role="alert">{{ fieldErrors.adminEmail }}</span>
               <small class="text-muted">
                 Un email de bienvenue avec les instructions de connexion sera envoyé à cette adresse.
               </small>
@@ -277,19 +306,21 @@
 
             <p-divider></p-divider>
 
-            <div class="form-group terms-group">
+            <div class="form-group terms-group" [class.form-group--invalid]="fieldErrors.acceptTerms">
               <div class="terms-checkbox">
-                <p-checkbox 
-                  [(ngModel)]="acceptTerms" 
-                  [binary]="true" 
+                <p-checkbox
+                  [(ngModel)]="acceptTerms"
+                  [binary]="true"
                   name="acceptTerms"
-                  [inputId]="'acceptTerms'">
+                  [inputId]="'acceptTerms'"
+                  (onChange)="clearFieldError('acceptTerms')">
                 </p-checkbox>
                 <label for="acceptTerms">
-                  J'accepte les <a href="#" target="_blank">conditions générales d'utilisation</a> 
+                  J'accepte les <a href="#" target="_blank">conditions générales d'utilisation</a>
                   et la <a href="#" target="_blank">politique de confidentialité</a> *
                 </label>
               </div>
+              <span *ngIf="fieldErrors.acceptTerms" class="field-error" role="alert">{{ fieldErrors.acceptTerms }}</span>
             </div>
           </div>
 
@@ -305,26 +336,25 @@
               (click)="previousStep()">
             </button>
             
-            <button 
+            <button
               *ngIf="currentStep < totalSteps"
-              pButton 
-              type="button" 
+              pButton
+              type="button"
               [label]="'Suivant'"
               icon="pi pi-arrow-right"
               iconPos="right"
               class="p-button-primary"
-              [disabled]="!isStepValid(currentStep)"
               (click)="nextStep()">
             </button>
 
-            <button 
+            <button
               *ngIf="currentStep === totalSteps"
-              pButton 
-              type="submit" 
+              pButton
+              type="submit"
               label="Créer mon compte"
               icon="pi pi-check"
               class="p-button-primary"
-              [disabled]="!isStepValid(3)">
+              [loading]="submitting">
             </button>
           </div>
         </form>

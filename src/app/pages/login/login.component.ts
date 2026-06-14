@@ -6,8 +6,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { PasswordModule } from 'primeng/password';
 import { CheckboxModule } from 'primeng/checkbox';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { PlatformStatusService } from '../../services/platform-status.service';
 import { getErrorMessage } from '../../utils/error-message.util';
@@ -22,10 +20,8 @@ import { getErrorMessage } from '../../utils/error-message.util';
     InputTextModule,
     ButtonModule,
     PasswordModule,
-    CheckboxModule,
-    ToastModule
+    CheckboxModule
   ],
-  providers: [MessageService],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -35,43 +31,27 @@ export class LoginComponent {
   rememberMe = false;
 
   errorMessage = '';
+  successMessage = '';
   maintenanceMode = false;
+  submitting = false;
+  fieldErrors: { email?: string; password?: string } = {};
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private authService: AuthService,
-    private platformStatusService: PlatformStatusService,
-    private messageService: MessageService
+    private platformStatusService: PlatformStatusService
   ) {
-    // Vérifier si on vient de l'inscription
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras?.queryParams?.['registered'] === 'true') {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Inscription réussie',
-        detail: 'Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.',
-        life: 5000
-      });
+      this.successMessage = 'Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.';
     }
 
-    // Vérifier s'il y a un message d'erreur ou une activation réussie
     this.route.queryParams.subscribe(params => {
       if (params['activated'] === 'true') {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Compte activé',
-          detail: 'Votre mot de passe a été défini. Connectez-vous avec votre email et votre mot de passe.',
-          life: 6000
-        });
+        this.successMessage = 'Votre mot de passe a été défini. Connectez-vous avec votre email et votre mot de passe.';
       }
       if (params['error']) {
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Session expirée',
-          detail: params['error'],
-          life: 5000
-        });
         this.errorMessage = params['error'];
       }
     });
@@ -80,7 +60,6 @@ export class LoginComponent {
       this.maintenanceMode = status.maintenanceMode;
     });
 
-    // Si l'utilisateur est déjà connecté, rediriger vers le dashboard approprié
     if (this.authService.isAuthenticated()) {
       this.redirectToDashboard();
     }
@@ -98,16 +77,63 @@ export class LoginComponent {
     }
   }
 
+  onEmailInput(): void {
+    this.clearFieldError('email');
+    this.errorMessage = '';
+  }
+
+  onPasswordInput(): void {
+    this.clearFieldError('password');
+    this.errorMessage = '';
+  }
+
+  validateEmail(): string | undefined {
+    const value = this.email.trim();
+    if (!value) {
+      return 'L\'email est obligatoire.';
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      return 'Format d\'email invalide.';
+    }
+    return undefined;
+  }
+
+  validatePassword(): string | undefined {
+    if (!this.password) {
+      return 'Le mot de passe est obligatoire.';
+    }
+    return undefined;
+  }
+
+  private validateForm(): boolean {
+    const emailError = this.validateEmail();
+    const passwordError = this.validatePassword();
+    this.fieldErrors = {
+      email: emailError,
+      password: passwordError
+    };
+    return !emailError && !passwordError;
+  }
+
+  private clearFieldError(field: 'email' | 'password'): void {
+    if (this.fieldErrors[field]) {
+      const next = { ...this.fieldErrors };
+      delete next[field];
+      this.fieldErrors = next;
+    }
+  }
+
   login() {
-    if (!this.email || !this.password) {
-      this.errorMessage = 'Veuillez remplir tous les champs';
+    if (!this.validateForm()) {
       return;
     }
 
     this.errorMessage = '';
+    this.submitting = true;
 
-    this.authService.login(this.email, this.password).subscribe({
+    this.authService.login(this.email.trim(), this.password).subscribe({
       next: () => {
+        this.submitting = false;
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || null;
         if (returnUrl) {
           this.router.navigateByUrl(returnUrl);
@@ -116,19 +142,10 @@ export class LoginComponent {
         }
       },
       error: (error) => {
+        this.submitting = false;
         console.error('Erreur de connexion:', error);
-        
-        const errorDetail = getErrorMessage(error, 'Une erreur est survenue lors de la connexion');
-        
-        this.errorMessage = errorDetail;
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur de connexion',
-          detail: errorDetail,
-          life: 5000
-        });
+        this.errorMessage = getErrorMessage(error, 'Une erreur est survenue lors de la connexion');
       }
     });
   }
 }
-

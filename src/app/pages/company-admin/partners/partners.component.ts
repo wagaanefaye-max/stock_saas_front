@@ -7,7 +7,6 @@ import { DialogModule } from 'primeng/dialog';
 import { CardModule } from 'primeng/card';
 import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { PaginatorModule } from 'primeng/paginator';
@@ -17,6 +16,8 @@ import { finalize } from 'rxjs';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
 import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_LG } from '../../../utils/dialog-mobile.util';
+import { EmptyStateComponent } from '../../../components/shared/empty-state.component';
+import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 @Component({
   selector: 'app-partners',
   standalone: true,
@@ -29,13 +30,13 @@ import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_LG } from '../../../utils/dial
     CardModule,
     SelectModule,
     SelectButtonModule,
-    ToastModule,
     TagModule,
     PaginatorModule,
     PhoneFormatDirective,
-    PhoneFormatPipe
+    PhoneFormatPipe,
+    EmptyStateComponent,
+    ListSkeletonComponent
   ],
-  providers: [MessageService],
   templateUrl: './partners.component.html',
   styleUrl: './partners.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -48,6 +49,8 @@ export class PartnersComponent implements OnInit {
   totalPartners = 0;
   rows = 10;
   first = 0;
+  listLoading = true;
+  listLoadError = false;
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
   displayDialog = false;
@@ -89,17 +92,37 @@ export class PartnersComponent implements OnInit {
     };
     if (this.selectedRoleFilter) params['role'] = this.selectedRoleFilter;
     if (this.globalFilter?.trim()) params['search'] = this.globalFilter.trim();
+    this.listLoading = true;
+    this.listLoadError = false;
+    this.cdr.markForCheck();
     this.apiService.get<{ content: any[]; totalElements: number }>('/partners', params)
-      .pipe(finalize(() => this.cdr.markForCheck()))
+      .pipe(finalize(() => {
+        this.listLoading = false;
+        this.cdr.markForCheck();
+      }))
       .subscribe({
       next: (data) => {
         this.partners = data?.content ?? [];
         this.totalPartners = data?.totalElements ?? 0;
       },
       error: () => {
+        this.listLoadError = true;
+        this.partners = [];
+        this.totalPartners = 0;
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les partenaires', life: 5000 });
       }
     });
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!(this.globalFilter?.trim() || this.selectedRoleFilter);
+  }
+
+  resetFilters(): void {
+    this.globalFilter = '';
+    this.selectedRoleFilter = '';
+    this.first = 0;
+    this.loadPartners({ first: 0, rows: this.rows });
   }
 
   onPartnersLazyLoad(event: any) {
@@ -108,7 +131,7 @@ export class PartnersComponent implements OnInit {
     this.loadPartners({ first: this.first, rows: this.rows });
   }
 
-  private refreshPartners() {
+  refreshPartners() {
     this.loadPartners({ first: this.first, rows: this.rows });
   }
 

@@ -1,5 +1,4 @@
 <div class="company-admin-dashboard simple-ux">
-  <p-toast></p-toast>
 
   <header class="dashboard-header">
     <h1>Bonjour, {{ companyName }}</h1>
@@ -45,6 +44,12 @@
       </div>
     </div>
   </section>
+
+  <app-onboarding-checklist
+    *ngIf="!loading && showOnboarding"
+    [steps]="onboardingSteps"
+    (dismiss)="dismissOnboarding()">
+  </app-onboarding-checklist>
 
   <div *ngIf="loading" class="dashboard-loading" aria-live="polite">
     <i class="pi pi-spin pi-spinner"></i>

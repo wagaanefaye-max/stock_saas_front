@@ -1,5 +1,4 @@
 <div class="platform-users-page mobile-page entity-page">
-  <p-toast></p-toast>
 
   <div class="page-header">
     <div>
@@ -24,12 +23,36 @@
   </div>
 
   <div class="mobile-list show-mobile-only">
-    <div *ngIf="users.length === 0" class="mobile-list__empty">
-      <i class="pi pi-users"></i>
-      <p>Aucun utilisateur trouvé</p>
-    </div>
+    <app-list-skeleton *ngIf="listLoading" [count]="4"></app-list-skeleton>
 
-    <ul *ngIf="users.length > 0" class="mobile-list__items">
+    <app-empty-state
+      *ngIf="!listLoading && listLoadError"
+      icon="pi pi-exclamation-triangle"
+      message="Impossible de charger les utilisateurs."
+      actionLabel="Réessayer"
+      actionIcon="pi pi-refresh"
+      (action)="loadUsers()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && users.length === 0 && hasActiveFilters"
+      icon="pi pi-filter-slash"
+      message="Aucun utilisateur ne correspond à votre recherche."
+      actionLabel="Réinitialiser la recherche"
+      actionIcon="pi pi-refresh"
+      (action)="resetFilters()">
+    </app-empty-state>
+
+    <app-empty-state
+      *ngIf="!listLoading && !listLoadError && users.length === 0 && !hasActiveFilters"
+      icon="pi pi-users"
+      message="Aucun utilisateur sur la plateforme pour le moment."
+      actionLabel="Nouvel utilisateur"
+      actionIcon="pi pi-plus"
+      (action)="openNew()">
+    </app-empty-state>
+
+    <ul *ngIf="!listLoading && !listLoadError && users.length > 0" class="mobile-list__items">
       <li *ngFor="let user of users; trackBy: trackByUserId" class="mobile-card">
         <div class="mobile-card__top">
           <div class="mobile-card__main">
@@ -78,7 +101,7 @@
     </ul>
 
     <p-paginator
-      *ngIf="totalRecords > 0"
+      *ngIf="!listLoading && !listLoadError && totalRecords > 0"
       class="mobile-list__paginator entity-paginator"
       [rows]="size"
       [totalRecords]="totalRecords"

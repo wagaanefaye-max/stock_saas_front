@@ -291,10 +291,23 @@ body {
 }
 
 /* Toast */
-.p-toast {
+.p-toast,
+.app-global-toast {
+  z-index: 11000;
+
   .p-toast-message {
     border-radius: 8px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 768px) {
+  .app-global-toast {
+    width: calc(100vw - 1.5rem) !important;
+    max-width: 22rem;
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    margin: 0 auto;
   }
 }
 

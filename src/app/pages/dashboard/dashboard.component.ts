@@ -5,7 +5,6 @@ import { RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
@@ -15,8 +14,7 @@ import { catchError, finalize, of } from 'rxjs';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, CardModule, ChartModule, ButtonModule, ToastModule],
-  providers: [MessageService],
+  imports: [CommonModule, RouterModule, CardModule, ChartModule, ButtonModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
