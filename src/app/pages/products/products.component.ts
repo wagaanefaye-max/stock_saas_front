@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,6 +16,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { PaginatorModule } from 'primeng/paginator';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
+import { finalize } from 'rxjs';
 import {
   APP_DIALOG_BREAKPOINTS,
   APP_DIALOG_STYLE_DETAIL,
@@ -42,7 +43,8 @@ import {
   ],
   providers: [MessageService],
   templateUrl: './products.component.html',
-  styleUrl: './products.component.scss'
+  styleUrl: './products.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductsComponent implements OnInit {
   readonly dialogStyle = APP_DIALOG_STYLE_LG;
@@ -71,7 +73,8 @@ export class ProductsComponent implements OnInit {
     private router: Router,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -107,7 +110,9 @@ export class ProductsComponent implements OnInit {
     if (this.filterDateFrom) params['dateFrom'] = this.formatDateForApi(this.filterDateFrom);
     if (this.filterDateTo) params['dateTo'] = this.formatDateForApi(this.filterDateTo);
 
-    this.apiService.get<{ content: any[]; totalElements: number }>('/products', params).subscribe({
+    this.apiService.get<{ content: any[]; totalElements: number }>('/products', params)
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (data) => {
         this.products = (data?.content ?? []).map(p => ({
           ...p,
@@ -182,7 +187,9 @@ export class ProductsComponent implements OnInit {
   }
 
   loadCategories() {
-    this.apiService.get<{ code: string; label: string }[]>('/categories').subscribe({
+    this.apiService.get<{ code: string; label: string }[]>('/categories')
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (categories) => {
         this.categories = categories || [];
         // Si création d'un nouveau produit sans catégorie choisie, sélectionner GENERAL par défaut.
@@ -204,7 +211,9 @@ export class ProductsComponent implements OnInit {
   loadWarehouses() {
     if (this.warehouses.length === 0){
 
-      this.apiService.get<any[]>('/warehouses/simple').subscribe({
+      this.apiService.get<any[]>('/warehouses/simple')
+        .pipe(finalize(() => this.cdr.markForCheck()))
+        .subscribe({
         next: (warehouses) => {
           // Le backend retourne déjà uniquement id et name
           this.warehouses = warehouses;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -17,6 +17,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
+import { finalize } from 'rxjs';
 import {
   APP_DIALOG_BREAKPOINTS,
   APP_DIALOG_STYLE,
@@ -44,7 +45,8 @@ import {
   ],
   providers: [MessageService],
   templateUrl: './warehouses.component.html',
-  styleUrl: './warehouses.component.scss'
+  styleUrl: './warehouses.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WarehousesComponent implements OnInit {
   warehouses: any[] = [];
@@ -79,7 +81,8 @@ export class WarehousesComponent implements OnInit {
     private router: Router,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -100,7 +103,9 @@ export class WarehousesComponent implements OnInit {
   }
 
   loadWarehouses() {
-    this.apiService.get<any[]>('/warehouses').subscribe({
+    this.apiService.get<any[]>('/warehouses')
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (warehouses) => {
         this.warehouses = warehouses.map(w => ({
           ...w,
@@ -464,7 +469,9 @@ export class WarehousesComponent implements OnInit {
   loadWarehouseProducts(warehouseId: number) {
     this.warehouseProducts = [];
     this.warehouseProductsLoading = true;
-    this.apiService.get<any[]>(`/warehouses/${warehouseId}/products`).subscribe({
+    this.apiService.get<any[]>(`/warehouses/${warehouseId}/products`)
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (products) => {
         this.warehouseProducts = (products || []).map(p => ({
           ...p,
@@ -483,6 +490,14 @@ export class WarehousesComponent implements OnInit {
         });
       }
     });
+  }
+
+  trackByWarehouseId(_index: number, warehouse: { id?: number }): number {
+    return warehouse.id ?? _index;
+  }
+
+  trackByProductId(_index: number, product: { id?: number; productId?: number }): number {
+    return product.id ?? product.productId ?? _index;
   }
 }
 

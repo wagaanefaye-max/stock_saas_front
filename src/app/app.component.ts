@@ -6,12 +6,14 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { APP_CONFIRM_BREAKPOINTS, APP_CONFIRM_STYLE } from './utils/dialog-mobile.util';
 import { LoadingService } from './services/loading.service';
 import { GlobalLoadingComponent } from './components/shared/global-loading.component';
+import { AppUpdateBannerComponent } from './components/shared/app-update-banner.component';
+import { AppUpdateService } from './services/app-update.service';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, ConfirmDialogModule, GlobalLoadingComponent],
+  imports: [RouterOutlet, CommonModule, ConfirmDialogModule, GlobalLoadingComponent, AppUpdateBannerComponent],
   template: `
     <div class="app-container">
       <router-outlet></router-outlet>
@@ -30,6 +32,7 @@ import { Subscription } from 'rxjs';
       </p-confirmDialog>
 
       <app-global-loading *ngIf="isLoading"></app-global-loading>
+      <app-update-banner></app-update-banner>
     </div>
   `,
   styles: [`
@@ -49,6 +52,7 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(
     private loadingService: LoadingService,
     private platformStatusService: PlatformStatusService,
+    private appUpdateService: AppUpdateService,
     private cdr: ChangeDetectorRef
   ) {
     this.loadingSubscription = this.loadingService.loading$.subscribe(loading => {
@@ -61,6 +65,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.platformStatusService.loadStatus().subscribe();
+    this.appUpdateService.init();
   }
 
   ngOnDestroy(): void {

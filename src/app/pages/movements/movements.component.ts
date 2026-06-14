@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,6 +18,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
+import { finalize } from 'rxjs';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_SM, APP_DIALOG_STYLE_XL } from '../../utils/dialog-mobile.util';
 @Component({
   selector: 'app-movements',
@@ -41,7 +42,8 @@ import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_SM, APP_DIALOG_STYLE_XL } from
   ],
   providers: [MessageService],
   templateUrl: './movements.component.html',
-  styleUrl: './movements.component.scss'
+  styleUrl: './movements.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MovementsComponent implements OnInit {
   readonly dialogStyle = APP_DIALOG_STYLE_XL;
@@ -83,7 +85,8 @@ export class MovementsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private apiService: ApiService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -107,7 +110,9 @@ export class MovementsComponent implements OnInit {
   }
 
   loadMovementTypes() {
-    this.apiService.get<any[]>('/movements/types').subscribe({
+    this.apiService.get<any[]>('/movements/types')
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (data) => {
         this.types = data.map(t => {
           // Convertir le code du backend vers le format interne (majuscules)
@@ -165,7 +170,9 @@ export class MovementsComponent implements OnInit {
     if (this.globalFilter?.trim()) {
       params['search'] = this.globalFilter.trim();
     }
-    this.apiService.get<{ content: any[]; totalElements: number } | any[]>('/movements', params).subscribe({
+    this.apiService.get<{ content: any[]; totalElements: number } | any[]>('/movements', params)
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (data) => {
         const items = Array.isArray(data) ? data : (data?.content ?? []);
         this.movements = items.map(m => ({
@@ -272,7 +279,9 @@ export class MovementsComponent implements OnInit {
   }
 
   loadAccessibleWarehouses() {
-    this.apiService.get<any[]>('/warehouses/simple').subscribe({
+    this.apiService.get<any[]>('/warehouses/simple')
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (data) => {
         this.accessibleWarehouses = data;
         this.defaultWarehouseId = this.resolveDefaultWarehouseId(data);
@@ -294,7 +303,9 @@ export class MovementsComponent implements OnInit {
   loadProducts() {
     // Charger tous les produits de l'entreprise sans filtrage par entrepôt
     // car les produits sont globaux, seul le stock est par entrepôt
-    this.apiService.get<any[]>('/products?all=true').subscribe({
+    this.apiService.get<any[]>('/products?all=true')
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (data) => {
         this.products = data.map(p => ({
           id: p.id,

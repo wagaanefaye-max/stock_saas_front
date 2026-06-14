@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -17,6 +17,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
+import { finalize } from 'rxjs';
 import { Invoice } from '../../../models';
 import {
   APP_DIALOG_BREAKPOINTS,
@@ -65,7 +66,8 @@ interface ProductForInvoice {
   ],
   providers: [MessageService],
   templateUrl: './invoices.component.html',
-  styleUrl: './invoices.component.scss'
+  styleUrl: './invoices.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InvoicesComponent implements OnInit {
   invoices: Invoice[] = [];
@@ -124,8 +126,13 @@ export class InvoicesComponent implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
+
+  trackByInvoiceId(_index: number, inv: { id?: number }): number {
+    return inv.id ?? _index;
+  }
 
   ngOnInit() {
     this.loadInvoices();
@@ -151,7 +158,9 @@ export class InvoicesComponent implements OnInit {
       clientName: this.clientNameFilter?.trim() || null
     };
 
-    this.apiService.get<Invoice[]>('/invoices', params).subscribe({
+    this.apiService.get<Invoice[]>('/invoices', params)
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (data) => {
         this.invoices = data || [];
         this.mobileFirst = 0;

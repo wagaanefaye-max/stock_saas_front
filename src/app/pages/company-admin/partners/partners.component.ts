@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -13,6 +13,7 @@ import { TagModule } from 'primeng/tag';
 import { PaginatorModule } from 'primeng/paginator';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
+import { finalize } from 'rxjs';
 import { PhoneFormatDirective } from '../../../directives/phone-format.directive';
 import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
 import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_LG } from '../../../utils/dialog-mobile.util';
@@ -36,7 +37,8 @@ import { APP_DIALOG_BREAKPOINTS, APP_DIALOG_STYLE_LG } from '../../../utils/dial
   ],
   providers: [MessageService],
   templateUrl: './partners.component.html',
-  styleUrl: './partners.component.scss'
+  styleUrl: './partners.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PartnersComponent implements OnInit {
   readonly dialogStyle = APP_DIALOG_STYLE_LG;
@@ -66,7 +68,8 @@ export class PartnersComponent implements OnInit {
     private apiService: ApiService,
     public authService: AuthService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   trackByPartnerId(_index: number, partner: { id?: number }): number {
@@ -86,7 +89,9 @@ export class PartnersComponent implements OnInit {
     };
     if (this.selectedRoleFilter) params['role'] = this.selectedRoleFilter;
     if (this.globalFilter?.trim()) params['search'] = this.globalFilter.trim();
-    this.apiService.get<{ content: any[]; totalElements: number }>('/partners', params).subscribe({
+    this.apiService.get<{ content: any[]; totalElements: number }>('/partners', params)
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (data) => {
         this.partners = data?.content ?? [];
         this.totalPartners = data?.totalElements ?? 0;

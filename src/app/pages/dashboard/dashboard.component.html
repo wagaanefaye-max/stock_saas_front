@@ -58,7 +58,7 @@
 
   <!-- Statistiques -->
   <div class="stats-grid">
-    <div *ngFor="let stat of stats" class="stat-card">
+    <div *ngFor="let stat of stats; trackBy: trackByStatTitle" class="stat-card">
       <div class="stat-icon" [style.background-color]="stat.color + '20'">
         <i [class]="stat.icon" [style.color]="stat.color"></i>
       </div>
@@ -104,7 +104,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let movement of recentMovements">
+          <tr *ngFor="let movement of recentMovements; trackBy: trackByMovementId">
             <td>{{ movement.date }}</td>
             <td>{{ movement.productName }}</td>
             <td><span class="badge badge-success">{{ movement.movementType }}</span></td>

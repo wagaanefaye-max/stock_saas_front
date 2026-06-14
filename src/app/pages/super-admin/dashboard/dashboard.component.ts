@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, HostListener, OnInit } from '@angular/core';
 import { buildBarChartOptions, buildDoughnutChartOptions, buildLineChartOptions } from '../../../utils/chart-options.util';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +11,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
+import { RequestCacheService } from '../../../services/request-cache.service';
 import { catchError, finalize, of } from 'rxjs';
 
 type SubscriptionChartFilter = 'ALL' | 'APPROVED' | 'REJECTED';
@@ -28,7 +29,8 @@ interface MonthlySubscriptionPoint {
   imports: [CommonModule, FormsModule, RouterModule, CardModule, ChartModule, SelectButtonModule, TagModule, ToastModule],
   providers: [MessageService],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SuperAdminDashboardComponent implements OnInit {
   loading = true;
@@ -52,7 +54,9 @@ export class SuperAdminDashboardComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private apiService: ApiService,
-    private messageService: MessageService
+    private requestCache: RequestCacheService,
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   get adminName(): string {
@@ -68,38 +72,48 @@ export class SuperAdminDashboardComponent implements OnInit {
   @HostListener('window:resize')
   onWindowResize(): void {
     this.refreshChartOptions();
+    this.cdr.markForCheck();
   }
 
-  loadStats() {
-    this.apiService.get<any>('/dashboard/super-admin/stats')
-      .pipe(
-        catchError(error => {
-          console.error('Erreur lors du chargement des statistiques:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail: 'Impossible de charger les statistiques'
-          });
-          // Retourner des données par défaut en cas d'erreur
-          return of({
-            activeCompanies: 0,
-            totalUsers: 0,
-            monthlyRevenue: '0 FCFA',
-            supportTickets: 0,
-            monthlyCompaniesData: [],
-            monthlySubscriptionsData: [],
-            planDistribution: [],
-            recentCompanies: [],
-            companiesChange: '0',
-            usersChange: '0%',
-            revenueChange: '0%',
-            ticketsChange: '0'
-          });
-        }),
-        finalize(() => {
-          this.loading = false;
-        })
+  loadStats(forceRefresh = false) {
+    if (forceRefresh) {
+      this.requestCache.invalidate('super-admin-dashboard-stats');
+    }
+
+    this.loading = true;
+    this.cdr.markForCheck();
+
+    this.requestCache
+      .get('super-admin-dashboard-stats', () =>
+        this.apiService.get<any>('/dashboard/super-admin/stats').pipe(
+          catchError(error => {
+            console.error('Erreur lors du chargement des statistiques:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: 'Impossible de charger les statistiques'
+            });
+            return of({
+              activeCompanies: 0,
+              totalUsers: 0,
+              monthlyRevenue: '0 FCFA',
+              supportTickets: 0,
+              monthlyCompaniesData: [],
+              monthlySubscriptionsData: [],
+              planDistribution: [],
+              recentCompanies: [],
+              companiesChange: 'Aucune nouvelle ce mois',
+              usersChange: 'Aucun nouveau ce mois',
+              revenueChange: 'Stable',
+              ticketsChange: 'Stable'
+            });
+          })
+        )
       )
+      .pipe(finalize(() => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      }))
       .subscribe(data => {
         // Formater les valeurs avec des séparateurs de milliers
         const formatNumber = (num: number) => num.toLocaleString('fr-FR');
@@ -158,11 +172,13 @@ export class SuperAdminDashboardComponent implements OnInit {
           pendingCount: d.pendingCount ?? 0
         }));
         this.updateSubscriptionChartData();
+        this.cdr.markForCheck();
       });
   }
 
   onSubscriptionFilterChange(): void {
     this.updateSubscriptionChartData();
+    this.cdr.markForCheck();
   }
 
   updateSubscriptionChartData(): void {
@@ -313,6 +329,14 @@ export class SuperAdminDashboardComponent implements OnInit {
       month: 'short',
       year: 'numeric'
     });
+  }
+
+  trackByStatTitle(_index: number, stat: { title: string }): string {
+    return stat.title;
+  }
+
+  trackByCompanyId(_index: number, company: { id?: number }): number {
+    return company.id ?? _index;
   }
 
   getStatusSeverity(status: string | null | undefined): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {

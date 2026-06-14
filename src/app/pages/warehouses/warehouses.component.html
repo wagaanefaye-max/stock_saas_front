@@ -55,7 +55,7 @@
       </div>
 
       <ul *ngIf="filteredWarehouses.length > 0" class="mobile-list__items">
-        <li *ngFor="let warehouse of paginatedWarehouses" class="mobile-card">
+        <li *ngFor="let warehouse of paginatedWarehouses; trackBy: trackByWarehouseId" class="mobile-card">
           <div class="mobile-card__top">
             <div class="mobile-card__main">
               <span class="mobile-card__title">{{ warehouse.name }}</span>
@@ -131,7 +131,7 @@
     </div>
 
     <ul *ngIf="warehouses.length > 0" class="mobile-list__items">
-      <li *ngFor="let warehouse of paginatedWarehousesNonAdmin" class="mobile-card">
+      <li *ngFor="let warehouse of paginatedWarehousesNonAdmin; trackBy: trackByWarehouseId" class="mobile-card">
         <div class="mobile-card__top">
           <div class="mobile-card__main">
             <span class="mobile-card__title">{{ warehouse.name }}</span>
@@ -348,7 +348,7 @@
 
         <ul *ngIf="!warehouseProductsLoading && warehouseProducts.length > 0" class="warehouse-detail__product-list show-mobile-only">
           <li
-            *ngFor="let product of warehouseProducts"
+            *ngFor="let product of warehouseProducts; trackBy: trackByProductId"
             class="warehouse-detail__product-card"
             [class.warehouse-detail__product-card--low]="product.lowStock">
             <div class="warehouse-detail__product-top">

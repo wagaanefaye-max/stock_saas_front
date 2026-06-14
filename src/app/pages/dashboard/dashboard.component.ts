@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, HostListener, OnInit } from '@angular/core';
 import { buildDoughnutChartOptions, buildLineChartOptions } from '../../utils/chart-options.util';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -9,7 +9,8 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
-import { catchError, of } from 'rxjs';
+import { RequestCacheService } from '../../services/request-cache.service';
+import { catchError, finalize, of } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,7 +18,8 @@ import { catchError, of } from 'rxjs';
   imports: [CommonModule, RouterModule, CardModule, ChartModule, ButtonModule, ToastModule],
   providers: [MessageService],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit {
   stats: any[] = [];
@@ -26,7 +28,9 @@ export class DashboardComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private apiService: ApiService,
-    private messageService: MessageService
+    private requestCache: RequestCacheService,
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -37,34 +41,41 @@ export class DashboardComponent implements OnInit {
   @HostListener('window:resize')
   onWindowResize(): void {
     this.refreshChartOptions();
+    this.cdr.markForCheck();
   }
 
-  loadStats() {
-    this.apiService.get<any>('/dashboard/stats')
-      .pipe(
-        catchError(error => {
-          console.error('Erreur lors du chargement des statistiques:', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail: 'Impossible de charger les statistiques'
-          });
-          // Retourner des données par défaut en cas d'erreur
-          return of({
-            totalProducts: 0,
-            totalWarehouses: 0,
-            monthlyMovements: 0,
-            alerts: 0,
-            monthlyMovementsData: [],
-            productsByCategory: [],
-            recentMovements: [],
-            productsChange: '0%',
-            warehousesChange: '0',
-            movementsChange: '0%',
-            alertsChange: '0'
-          });
-        })
+  loadStats(forceRefresh = false) {
+    if (forceRefresh) {
+      this.requestCache.invalidate('gestionnaire-dashboard-stats');
+    }
+
+    this.requestCache
+      .get('gestionnaire-dashboard-stats', () =>
+        this.apiService.get<any>('/dashboard/stats').pipe(
+          catchError(error => {
+            console.error('Erreur lors du chargement des statistiques:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur',
+              detail: 'Impossible de charger les statistiques'
+            });
+            return of({
+              totalProducts: 0,
+              totalWarehouses: 0,
+              monthlyMovements: 0,
+              alerts: 0,
+              monthlyMovementsData: [],
+              productsByCategory: [],
+              recentMovements: [],
+              productsChange: '0%',
+              warehousesChange: '0',
+              movementsChange: '0%',
+              alertsChange: '0'
+            });
+          })
+        )
       )
+      .pipe(finalize(() => this.cdr.markForCheck()))
       .subscribe(data => {
         const user = this.authService.getCurrentUser();
         const accessibleIds = this.authService.getAccessibleWarehouseIds();
@@ -378,6 +389,14 @@ export class DashboardComponent implements OnInit {
       }]
     };
 
+  }
+
+  trackByStatTitle(_index: number, stat: { title: string }): string {
+    return stat.title;
+  }
+
+  trackByMovementId(_index: number, movement: { id?: number }): number {
+    return movement.id ?? _index;
   }
 }
 

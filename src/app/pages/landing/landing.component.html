@@ -21,14 +21,7 @@
       <img src="/assets/logo.jpg" alt="" class="landing-splash__logo" />
     </div>
 
-    <h1 class="landing-splash__title">
-      <span *ngFor="let letter of appName.split(''); let i = index"
-        class="landing-splash__letter"
-        [style.--i]="i"
-        [class.landing-splash__letter--space]="letter === ' '">
-        {{ letter === ' ' ? '\u00a0' : letter }}
-      </span>
-    </h1>
+    <h1 class="landing-splash__title">{{ appName }}</h1>
 
     <p class="landing-splash__tagline">Gestion de stock &amp; facturation</p>
 

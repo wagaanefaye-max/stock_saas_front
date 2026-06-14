@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, HostListener, OnInit } from '@angular/core';
 import { buildDoughnutChartOptions, buildLineChartOptions } from '../../../utils/chart-options.util';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -8,8 +8,9 @@ import { ChartModule } from 'primeng/chart';
 import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
 import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, finalize } from 'rxjs/operators';
 import { ApiService } from '../../../services/api.service';
+import { RequestCacheService } from '../../../services/request-cache.service';
 import { AuthService } from '../../../services/auth.service';
 import { SubscriptionService, SubscriptionStatus } from '../../../services/subscription.service';
 
@@ -74,7 +75,8 @@ interface DashboardStatCard {
   imports: [CommonModule, RouterModule, ToastModule, CardModule, ChartModule, TagModule],
   providers: [MessageService],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CompanyAdminDashboardComponent implements OnInit {
   loading = true;
@@ -113,7 +115,9 @@ export class CompanyAdminDashboardComponent implements OnInit {
     private apiService: ApiService,
     private authService: AuthService,
     private subscriptionService: SubscriptionService,
-    private messageService: MessageService
+    private requestCache: RequestCacheService,
+    private messageService: MessageService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   get companyName(): string {
@@ -128,25 +132,40 @@ export class CompanyAdminDashboardComponent implements OnInit {
   @HostListener('window:resize')
   onWindowResize(): void {
     this.refreshChartOptions();
+    this.cdr.markForCheck();
   }
 
-  private loadDashboardData(): void {
+  private loadDashboardData(forceRefresh = false): void {
+    if (forceRefresh) {
+      this.requestCache.invalidate('company-admin-dashboard-stats');
+      this.requestCache.invalidate('company-admin-subscription-status');
+    }
+
     this.loading = true;
+    this.cdr.markForCheck();
 
     forkJoin({
-      stats: this.apiService.get<DashboardStats>('/dashboard/stats').pipe(catchError(() => of(null))),
-      subscription: this.subscriptionService.getStatus().pipe(catchError(() => of(null)))
-    }).subscribe({
+      stats: this.requestCache.get('company-admin-dashboard-stats', () =>
+        this.apiService.get<DashboardStats>('/dashboard/stats').pipe(catchError(() => of(null)))
+      ),
+      subscription: this.requestCache.get('company-admin-subscription-status', () =>
+        this.subscriptionService.getStatus().pipe(catchError(() => of(null)))
+      )
+    })
+      .pipe(finalize(() => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
       next: ({ stats, subscription }) => {
         this.subscriptionStatus = subscription;
         this.applyStats(stats);
         this.buildStatCards();
         this.buildStatusChart();
         this.buildMovementsChart(stats?.monthlyMovementsData || []);
-        this.loading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
-        this.loading = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
@@ -418,5 +437,21 @@ export class CompanyAdminDashboardComponent implements OnInit {
       case 'CANCELLED': return 'Annulée';
       default: return 'Brouillon';
     }
+  }
+
+  trackByStatTitle(_index: number, stat: { title: string }): string {
+    return stat.title;
+  }
+
+  trackByProductId(_index: number, item: { productId?: number; id?: number }): number {
+    return item.productId ?? item.id ?? _index;
+  }
+
+  trackByInvoiceId(_index: number, inv: { id?: number }): number {
+    return inv.id ?? _index;
+  }
+
+  trackByMovementId(_index: number, m: { id?: number }): number {
+    return m.id ?? _index;
   }
 }

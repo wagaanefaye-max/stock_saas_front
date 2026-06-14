@@ -57,7 +57,7 @@
         <h2>Indicateurs clés</h2>
       </div>
       <div class="stats-grid">
-        <div *ngFor="let stat of salesStats" class="stat-card">
+        <div *ngFor="let stat of salesStats; trackBy: trackByStatTitle" class="stat-card">
           <div class="stat-icon" [style.background-color]="stat.color + '18'">
             <i [class]="stat.icon" [style.color]="stat.color"></i>
           </div>
@@ -69,7 +69,7 @@
         </div>
       </div>
       <div class="stats-grid stats-grid--stock">
-        <div *ngFor="let stat of stockStats" class="stat-card" [class.stat-card--alert]="stat.alert">
+        <div *ngFor="let stat of stockStats; trackBy: trackByStatTitle" class="stat-card" [class.stat-card--alert]="stat.alert">
           <div class="stat-icon" [style.background-color]="stat.color + '18'">
             <i [class]="stat.icon" [style.color]="stat.color"></i>
           </div>
@@ -128,7 +128,7 @@
             <a routerLink="/company-admin/products" class="panel-card__link">Voir tout</a>
           </div>
           <ul class="panel-list" *ngIf="lowStockItems.length > 0">
-            <li *ngFor="let p of lowStockItems">
+            <li *ngFor="let p of lowStockItems; trackBy: trackByProductId">
               <a routerLink="/company-admin/products" class="panel-list__item">
                 <span class="panel-list__main">
                   <strong>{{ p.name || 'Produit #' + p.id }}</strong>
@@ -147,7 +147,7 @@
             <a routerLink="/company-admin/invoices" class="panel-card__link">Voir tout</a>
           </div>
           <ul class="panel-list" *ngIf="pendingInvoices.length > 0">
-            <li *ngFor="let inv of pendingInvoices">
+            <li *ngFor="let inv of pendingInvoices; trackBy: trackByInvoiceId">
               <a routerLink="/company-admin/invoices" class="panel-list__item">
                 <span class="panel-list__main">
                   <strong>{{ inv.invoiceNumber || 'Facture #' + inv.id }}</strong>
@@ -212,7 +212,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let m of recentMovements">
+                <tr *ngFor="let m of recentMovements; trackBy: trackByMovementId">
                   <td>{{ m.date }}</td>
                   <td>{{ m.productName }}</td>
                   <td><span class="movement-badge">{{ m.movementType }}</span></td>
@@ -233,7 +233,7 @@
             <a routerLink="/company-admin/invoices" class="panel-card__link">Voir tout</a>
           </div>
           <ul class="panel-list panel-list--compact" *ngIf="recentInvoices.length > 0">
-            <li *ngFor="let inv of recentInvoices">
+            <li *ngFor="let inv of recentInvoices; trackBy: trackByInvoiceId">
               <a routerLink="/company-admin/invoices" class="panel-list__item">
                 <span class="panel-list__main">
                   <strong>{{ inv.invoiceNumber || 'Facture #' + inv.id }}</strong>

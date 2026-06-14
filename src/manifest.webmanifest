@@ -1,0 +1,30 @@
+{
+  "name": "Stock SaaS — Gestion de stock",
+  "short_name": "Stock SaaS",
+  "description": "Gestion de stock, facturation et inventaire pour les PME.",
+  "theme_color": "#2563EB",
+  "background_color": "#F9FAFB",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "lang": "fr",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/favicon-16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    }
+  ]
+}

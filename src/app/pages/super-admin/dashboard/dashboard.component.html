@@ -17,7 +17,7 @@
         <h2>Indicateurs clés</h2>
       </div>
       <div class="stats-grid">
-        <div *ngFor="let stat of stats" class="stat-card">
+        <div *ngFor="let stat of stats; trackBy: trackByStatTitle" class="stat-card">
           <div class="stat-icon" [style.background-color]="stat.color + '18'">
             <i [class]="stat.icon" [style.color]="stat.color"></i>
           </div>
@@ -116,7 +116,7 @@
         </div>
 
         <ul class="recent-list show-mobile-only" *ngIf="recentCompanies.length > 0">
-          <li *ngFor="let company of recentCompanies" class="recent-item">
+          <li *ngFor="let company of recentCompanies; trackBy: trackByCompanyId" class="recent-item">
             <div class="recent-item__main">
               <span class="recent-item__name">{{ company.name }}</span>
               <p-tag [value]="company.status" [severity]="getStatusSeverity(company.status)"></p-tag>
@@ -141,7 +141,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let company of recentCompanies">
+              <tr *ngFor="let company of recentCompanies; trackBy: trackByCompanyId">
                 <td class="recent-table__name">{{ company.name }}</td>
                 <td>{{ company.email }}</td>
                 <td><p-tag [value]="company.plan" severity="info"></p-tag></td>
