@@ -19,8 +19,7 @@ import { ApiService } from '../../services/api.service';
 import { finalize } from 'rxjs';
 import {
   APP_DIALOG_BREAKPOINTS,
-  APP_DIALOG_STYLE,
-  APP_DIALOG_STYLE_DETAIL
+  APP_DIALOG_STYLE
 } from '../../utils/dialog-mobile.util';
 import { EmptyStateComponent } from '../../components/shared/empty-state.component';
 import { ListSkeletonComponent } from '../../components/shared/list-skeleton.component';
@@ -61,8 +60,19 @@ export class WarehousesComponent implements OnInit {
   warehouseProducts: any[] = [];
   globalFilter = '';
   readonly dialogStyle = APP_DIALOG_STYLE;
-  readonly dialogStyleDetail = APP_DIALOG_STYLE_DETAIL;
+  /** Modal détail entrepôt — plus large pour le tableau produits */
+  readonly dialogStyleDetail = {
+    width: '94vw',
+    maxWidth: '76rem',
+    maxHeight: '90vh'
+  };
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
+  readonly dialogDetailBreakpoints = {
+    '1400px': '74rem',
+    '1200px': '68rem',
+    '960px': '92vw',
+    '640px': '96vw'
+  };
   rows = 10;
   first = 0;
 
