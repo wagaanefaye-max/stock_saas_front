@@ -126,7 +126,7 @@
     align-items: center;
     justify-content: center;
     background: var(--surface-card, #fff);
-    color: #2563eb;
+    color: var(--primary);
     font-size: 1.35rem;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
   }
@@ -145,7 +145,7 @@
     gap: 0.35rem;
 
     .pi {
-      color: #7c3aed;
+      color: var(--primary-dark);
       font-size: 0.85rem;
     }
   }
@@ -291,7 +291,7 @@
     gap: 0.45rem;
 
     .pi {
-      color: #2563eb;
+      color: var(--primary);
     }
   }
 

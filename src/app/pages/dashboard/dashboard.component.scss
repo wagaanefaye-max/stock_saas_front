@@ -103,6 +103,30 @@
           justify-content: center;
           flex-shrink: 0;
 
+          i {
+            font-size: 2rem;
+          }
+
+          &--primary {
+            background-color: color-mix(in srgb, var(--primary) 12%, transparent);
+            i { color: var(--primary); }
+          }
+
+          &--primary-dark {
+            background-color: color-mix(in srgb, var(--primary-dark) 12%, transparent);
+            i { color: var(--primary-dark); }
+          }
+
+          &--secondary {
+            background-color: color-mix(in srgb, var(--secondary) 12%, transparent);
+            i { color: var(--secondary); }
+          }
+
+          &--warning {
+            background-color: color-mix(in srgb, var(--warning) 12%, transparent);
+            i { color: var(--warning); }
+          }
+
           @media (max-width: 480px) {
             width: 56px;
             height: 56px;

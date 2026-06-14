@@ -26,6 +26,10 @@
   --text-main: #111827;
   --text-muted: #6B7280;
   --border: #E5E7EB;
+  --primary-color: var(--primary);
+  --primary-dark: #1D4ED8;
+  --secondary-dark: #15803D;
+  --warning-dark: #D97706;
 
   /* Champs de formulaire — dérivés de la charte */
   --input-bg: var(--bg-card);
@@ -155,8 +159,8 @@ body {
     border-color: var(--primary);
 
     &:hover {
-      background: #1d4ed8;
-      border-color: #1d4ed8;
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
     }
 
     &:active {

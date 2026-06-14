@@ -10,8 +10,8 @@
     <h2 class="section-title">Actions rapides</h2>
     <div class="actions-grid">
       <a routerLink="/gestionnaire/movements" class="action-card" [queryParams]="{action: 'new'}">
-        <div class="action-icon" style="background-color: rgba(22, 163, 74, 0.1);">
-          <i class="pi pi-sync" style="color: #16A34A; font-size: 2rem;"></i>
+        <div class="action-icon action-icon--secondary">
+          <i class="pi pi-sync"></i>
         </div>
         <div class="action-content">
           <h3>Enregistrer un mouvement</h3>
@@ -21,8 +21,8 @@
       </a>
 
       <a routerLink="/gestionnaire/products" class="action-card">
-        <div class="action-icon" style="background-color: rgba(37, 99, 235, 0.1);">
-          <i class="pi pi-shopping-bag" style="color: #2563EB; font-size: 2rem;"></i>
+        <div class="action-icon action-icon--primary">
+          <i class="pi pi-shopping-bag"></i>
         </div>
         <div class="action-content">
           <h3>Voir les produits</h3>
@@ -32,8 +32,8 @@
       </a>
 
       <a routerLink="/gestionnaire/warehouses" class="action-card">
-        <div class="action-icon" style="background-color: rgba(245, 158, 11, 0.1);">
-          <i class="pi pi-warehouse" style="color: #F59E0B; font-size: 2rem;"></i>
+        <div class="action-icon action-icon--warning">
+          <i class="pi pi-warehouse"></i>
         </div>
         <div class="action-content">
           <h3>Mes entrepôts</h3>
@@ -43,8 +43,8 @@
       </a>
 
       <a routerLink="/gestionnaire/inventories" class="action-card">
-        <div class="action-icon" style="background-color: rgba(139, 92, 246, 0.1);">
-          <i class="pi pi-clipboard" style="color: #8B5CF6; font-size: 2rem;"></i>
+        <div class="action-icon action-icon--primary-dark">
+          <i class="pi pi-clipboard"></i>
         </div>
         <div class="action-content">
           <h3>Inventaire</h3>

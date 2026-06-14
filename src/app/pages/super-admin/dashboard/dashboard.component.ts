@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, ChangeDetectorRef, HostListener, OnInit } from '@angular/core';
 import { buildBarChartOptions, buildDoughnutChartOptions, buildLineChartOptions } from '../../../utils/chart-options.util';
+import { BRAND, CHART_PALETTE, chartFill, paletteColor } from '../../../utils/chart-colors.util';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -198,8 +199,8 @@ export class SuperAdminDashboardComponent implements OnInit {
       datasets.push({
         label: 'Validées',
         data: approvedData,
-        backgroundColor: 'rgba(22, 163, 74, 0.85)',
-        borderColor: '#16A34A',
+        backgroundColor: chartFill(BRAND.secondary, 0.85),
+        borderColor: BRAND.secondary,
         borderWidth: 1,
         borderRadius: 6,
         maxBarThickness: 48
@@ -210,8 +211,8 @@ export class SuperAdminDashboardComponent implements OnInit {
       datasets.push({
         label: 'Rejetées',
         data: rejectedData,
-        backgroundColor: 'rgba(239, 68, 68, 0.85)',
-        borderColor: '#EF4444',
+        backgroundColor: chartFill(BRAND.danger, 0.85),
+        borderColor: BRAND.danger,
         borderWidth: 1,
         borderRadius: 6,
         maxBarThickness: 48
@@ -226,7 +227,7 @@ export class SuperAdminDashboardComponent implements OnInit {
 
   updateChartData(monthlyData: any[]) {
     const colors = {
-      primary: '#2563EB'
+      primary: BRAND.primary
     };
     
     if (monthlyData.length === 0) {
@@ -239,12 +240,12 @@ export class SuperAdminDashboardComponent implements OnInit {
             label: 'Nouvelles entreprises',
             data: new Array(6).fill(0),
             fill: true,
-            backgroundColor: 'rgba(37, 99, 235, 0.15)',
+            backgroundColor: chartFill(colors.primary, 0.15),
             borderColor: colors.primary,
             borderWidth: 3,
             tension: 0.4,
             pointBackgroundColor: colors.primary,
-            pointBorderColor: '#fff',
+            pointBorderColor: BRAND.white,
             pointBorderWidth: 2,
             pointRadius: 5,
             pointHoverRadius: 7
@@ -259,12 +260,12 @@ export class SuperAdminDashboardComponent implements OnInit {
             label: 'Nouvelles entreprises',
             data: monthlyData.map(d => d.count || 0),
             fill: true,
-            backgroundColor: 'rgba(37, 99, 235, 0.15)',
+            backgroundColor: chartFill(colors.primary, 0.15),
             borderColor: colors.primary,
             borderWidth: 3,
             tension: 0.4,
             pointBackgroundColor: colors.primary,
-            pointBorderColor: '#fff',
+            pointBorderColor: BRAND.white,
             pointBorderWidth: 2,
             pointRadius: 5,
             pointHoverRadius: 7
@@ -276,11 +277,11 @@ export class SuperAdminDashboardComponent implements OnInit {
 
   updatePlanChartData(planData: any[]) {
     const planColors: { [key: string]: string } = {
-      'Gratuit': '#16A34A',
-      'Premium': '#2563EB',
-      'Standard': '#9333EA',
-      'Basique': '#F59E0B',
-      'Free': '#16A34A'
+      'Gratuit': BRAND.secondary,
+      'Premium': BRAND.primary,
+      'Standard': BRAND.warning,
+      'Basique': BRAND.primaryDark,
+      'Free': BRAND.secondary
     };
     
     if (planData.length === 0) {
@@ -288,9 +289,9 @@ export class SuperAdminDashboardComponent implements OnInit {
         labels: ['Aucun plan'],
         datasets: [{
           data: [1],
-          backgroundColor: ['#E5E7EB'],
+          backgroundColor: [BRAND.border],
           borderWidth: 3,
-          borderColor: '#fff',
+          borderColor: BRAND.white,
           hoverOffset: 4
         }]
       };
@@ -299,9 +300,9 @@ export class SuperAdminDashboardComponent implements OnInit {
         labels: planData.map(d => d.plan),
         datasets: [{
           data: planData.map(d => d.count || 0),
-          backgroundColor: planData.map(d => planColors[d.plan] || '#6366F1'),
+          backgroundColor: planData.map(d => planColors[d.plan] || paletteColor(planData.indexOf(d))),
           borderWidth: 3,
-          borderColor: '#fff',
+          borderColor: BRAND.white,
           hoverOffset: 4
         }]
       };

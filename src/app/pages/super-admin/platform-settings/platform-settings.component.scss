@@ -164,7 +164,7 @@
       background: var(--surface-ground, #f8fafc);
 
       &--wave {
-        border-top: 3px solid #1d4ed8;
+        border-top: 3px solid var(--primary-dark);
       }
 
       &--orange {

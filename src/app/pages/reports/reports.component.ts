@@ -1,11 +1,6 @@
 import { Component, HostListener, OnInit } from '@angular/core';
-import {
-  buildDoughnutChartOptions,
-  buildLineChartOptions,
-  compactAxisTick,
-  isChartMobile,
-  mergeChartOptions
-} from '../../utils/chart-options.util';
+import { buildDoughnutChartOptions, buildLineChartOptions, buildBarChartOptions, compactAxisTick, isChartMobile, mergeChartOptions } from '../../utils/chart-options.util';
+import { BRAND, CHART_PALETTE, MOVEMENT_SERIES, chartFill, paletteColor } from '../../utils/chart-colors.util';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
@@ -112,32 +107,7 @@ export class ReportsComponent implements OnInit {
   }
 
   updateCharts() {
-    // Palette de couleurs
-    const colors = {
-      primary: '#2563EB',
-      secondary: '#16A34A',
-      warning: '#F59E0B',
-      danger: '#DC2626',
-      info: '#06B6D4',
-      purple: '#9333EA',
-      indigo: '#6366F1',
-      pink: '#EC4899',
-      teal: '#14B8A6',
-      amber: '#F59E0B'
-    };
-
-    const colorArray = [
-      colors.primary,
-      colors.secondary,
-      colors.warning,
-      colors.danger,
-      colors.info,
-      colors.purple,
-      colors.indigo,
-      colors.pink,
-      colors.teal,
-      colors.amber
-    ];
+    const colorArray = [...CHART_PALETTE];
 
     // Déterminer les entrepôts à afficher
     const warehousesToShow = this.selectedWarehouse 
@@ -155,12 +125,12 @@ export class ReportsComponent implements OnInit {
             label: `Valeur du stock - ${warehouse.name}`,
             data: [45000, 42000, 55000, 58000, 40000, 38000, 48000, 52000, 56000, 54000, 62000, 65000],
           fill: true,
-            backgroundColor: 'rgba(37, 99, 235, 0.15)',
-            borderColor: colors.primary,
+            backgroundColor: chartFill(BRAND.primary, 0.15),
+            borderColor: BRAND.primary,
             borderWidth: 3,
             tension: 0.4,
-            pointBackgroundColor: colors.primary,
-            pointBorderColor: '#fff',
+            pointBackgroundColor: BRAND.primary,
+            pointBorderColor: BRAND.white,
             pointBorderWidth: 2,
             pointRadius: 4,
             pointHoverRadius: 6
@@ -183,7 +153,7 @@ export class ReportsComponent implements OnInit {
           borderWidth: 2,
           tension: 0.4,
           pointBackgroundColor: colorArray[index % colorArray.length],
-          pointBorderColor: '#fff',
+          pointBorderColor: BRAND.white,
           pointBorderWidth: 2,
           pointRadius: 3,
           pointHoverRadius: 5
@@ -206,12 +176,12 @@ export class ReportsComponent implements OnInit {
             label: 'Entrées',
             data: [45, 38, 52, 48, 35, 42],
             fill: true,
-            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-            borderColor: colors.primary,
+            backgroundColor: chartFill(BRAND.primary),
+            borderColor: BRAND.primary,
             borderWidth: 2,
             tension: 0.4,
-            pointBackgroundColor: colors.primary,
-            pointBorderColor: '#fff',
+            pointBackgroundColor: BRAND.primary,
+            pointBorderColor: BRAND.white,
             pointBorderWidth: 2,
             pointRadius: 4
           },
@@ -219,12 +189,12 @@ export class ReportsComponent implements OnInit {
             label: 'Sorties',
             data: [28, 32, 35, 30, 25, 28],
             fill: true,
-            backgroundColor: 'rgba(220, 38, 38, 0.1)',
-            borderColor: colors.danger,
+            backgroundColor: chartFill(BRAND.danger),
+            borderColor: BRAND.danger,
             borderWidth: 2,
             tension: 0.4,
-            pointBackgroundColor: colors.danger,
-            pointBorderColor: '#fff',
+            pointBackgroundColor: BRAND.danger,
+            pointBorderColor: BRAND.white,
             pointBorderWidth: 2,
             pointRadius: 4
           },
@@ -232,12 +202,12 @@ export class ReportsComponent implements OnInit {
             label: 'Transferts',
             data: [12, 15, 18, 14, 10, 12],
             fill: true,
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-            borderColor: colors.warning,
+            backgroundColor: chartFill(MOVEMENT_SERIES.transfers),
+            borderColor: MOVEMENT_SERIES.transfers,
             borderWidth: 2,
             tension: 0.4,
-            pointBackgroundColor: colors.warning,
-            pointBorderColor: '#fff',
+            pointBackgroundColor: MOVEMENT_SERIES.transfers,
+            pointBorderColor: BRAND.white,
             pointBorderWidth: 2,
             pointRadius: 4
           }
@@ -259,7 +229,7 @@ export class ReportsComponent implements OnInit {
           borderWidth: 2,
           tension: 0.4,
           pointBackgroundColor: colorArray[index % colorArray.length],
-          pointBorderColor: '#fff',
+          pointBorderColor: BRAND.white,
           pointBorderWidth: 2,
           pointRadius: 3
         };

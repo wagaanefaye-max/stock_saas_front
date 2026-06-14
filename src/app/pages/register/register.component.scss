@@ -18,7 +18,7 @@
   transition: color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 
   &:hover {
-    color: #1d4ed8;
+    color: var(--primary-dark);
     border-color: rgba(37, 99, 235, 0.35);
     box-shadow: 0 4px 14px rgba(37, 99, 235, 0.12);
     transform: translateY(-1px);
@@ -547,7 +547,7 @@
   margin-top: 0.5rem;
 
   i {
-    color: #3b82f6;
+    color: var(--primary);
     font-size: 1.25rem;
     margin-top: 0.125rem;
   }

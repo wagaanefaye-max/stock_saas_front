@@ -56,9 +56,9 @@
   border-radius: 50%;
   background: #94a3b8;
 
-  &.TRIAL { background: #3b82f6; }
-  &.ACTIVE { background: #22c55e; }
-  &.EXPIRED { background: #ef4444; }
+  &.TRIAL { background: var(--primary); }
+  &.ACTIVE { background: var(--secondary); }
+  &.EXPIRED { background: var(--danger); }
 }
 
 .step {
@@ -138,8 +138,8 @@
 
   &--pay.chip--active {
     &.chip--wave {
-      border-color: #1d4ed8;
-      background: #1d4ed8;
+      border-color: var(--primary-dark);
+      background: var(--primary-dark);
     }
     &.chip--orange {
       border-color: #c2410c;
@@ -147,7 +147,7 @@
     }
     &.chip--cash {
       border-color: #15803d;
-      background: #16a34a;
+      background: var(--secondary);
     }
   }
 
@@ -274,7 +274,7 @@
   position: relative;
   border-radius: 12px;
   overflow: hidden;
-  border: 2px solid #22c55e;
+  border: 2px solid var(--secondary);
   cursor: pointer;
   max-height: 140px;
 
@@ -305,7 +305,7 @@
 .stack-hint {
   margin: -0.5rem 0 1rem;
   font-size: 0.75rem;
-  color: #3b82f6;
+  color: var(--primary);
   text-align: center;
 }
 
@@ -318,7 +318,7 @@
   padding: 1rem 1.25rem;
   border: none;
   border-radius: 14px;
-  background: #16a34a;
+  background: var(--secondary);
   color: #fff;
   cursor: pointer;
   font-family: inherit;

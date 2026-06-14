@@ -29,7 +29,7 @@
     i { font-size: 0.9rem; }
     &--paid {
       background: rgba(34, 197, 94, 0.15);
-      color: #16a34a;
+      color: var(--secondary);
     }
     &--unpaid {
       background: rgba(234, 88, 12, 0.12);
@@ -411,7 +411,7 @@
     }
     &.done {
       background: rgba(34, 197, 94, 0.2);
-      color: #16a34a;
+      color: var(--secondary);
     }
   }
 }
@@ -454,7 +454,7 @@
       height: 72px;
       margin: 0 auto 1rem;
       border-radius: 50%;
-      background: #16a34a;
+      background: var(--secondary);
       color: white;
       display: flex;
       align-items: center;

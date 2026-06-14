@@ -249,15 +249,15 @@
     }
 
     &--warning {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
+      background: linear-gradient(135deg, var(--warning), var(--warning-dark));
     }
 
     &--info {
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     }
 
     &--report {
-      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
     }
   }
 

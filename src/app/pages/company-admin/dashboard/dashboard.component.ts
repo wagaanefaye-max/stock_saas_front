@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, ChangeDetectorRef, HostListener, OnInit } from '@angular/core';
 import { buildDoughnutChartOptions, buildLineChartOptions } from '../../../utils/chart-options.util';
+import { BRAND, MOVEMENT_SERIES, brandLineDataset, chartFill } from '../../../utils/chart-colors.util';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
@@ -234,8 +235,8 @@ export class CompanyAdminDashboardComponent implements OnInit {
           {
             label: 'Ventes payées (FCFA)',
             data: [],
-            borderColor: '#2563eb',
-            backgroundColor: 'rgba(37, 99, 235, 0.2)',
+            borderColor: BRAND.primary,
+            backgroundColor: chartFill(BRAND.primary, 0.2),
             tension: 0.3,
             fill: true
           }
@@ -250,8 +251,8 @@ export class CompanyAdminDashboardComponent implements OnInit {
         {
           label: 'Ventes payées (FCFA)',
           data: salesByMonth.map(m => Number(m.amount) || 0),
-          borderColor: '#2563eb',
-          backgroundColor: 'rgba(37, 99, 235, 0.2)',
+          borderColor: BRAND.primary,
+          backgroundColor: chartFill(BRAND.primary, 0.2),
           tension: 0.3,
           fill: true
         }
@@ -268,28 +269,28 @@ export class CompanyAdminDashboardComponent implements OnInit {
         value: `${this.formatMoney(this.paidRevenue)} F`,
         sub: `${this.paidInvoices} facture(s) payée(s)`,
         icon: 'pi pi-wallet',
-        color: '#16a34a'
+        color: BRAND.secondary
       },
       {
         title: 'Impayées',
         value: `${this.formatMoney(this.pendingRevenue)} F`,
         sub: `${this.sentInvoices} envoyée(s)`,
         icon: 'pi pi-clock',
-        color: '#f59e0b'
+        color: BRAND.warning
       },
       {
         title: 'Brouillons',
         value: String(this.draftInvoices),
         sub: 'À finaliser',
         icon: 'pi pi-pencil',
-        color: '#64748b'
+        color: BRAND.textMuted
       },
       {
         title: 'Factures payées',
         value: String(this.paidInvoices),
         sub: 'Total validé',
         icon: 'pi pi-check-circle',
-        color: '#2563eb'
+        color: BRAND.primary
       }
     ];
 
@@ -299,28 +300,28 @@ export class CompanyAdminDashboardComponent implements OnInit {
         value: String(this.totalProducts),
         sub: 'Dans le catalogue',
         icon: 'pi pi-box',
-        color: '#2563eb'
+        color: BRAND.primary
       },
       {
         title: 'Entrepôts',
         value: String(this.totalWarehouses),
         sub: 'Points de stockage',
         icon: 'pi pi-building',
-        color: '#7c3aed'
+        color: BRAND.secondary
       },
       {
         title: 'Mouvements (mois)',
         value: String(this.monthlyMovements),
         sub: 'Ce mois-ci',
         icon: 'pi pi-sync',
-        color: '#0891b2'
+        color: BRAND.warning
       },
       {
         title: 'Alertes stock bas',
         value: String(alertCount),
         sub: alertCount > 0 ? 'À réapprovisionner' : 'Tout est OK',
         icon: 'pi pi-exclamation-triangle',
-        color: alertCount > 0 ? '#dc2626' : '#16a34a',
+        color: alertCount > 0 ? BRAND.danger : BRAND.secondary,
         alert: alertCount > 0
       }
     ];
@@ -332,7 +333,7 @@ export class CompanyAdminDashboardComponent implements OnInit {
       datasets: [
         {
           data: [this.paidInvoices, this.draftInvoices, this.sentInvoices, this.cancelledInvoices],
-          backgroundColor: ['#16a34a', '#94a3b8', '#f59e0b', '#dc2626']
+          backgroundColor: [BRAND.secondary, BRAND.textMuted, BRAND.warning, BRAND.danger]
         }
       ]
     };
@@ -340,38 +341,10 @@ export class CompanyAdminDashboardComponent implements OnInit {
 
   private buildMovementsChart(monthlyData: DashboardStats['monthlyMovementsData']): void {
     const emptyMovementDatasets = [
-      {
-        label: 'Entrées',
-        data: new Array(6).fill(0),
-        borderColor: '#2563eb',
-        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-        tension: 0.3,
-        fill: true
-      },
-      {
-        label: 'Sorties',
-        data: new Array(6).fill(0),
-        borderColor: '#dc2626',
-        backgroundColor: 'rgba(220, 38, 38, 0.08)',
-        tension: 0.3,
-        fill: true
-      },
-      {
-        label: 'Transferts',
-        data: new Array(6).fill(0),
-        borderColor: '#7c3aed',
-        backgroundColor: 'rgba(124, 58, 237, 0.08)',
-        tension: 0.3,
-        fill: true
-      },
-      {
-        label: 'Ajustements',
-        data: new Array(6).fill(0),
-        borderColor: '#f59e0b',
-        backgroundColor: 'rgba(245, 158, 11, 0.08)',
-        tension: 0.3,
-        fill: true
-      }
+      brandLineDataset('Entrées', MOVEMENT_SERIES.entries, new Array(6).fill(0)),
+      brandLineDataset('Sorties', MOVEMENT_SERIES.exits, new Array(6).fill(0)),
+      brandLineDataset('Transferts', MOVEMENT_SERIES.transfers, new Array(6).fill(0)),
+      brandLineDataset('Ajustements', MOVEMENT_SERIES.adjustments, new Array(6).fill(0))
     ];
 
     if (!monthlyData.length) {
@@ -386,38 +359,10 @@ export class CompanyAdminDashboardComponent implements OnInit {
     this.movementsChartData = {
       labels: monthlyData.map(d => d.month),
       datasets: [
-        {
-          label: 'Entrées',
-          data: monthlyData.map(d => d.entries || 0),
-          borderColor: '#2563eb',
-          backgroundColor: 'rgba(37, 99, 235, 0.1)',
-          tension: 0.3,
-          fill: true
-        },
-        {
-          label: 'Sorties',
-          data: monthlyData.map(d => d.exits || 0),
-          borderColor: '#dc2626',
-          backgroundColor: 'rgba(220, 38, 38, 0.08)',
-          tension: 0.3,
-          fill: true
-        },
-        {
-          label: 'Transferts',
-          data: monthlyData.map(d => d.transfers || 0),
-          borderColor: '#7c3aed',
-          backgroundColor: 'rgba(124, 58, 237, 0.08)',
-          tension: 0.3,
-          fill: true
-        },
-        {
-          label: 'Ajustements',
-          data: monthlyData.map(d => d.adjustments || 0),
-          borderColor: '#f59e0b',
-          backgroundColor: 'rgba(245, 158, 11, 0.08)',
-          tension: 0.3,
-          fill: true
-        }
+        brandLineDataset('Entrées', MOVEMENT_SERIES.entries, monthlyData.map(d => d.entries || 0)),
+        brandLineDataset('Sorties', MOVEMENT_SERIES.exits, monthlyData.map(d => d.exits || 0)),
+        brandLineDataset('Transferts', MOVEMENT_SERIES.transfers, monthlyData.map(d => d.transfers || 0)),
+        brandLineDataset('Ajustements', MOVEMENT_SERIES.adjustments, monthlyData.map(d => d.adjustments || 0))
       ]
     };
   }

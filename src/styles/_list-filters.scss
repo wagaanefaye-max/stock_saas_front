@@ -314,7 +314,7 @@
     }
 
     .p-button.p-highlight {
-      background: var(--primary-color, #3b82f6) !important;
+      background: var(--primary-color, var(--primary)) !important;
       color: #fff !important;
     }
   }

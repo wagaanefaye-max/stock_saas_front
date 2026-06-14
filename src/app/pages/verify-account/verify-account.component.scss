@@ -491,7 +491,7 @@
   }
 
   &.strength-strong ::ng-deep .p-progressbar-value {
-    background-color: #22c55e; /* vert */
+    background-color: var(--secondary);
   }
 
   .password-strength-label {

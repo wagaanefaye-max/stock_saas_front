@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, ChangeDetectorRef, HostListener, OnInit } from '@angular/core';
 import { buildDoughnutChartOptions, buildLineChartOptions } from '../../utils/chart-options.util';
+import { BRAND, CHART_PALETTE, MOVEMENT_SERIES, brandMovementPointDataset } from '../../utils/chart-colors.util';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
@@ -168,58 +169,10 @@ export class DashboardComponent implements OnInit {
   
   updateChartData(monthlyData: any[]) {
     const emptyDatasets = [
-      {
-        label: 'Entrées',
-        data: new Array(6).fill(0),
-        fill: true,
-        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-        borderColor: '#2563EB',
-        borderWidth: 2,
-        tension: 0.4,
-        pointBackgroundColor: '#2563EB',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 4
-      },
-      {
-        label: 'Sorties',
-        data: new Array(6).fill(0),
-        fill: true,
-        backgroundColor: 'rgba(220, 38, 38, 0.1)',
-        borderColor: '#DC2626',
-        borderWidth: 2,
-        tension: 0.4,
-        pointBackgroundColor: '#DC2626',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 4
-      },
-      {
-        label: 'Transferts',
-        data: new Array(6).fill(0),
-        fill: true,
-        backgroundColor: 'rgba(124, 58, 237, 0.1)',
-        borderColor: '#7C3AED',
-        borderWidth: 2,
-        tension: 0.4,
-        pointBackgroundColor: '#7C3AED',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 4
-      },
-      {
-        label: 'Ajustements',
-        data: new Array(6).fill(0),
-        fill: true,
-        backgroundColor: 'rgba(245, 158, 11, 0.1)',
-        borderColor: '#F59E0B',
-        borderWidth: 2,
-        tension: 0.4,
-        pointBackgroundColor: '#F59E0B',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 4
-      }
+      brandMovementPointDataset('Entrées', MOVEMENT_SERIES.entries, new Array(6).fill(0)),
+      brandMovementPointDataset('Sorties', MOVEMENT_SERIES.exits, new Array(6).fill(0)),
+      brandMovementPointDataset('Transferts', MOVEMENT_SERIES.transfers, new Array(6).fill(0)),
+      brandMovementPointDataset('Ajustements', MOVEMENT_SERIES.adjustments, new Array(6).fill(0))
     ];
 
     if (monthlyData.length === 0) {
@@ -232,73 +185,24 @@ export class DashboardComponent implements OnInit {
       this.chartData = {
         labels: monthlyData.map(d => d.month),
         datasets: [
-          {
-            label: 'Entrées',
-            data: monthlyData.map(d => d.entries || 0),
-            fill: true,
-            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-            borderColor: '#2563EB',
-            borderWidth: 2,
-            tension: 0.4,
-            pointBackgroundColor: '#2563EB',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 4
-          },
-          {
-            label: 'Sorties',
-            data: monthlyData.map(d => d.exits || 0),
-            fill: true,
-            backgroundColor: 'rgba(220, 38, 38, 0.1)',
-            borderColor: '#DC2626',
-            borderWidth: 2,
-            tension: 0.4,
-            pointBackgroundColor: '#DC2626',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 4
-          },
-          {
-            label: 'Transferts',
-            data: monthlyData.map(d => d.transfers || 0),
-            fill: true,
-            backgroundColor: 'rgba(124, 58, 237, 0.1)',
-            borderColor: '#7C3AED',
-            borderWidth: 2,
-            tension: 0.4,
-            pointBackgroundColor: '#7C3AED',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 4
-          },
-          {
-            label: 'Ajustements',
-            data: monthlyData.map(d => d.adjustments || 0),
-            fill: true,
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-            borderColor: '#F59E0B',
-            borderWidth: 2,
-            tension: 0.4,
-            pointBackgroundColor: '#F59E0B',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 4
-          }
+          brandMovementPointDataset('Entrées', MOVEMENT_SERIES.entries, monthlyData.map(d => d.entries || 0)),
+          brandMovementPointDataset('Sorties', MOVEMENT_SERIES.exits, monthlyData.map(d => d.exits || 0)),
+          brandMovementPointDataset('Transferts', MOVEMENT_SERIES.transfers, monthlyData.map(d => d.transfers || 0)),
+          brandMovementPointDataset('Ajustements', MOVEMENT_SERIES.adjustments, monthlyData.map(d => d.adjustments || 0))
         ]
       };
     }
   }
   
   updateCategoryChartData(categoryData: any[]) {
-    const colors = ['#2563EB', '#16A34A', '#F59E0B', '#6366F1', '#9333EA', '#EC4899'];
     if (categoryData.length === 0) {
       this.categoryChartData = {
         labels: ['Aucune catégorie'],
         datasets: [{
           data: [1],
-          backgroundColor: ['#E5E7EB'],
+          backgroundColor: [BRAND.border],
           borderWidth: 2,
-          borderColor: '#fff'
+          borderColor: BRAND.white
         }]
       };
     } else {
@@ -306,9 +210,9 @@ export class DashboardComponent implements OnInit {
         labels: categoryData.map(d => d.category),
         datasets: [{
           data: categoryData.map(d => d.count || 0),
-          backgroundColor: categoryData.map((_, i) => colors[i % colors.length]),
+          backgroundColor: categoryData.map((_, i) => CHART_PALETTE[i % CHART_PALETTE.length]),
           borderWidth: 2,
-          borderColor: '#fff'
+          borderColor: BRAND.white
         }]
       };
     }
@@ -329,46 +233,11 @@ export class DashboardComponent implements OnInit {
   initCharts() {
     this.refreshChartOptions();
 
-    const colors = {
-      primary: '#2563EB',
-      secondary: '#16A34A',
-      warning: '#F59E0B',
-      danger: '#DC2626',
-      info: '#06B6D4',
-      purple: '#9333EA',
-      pink: '#EC4899',
-      indigo: '#6366F1'
-    };
-
     this.chartData = {
       labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
       datasets: [
-        {
-          label: 'Entrées',
-          data: [65, 59, 80, 81, 56, 55],
-          fill: true,
-          backgroundColor: 'rgba(37, 99, 235, 0.1)',
-          borderColor: colors.primary,
-          borderWidth: 2,
-          tension: 0.4,
-          pointBackgroundColor: colors.primary,
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 4
-        },
-        {
-          label: 'Sorties',
-          data: [28, 48, 40, 19, 86, 27],
-          fill: true,
-          backgroundColor: 'rgba(220, 38, 38, 0.1)',
-          borderColor: colors.danger,
-          borderWidth: 2,
-          tension: 0.4,
-          pointBackgroundColor: colors.danger,
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 4
-        }
+        brandMovementPointDataset('Entrées', MOVEMENT_SERIES.entries, [65, 59, 80, 81, 56, 55]),
+        brandMovementPointDataset('Sorties', MOVEMENT_SERIES.exits, [28, 48, 40, 19, 86, 27])
       ]
     };
 
@@ -376,14 +245,9 @@ export class DashboardComponent implements OnInit {
       labels: ['Électronique', 'Vêtements', 'Alimentaire', 'Autres'],
       datasets: [{
         data: [300, 450, 280, 204],
-        backgroundColor: [
-          '#2563EB',  // Bleu - Électronique
-          '#16A34A',  // Vert - Vêtements
-          '#F59E0B',  // Orange - Alimentaire
-          '#6366F1'   // Indigo - Autres
-        ],
+        backgroundColor: CHART_PALETTE.slice(0, 4),
         borderWidth: 2,
-        borderColor: '#fff'
+        borderColor: BRAND.white
       }]
     };
 

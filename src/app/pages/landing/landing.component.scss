@@ -257,7 +257,7 @@
     border-radius: 50%;
     background: var(--border);
 
-    &:first-child { background: #ef4444; }
+    &:first-child { background: var(--danger); }
     &:nth-child(2) { background: var(--warning); }
     &:nth-child(3) { background: var(--secondary); }
   }

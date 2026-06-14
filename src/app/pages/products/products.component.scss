@@ -86,7 +86,7 @@
     text-underline-offset: 2px;
 
     &:hover {
-      color: #1d4ed8;
+      color: var(--primary-dark);
     }
   }
 
@@ -368,7 +368,7 @@
   height: 3.25rem;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, var(--primary), #1d4ed8);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: #fff;
   box-shadow: 0 4px 16px rgba(37, 99, 235, 0.45);
   display: flex;

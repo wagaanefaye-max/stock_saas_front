@@ -111,7 +111,7 @@
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary, #2563eb), #1d4ed8);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: #fff;
   display: flex;
   align-items: center;
@@ -158,7 +158,7 @@
 
 .super-admin-layout .app-sidebar__role-badge {
   background: rgba(124, 58, 237, 0.12);
-  color: #7c3aed;
+  color: var(--danger);
 }
 
 .gestionnaire-layout .app-sidebar__role-badge,
@@ -270,7 +270,7 @@
   height: 1.1rem;
   padding: 0 0.25rem;
   border-radius: 999px;
-  background: #ef4444;
+  background: var(--danger);
   color: #fff;
   font-size: 0.625rem;
   font-weight: 700;
@@ -388,7 +388,7 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), #1d4ed8);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: #fff;
   font-size: 0.875rem;
   font-weight: 700;

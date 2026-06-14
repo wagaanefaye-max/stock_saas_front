@@ -6,7 +6,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideServiceWorker } from '@angular/service-worker';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
+import { StockSaasPreset } from './app/config/primeng-theme.config';
 import { PRIMENG_FR } from './app/config/primeng-fr.translation';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
@@ -22,7 +22,7 @@ bootstrapApplication(AppComponent, {
     providePrimeNG({
       translation: PRIMENG_FR,
       theme: {
-        preset: Aura,
+        preset: StockSaasPreset,
         options: {
           darkModeSelector: false,
           cssLayer: false

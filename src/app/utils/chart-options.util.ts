@@ -1,5 +1,7 @@
 /** Options Chart.js adaptées mobile / desktop */
 
+import { BRAND } from './chart-colors.util';
+
 const MOBILE_BREAKPOINT = 768;
 
 export function isChartMobile(): boolean {
@@ -55,7 +57,7 @@ export function buildLineChartOptions(config: LineChartConfig = {}): Record<stri
         display: showLegend,
         position: legendPosition,
         labels: {
-          color: '#64748b',
+          color: BRAND.textMuted,
           boxWidth: mobile ? 8 : 12,
           padding: mobile ? 6 : 12,
           font: { size: mobile ? 9 : 11 },
@@ -82,7 +84,7 @@ export function buildLineChartOptions(config: LineChartConfig = {}): Record<stri
     scales: {
       x: {
         ticks: {
-          color: '#64748b',
+          color: BRAND.textMuted,
           font: { size: mobile ? 9 : 11 },
           maxRotation: mobile ? 0 : 45,
           minRotation: 0,
@@ -97,7 +99,7 @@ export function buildLineChartOptions(config: LineChartConfig = {}): Record<stri
       y: {
         beginAtZero,
         ticks: {
-          color: '#64748b',
+          color: BRAND.textMuted,
           font: { size: mobile ? 9 : 11 },
           maxTicksLimit: mobile ? 5 : 8,
           callback: yTickCallback
@@ -132,7 +134,7 @@ export function buildBarChartOptions(config: BarChartConfig = {}): Record<string
         display: showLegend,
         position: legendPosition,
         labels: {
-          color: '#64748b',
+          color: BRAND.textMuted,
           boxWidth: mobile ? 8 : 12,
           padding: mobile ? 6 : 12,
           font: { size: mobile ? 9 : 11 },
@@ -149,7 +151,7 @@ export function buildBarChartOptions(config: BarChartConfig = {}): Record<string
     scales: {
       x: {
         ticks: {
-          color: '#64748b',
+          color: BRAND.textMuted,
           font: { size: mobile ? 9 : 11 },
           maxRotation: mobile ? 0 : 0,
           autoSkip: true,
@@ -162,7 +164,7 @@ export function buildBarChartOptions(config: BarChartConfig = {}): Record<string
       y: {
         beginAtZero,
         ticks: {
-          color: '#64748b',
+          color: BRAND.textMuted,
           font: { size: mobile ? 9 : 11 },
           maxTicksLimit: mobile ? 5 : 8,
           stepSize: 1,
@@ -186,7 +188,7 @@ export function buildDoughnutChartOptions(
     legend: {
       position: 'bottom',
       labels: {
-        color: '#64748b',
+        color: BRAND.textMuted,
         boxWidth: mobile ? 8 : 12,
         padding: mobile ? 8 : 14,
         font: { size: mobile ? 9 : 11 },
