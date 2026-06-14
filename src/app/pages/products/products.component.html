@@ -442,9 +442,7 @@
           class="w-full"
           [style]="{ width: '100%' }">
         </p-inputNumber>
-        <p class="product-form__hint" *ngIf="isCreatingProduct()">
-          Minimum 1. Ex. : 10 pour être alerté quand le stock atteint 10 ou moins.
-        </p>
+
         <p class="product-form__hint" *ngIf="!isCreatingProduct()">
           0 = pas d'alerte. Ex. : 10 pour être alerté quand le stock atteint 10 ou moins.
         </p>
