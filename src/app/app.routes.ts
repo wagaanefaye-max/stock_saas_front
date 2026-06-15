@@ -53,6 +53,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/warehouses/warehouses.component').then(m => m.WarehousesComponent)
       },
       {
+        path: 'warehouses/:id',
+        loadComponent: () => import('./pages/warehouses/warehouse-detail.component').then(m => m.WarehouseDetailComponent)
+      },
+      {
         path: 'movements',
         loadComponent: () => import('./pages/movements/movements.component').then(m => m.MovementsComponent)
       },
@@ -87,6 +91,10 @@ export const routes: Routes = [
       {
         path: 'warehouses',
         loadComponent: () => import('./pages/warehouses/warehouses.component').then(m => m.WarehousesComponent)
+      },
+      {
+        path: 'warehouses/:id',
+        loadComponent: () => import('./pages/warehouses/warehouse-detail.component').then(m => m.WarehouseDetailComponent)
       },
       {
         path: 'movements',
@@ -135,6 +143,10 @@ export const routes: Routes = [
       {
         path: 'warehouses',
         loadComponent: () => import('./pages/warehouses/warehouses.component').then(m => m.WarehousesComponent)
+      },
+      {
+        path: 'warehouses/:id',
+        loadComponent: () => import('./pages/warehouses/warehouse-detail.component').then(m => m.WarehouseDetailComponent)
       },
       {
         path: 'movements',

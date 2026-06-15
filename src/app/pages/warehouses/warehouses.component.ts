@@ -4,15 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
-import { ToolbarModule } from 'primeng/toolbar';
 import { PaginatorModule } from 'primeng/paginator';
-import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
@@ -32,15 +29,12 @@ import { ListSkeletonComponent } from '../../components/shared/list-skeleton.com
     FormsModule,
     CardModule,
     ButtonModule,
-    TableModule,
     TagModule,
     DialogModule,
     InputTextModule,
     InputNumberModule,
     SelectModule,
-    ToolbarModule,
     PaginatorModule,
-    TooltipModule,
     EmptyStateComponent,
     ListSkeletonComponent
   ],
@@ -51,28 +45,12 @@ import { ListSkeletonComponent } from '../../components/shared/list-skeleton.com
 export class WarehousesComponent implements OnInit {
   warehouses: any[] = [];
   displayDialog = false;
-  displayDetailsDialog = false;
-  warehouseProductsLoading = false;
   listLoading = true;
   listLoadError = false;
   warehouse: any = {};
-  selectedWarehouseDetails: any = null;
-  warehouseProducts: any[] = [];
   globalFilter = '';
   readonly dialogStyle = APP_DIALOG_STYLE;
-  /** Modal détail entrepôt — plus large pour le tableau produits */
-  readonly dialogStyleDetail = {
-    width: '94vw',
-    maxWidth: '76rem',
-    maxHeight: '90vh'
-  };
   readonly dialogBreakpoints = APP_DIALOG_BREAKPOINTS;
-  readonly dialogDetailBreakpoints = {
-    '1400px': '74rem',
-    '1200px': '68rem',
-    '960px': '92vw',
-    '640px': '96vw'
-  };
   rows = 10;
   first = 0;
 
@@ -105,14 +83,46 @@ export class WarehousesComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       if (params['action'] === 'new' && this.authService.isAdminEntreprise()) {
         this.openNew();
-        // Nettoyer l'URL
         this.router.navigate([], {
           relativeTo: this.route,
           queryParams: {},
           replaceUrl: true
         });
+      } else if (params['edit'] && this.authService.isAdminEntreprise()) {
+        const editId = Number(params['edit']);
+        if (editId && !Number.isNaN(editId)) {
+          this.apiService.get<any>(`/warehouses/${editId}`).subscribe({
+            next: (warehouse) => {
+              this.editWarehouse(warehouse);
+              this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: {},
+                replaceUrl: true
+              });
+            },
+            error: () => {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Erreur',
+                detail: 'Impossible de charger l\'entrepôt à modifier',
+                life: 5000
+              });
+            }
+          });
+        }
       }
     });
+  }
+
+  private getWarehousesBasePath(): string {
+    const url = this.router.url;
+    if (url.includes('/company-admin/')) {
+      return '/company-admin/warehouses';
+    }
+    if (url.includes('/gestionnaire/')) {
+      return '/gestionnaire/warehouses';
+    }
+    return '/gestion/warehouses';
   }
 
   loadWarehouses() {
@@ -410,124 +420,11 @@ export class WarehousesComponent implements OnInit {
   }
 
   viewWarehouseDetails(warehouse: any) {
-    this.selectedWarehouseDetails = warehouse;
-    this.displayDetailsDialog = true;
-    this.loadWarehouseProducts(warehouse.id);
-  }
-
-  closeDetails(): void {
-    this.displayDetailsDialog = false;
-    this.selectedWarehouseDetails = null;
-    this.warehouseProducts = [];
-    this.warehouseProductsLoading = false;
-  }
-
-  editFromDetails(): void {
-    if (!this.selectedWarehouseDetails || !this.authService.isAdminEntreprise()) {
-      return;
-    }
-    const warehouse = { ...this.selectedWarehouseDetails };
-    this.closeDetails();
-    this.editWarehouse(warehouse);
-  }
-
-  get warehouseLowStockCount(): number {
-    return this.warehouseProducts.filter(p => p.lowStock).length;
-  }
-
-  get warehouseTotalQuantity(): number {
-    return this.warehouseProducts.reduce(
-      (sum, p) => sum + (Number(p.quantity) || 0),
-      0
-    );
-  }
-
-  formatMoney(value: number | null | undefined): string {
-    const n = Number(value);
-    if (!Number.isFinite(n)) {
-      return '—';
-    }
-    return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(n) + ' F';
-  }
-
-  formatDate(value: string | null | undefined): string {
-    if (!value) {
-      return '—';
-    }
-    const d = new Date(value);
-    return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-FR');
-  }
-
-  hasUpdatedAt(warehouse: { createdAt?: string; updatedAt?: string } | null): boolean {
-    if (!warehouse?.updatedAt || !warehouse?.createdAt) {
-      return false;
-    }
-    return new Date(warehouse.updatedAt).getTime() > new Date(warehouse.createdAt).getTime();
-  }
-
-  saveProductThreshold(product: { productId: number; minThreshold?: number; lowStock?: boolean }) {
-    if (!this.selectedWarehouseDetails?.id) {
-      return;
-    }
-    const warehouseId = this.selectedWarehouseDetails.id;
-    const minThreshold = product.minThreshold != null ? product.minThreshold : 0;
-    this.apiService.put<any>(
-      `/warehouses/${warehouseId}/products/${product.productId}/threshold`,
-      { minThreshold }
-    ).subscribe({
-      next: (updated) => {
-        product.minThreshold = updated.minThreshold ?? minThreshold;
-        product.lowStock = !!updated.lowStock;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Seuil enregistré',
-          detail: 'Le seuil minimum a été mis à jour.',
-          life: 3000
-        });
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: error?.error?.message || 'Impossible de mettre à jour le seuil.',
-          life: 5000
-        });
-      }
-    });
-  }
-
-  loadWarehouseProducts(warehouseId: number) {
-    this.warehouseProducts = [];
-    this.warehouseProductsLoading = true;
-    this.apiService.get<any[]>(`/warehouses/${warehouseId}/products`)
-      .pipe(finalize(() => this.cdr.markForCheck()))
-      .subscribe({
-      next: (products) => {
-        this.warehouseProducts = (products || []).map(p => ({
-          ...p,
-          lowStock: !!p.lowStock
-        }));
-        this.warehouseProductsLoading = false;
-      },
-      error: (error) => {
-        this.warehouseProductsLoading = false;
-        console.error('Erreur lors du chargement des produits', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: 'Impossible de charger les produits de l\'entrepôt',
-          life: 5000
-        });
-      }
-    });
+    this.router.navigate([this.getWarehousesBasePath(), warehouse.id]);
   }
 
   trackByWarehouseId(_index: number, warehouse: { id?: number }): number {
     return warehouse.id ?? _index;
-  }
-
-  trackByProductId(_index: number, product: { id?: number; productId?: number }): number {
-    return product.id ?? product.productId ?? _index;
   }
 }
 
