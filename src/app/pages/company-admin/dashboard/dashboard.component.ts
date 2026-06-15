@@ -272,28 +272,38 @@ export class CompanyAdminDashboardComponent implements OnInit {
         value: `${this.formatMoney(this.paidRevenue)} F`,
         sub: `${this.paidInvoices} facture(s) payée(s)`,
         icon: 'pi pi-wallet',
-        color: BRAND.secondary
+        color: BRAND.secondary,
+        routerLink: '/company-admin/invoices',
+        queryParams: { status: 'PAID' }
       },
       {
         title: 'Impayées',
         value: `${this.formatMoney(this.pendingRevenue)} F`,
         sub: `${this.sentInvoices} envoyée(s)`,
         icon: 'pi pi-clock',
-        color: BRAND.warning
+        color: BRAND.warning,
+        routerLink: '/company-admin/invoices',
+        queryParams: { status: 'UNPAID' },
+        alert: this.sentInvoices > 0
       },
       {
         title: 'Brouillons',
         value: String(this.draftInvoices),
         sub: 'À finaliser',
         icon: 'pi pi-pencil',
-        color: BRAND.textMuted
+        color: BRAND.textMuted,
+        routerLink: '/company-admin/invoices',
+        queryParams: { status: 'DRAFT' },
+        alert: this.draftInvoices > 0
       },
       {
         title: 'Factures payées',
         value: String(this.paidInvoices),
         sub: 'Total validé',
         icon: 'pi pi-check-circle',
-        color: BRAND.primary
+        color: BRAND.primary,
+        routerLink: '/company-admin/invoices',
+        queryParams: { status: 'PAID' }
       }
     ];
 
@@ -303,21 +313,24 @@ export class CompanyAdminDashboardComponent implements OnInit {
         value: String(this.totalProducts),
         sub: 'Dans le catalogue',
         icon: 'pi pi-box',
-        color: BRAND.primary
+        color: BRAND.primary,
+        routerLink: '/company-admin/products'
       },
       {
         title: 'Entrepôts',
         value: String(this.totalWarehouses),
         sub: 'Points de stockage',
         icon: 'pi pi-building',
-        color: BRAND.secondary
+        color: BRAND.secondary,
+        routerLink: '/company-admin/warehouses'
       },
       {
         title: 'Mouvements (mois)',
         value: String(this.monthlyMovements),
         sub: 'Ce mois-ci',
         icon: 'pi pi-sync',
-        color: BRAND.warning
+        color: BRAND.warning,
+        routerLink: '/company-admin/movements'
       },
       {
         title: 'Alertes stock bas',

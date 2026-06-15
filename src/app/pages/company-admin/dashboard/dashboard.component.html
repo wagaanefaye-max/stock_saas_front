@@ -62,7 +62,16 @@
         <h2>Indicateurs clés</h2>
       </div>
       <div class="stats-grid">
-        <div *ngFor="let stat of salesStats; trackBy: trackByStatTitle" class="stat-card">
+        <div
+          *ngFor="let stat of salesStats; trackBy: trackByStatTitle"
+          class="stat-card"
+          [class.stat-card--alert]="stat.alert"
+          [class.stat-card--link]="stat.routerLink"
+          [attr.role]="stat.routerLink ? 'link' : null"
+          [attr.tabindex]="stat.routerLink ? 0 : null"
+          (click)="onStatCardClick(stat)"
+          (keydown.enter)="onStatCardClick(stat)"
+          (keydown.space)="$event.preventDefault(); onStatCardClick(stat)">
           <div class="stat-icon" [style.background-color]="stat.color + '18'">
             <i [class]="stat.icon" [style.color]="stat.color"></i>
           </div>
@@ -143,7 +152,7 @@
           </div>
           <ul class="panel-list" *ngIf="lowStockItems.length > 0">
             <li *ngFor="let p of lowStockItems; trackBy: trackByProductId">
-              <a routerLink="/company-admin/products" class="panel-list__item">
+              <a routerLink="/company-admin/products" [queryParams]="{ lowStock: '1' }" class="panel-list__item">
                 <span class="panel-list__main">
                   <strong>{{ p.name || 'Produit #' + p.id }}</strong>
                   <span class="panel-list__meta">Seuil {{ p.minThreshold | number }} · Stock {{ p.stock | number }}</span>
@@ -158,11 +167,11 @@
         <p-card class="panel-card">
           <div class="panel-card__head">
             <h3><i class="pi pi-file"></i> Factures à traiter</h3>
-            <a routerLink="/company-admin/invoices" class="panel-card__link">Voir tout</a>
+            <a routerLink="/company-admin/invoices" [queryParams]="{ status: 'UNPAID' }" class="panel-card__link">Voir tout</a>
           </div>
           <ul class="panel-list" *ngIf="pendingInvoices.length > 0">
             <li *ngFor="let inv of pendingInvoices; trackBy: trackByInvoiceId">
-              <a routerLink="/company-admin/invoices" class="panel-list__item">
+              <a routerLink="/company-admin/invoices" [queryParams]="{ status: 'UNPAID' }" class="panel-list__item">
                 <span class="panel-list__main">
                   <strong>{{ inv.invoiceNumber || 'Facture #' + inv.id }}</strong>
                   <span class="panel-list__meta">

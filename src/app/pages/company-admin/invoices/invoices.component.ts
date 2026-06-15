@@ -99,12 +99,13 @@ export class InvoicesComponent implements OnInit {
   /** Filtres liste factures (envoyés au backend) */
   invoiceNumberFilter = '';
   clientNameFilter = '';
-  /** Filtre de statut : ALL = toutes, PAID = payées, UNPAID = non payées */
-  statusFilter: 'ALL' | 'PAID' | 'UNPAID' = 'ALL';
+  /** Filtre de statut : ALL = toutes, PAID = payées, UNPAID = impayées, DRAFT = brouillons */
+  statusFilter: 'ALL' | 'PAID' | 'UNPAID' | 'DRAFT' = 'ALL';
   statusFilterOptions = [
     { label: 'Toutes', value: 'ALL' },
     { label: 'Payées', value: 'PAID' },
-    { label: 'Impayées', value: 'UNPAID' }
+    { label: 'Impayées', value: 'UNPAID' },
+    { label: 'Brouillons', value: 'DRAFT' }
   ];
 
   createForm = {
@@ -139,25 +140,37 @@ export class InvoicesComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadInvoices();
+    this.handleRouteQueryParams(this.route.snapshot.queryParams, true);
     this.route.queryParams.subscribe(params => {
-      if (params['new'] === '1') {
-        this.openCreateDialog();
-        this.router.navigate([], { relativeTo: this.route, queryParams: {}, queryParamsHandling: '', replaceUrl: true });
-      }
+      this.handleRouteQueryParams(params, false);
     });
+  }
+
+  private handleRouteQueryParams(params: Record<string, string>, isInitial: boolean): void {
+    if (params['new'] === '1') {
+      this.openCreateDialog();
+      this.router.navigate([], { relativeTo: this.route, queryParams: {}, queryParamsHandling: '', replaceUrl: true });
+      return;
+    }
+
+    const status = (params['status'] || '').toUpperCase();
+    if (status === 'PAID' || status === 'UNPAID' || status === 'DRAFT') {
+      this.statusFilter = status as 'PAID' | 'UNPAID' | 'DRAFT';
+      this.loadInvoices();
+      this.router.navigate([], { relativeTo: this.route, queryParams: {}, queryParamsHandling: '', replaceUrl: true });
+      return;
+    }
+
+    if (isInitial) {
+      this.loadInvoices();
+    }
   }
 
   loadInvoices() {
     this.listLoading = true;
     this.listLoadError = false;
     this.cdr.markForCheck();
-    const statusParam =
-      this.statusFilter === 'ALL'
-        ? null
-        : this.statusFilter === 'UNPAID'
-          ? 'UNPAID'
-          : 'PAID';
+    const statusParam = this.statusFilter === 'ALL' ? null : this.statusFilter;
 
     const params: Record<string, string | null> = {
       status: statusParam,
