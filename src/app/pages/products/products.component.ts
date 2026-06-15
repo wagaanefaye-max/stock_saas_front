@@ -12,6 +12,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
 import { DatePickerModule } from 'primeng/datepicker';
+import { CheckboxModule } from 'primeng/checkbox';
 import { PaginatorModule } from 'primeng/paginator';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
@@ -39,6 +40,7 @@ import { ListSkeletonComponent } from '../../components/shared/list-skeleton.com
     InputNumberModule,
     TooltipModule,
     DatePickerModule,
+    CheckboxModule,
     PaginatorModule,
     EmptyStateComponent,
     ListSkeletonComponent
@@ -68,6 +70,7 @@ export class ProductsComponent implements OnInit {
   filterCategoryCode: string | null = null;
   filterDateFrom: Date | null = null;
   filterDateTo: Date | null = null;
+  filterLowStock = false;
   showFilterPanel = false;
 
   constructor(
@@ -82,20 +85,41 @@ export class ProductsComponent implements OnInit {
 
   ngOnInit() {
     this.loadCategories();
-    this.loadProducts({ first: 0, rows: this.rows });
+    this.handleRouteQueryParams(this.route.snapshot.queryParams, true);
 
-    // Vérifier si on doit ouvrir le formulaire automatiquement
     this.route.queryParams.subscribe(params => {
-      if (params['action'] === 'new' && this.authService.isAdminEntreprise()) {
-        this.openNew();
-        // Nettoyer l'URL
-        this.router.navigate([], {
-          relativeTo: this.route,
-          queryParams: {},
-          replaceUrl: true
-        });
-      }
+      this.handleRouteQueryParams(params, false);
     });
+  }
+
+  private handleRouteQueryParams(params: Record<string, string>, isInitial: boolean): void {
+    if (params['action'] === 'new' && this.authService.isAdminEntreprise()) {
+      this.openNew();
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true
+      });
+      return;
+    }
+
+    const lowStock = params['lowStock'] === '1' || params['lowStock'] === 'true';
+    if (lowStock) {
+      this.filterLowStock = true;
+      this.showFilterPanel = true;
+      this.first = 0;
+      this.loadProducts({ first: 0, rows: this.rows });
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true
+      });
+      return;
+    }
+
+    if (isInitial) {
+      this.loadProducts({ first: 0, rows: this.rows });
+    }
   }
 
   loadProducts(event?: { first: number; rows: number }) {
@@ -115,6 +139,7 @@ export class ProductsComponent implements OnInit {
     if (this.filterCategoryCode) params['categoryCode'] = this.filterCategoryCode;
     if (this.filterDateFrom) params['dateFrom'] = this.formatDateForApi(this.filterDateFrom);
     if (this.filterDateTo) params['dateTo'] = this.formatDateForApi(this.filterDateTo);
+    if (this.filterLowStock) params['lowStock'] = 'true';
 
     this.apiService.get<{ content: any[]; totalElements: number }>('/products', params)
       .pipe(finalize(() => {
@@ -170,7 +195,8 @@ export class ProductsComponent implements OnInit {
       this.filterSku?.trim() ||
       this.filterCategoryCode ||
       this.filterDateFrom ||
-      this.filterDateTo
+      this.filterDateTo ||
+      this.filterLowStock
     );
   }
 
@@ -204,6 +230,7 @@ export class ProductsComponent implements OnInit {
     this.filterCategoryCode = null;
     this.filterDateFrom = null;
     this.filterDateTo = null;
+    this.filterLowStock = false;
     this.globalFilter = '';
     this.first = 0;
     this.loadProducts({ first: 0, rows: this.rows });

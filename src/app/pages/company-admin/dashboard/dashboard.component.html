@@ -74,7 +74,16 @@
         </div>
       </div>
       <div class="stats-grid stats-grid--stock">
-        <div *ngFor="let stat of stockStats; trackBy: trackByStatTitle" class="stat-card" [class.stat-card--alert]="stat.alert">
+        <div
+          *ngFor="let stat of stockStats; trackBy: trackByStatTitle"
+          class="stat-card"
+          [class.stat-card--alert]="stat.alert"
+          [class.stat-card--link]="stat.routerLink"
+          [attr.role]="stat.routerLink ? 'link' : null"
+          [attr.tabindex]="stat.routerLink ? 0 : null"
+          (click)="onStatCardClick(stat)"
+          (keydown.enter)="onStatCardClick(stat)"
+          (keydown.space)="$event.preventDefault(); onStatCardClick(stat)">
           <div class="stat-icon" [style.background-color]="stat.color + '18'">
             <i [class]="stat.icon" [style.color]="stat.color"></i>
           </div>
@@ -130,7 +139,7 @@
         <p-card class="panel-card">
           <div class="panel-card__head">
             <h3><i class="pi pi-exclamation-triangle"></i> Stock bas</h3>
-            <a routerLink="/company-admin/products" class="panel-card__link">Voir tout</a>
+            <a routerLink="/company-admin/products" [queryParams]="{ lowStock: '1' }" class="panel-card__link">Voir tout</a>
           </div>
           <ul class="panel-list" *ngIf="lowStockItems.length > 0">
             <li *ngFor="let p of lowStockItems; trackBy: trackByProductId">

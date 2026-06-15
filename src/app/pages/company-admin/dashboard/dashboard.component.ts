@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, ChangeDetectorRef, HostListener, On
 import { buildDoughnutChartOptions, buildLineChartOptions } from '../../../utils/chart-options.util';
 import { BRAND, MOVEMENT_SERIES, brandLineDataset, chartFill } from '../../../utils/chart-colors.util';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { TagModule } from 'primeng/tag';
@@ -72,6 +72,8 @@ interface DashboardStatCard {
   icon: string;
   color: string;
   alert?: boolean;
+  routerLink?: string;
+  queryParams?: Record<string, string>;
 }
 
 @Component({
@@ -124,6 +126,7 @@ export class CompanyAdminDashboardComponent implements OnInit {
     private onboardingService: OnboardingService,
     private requestCache: RequestCacheService,
     private messageService: MessageService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -322,7 +325,9 @@ export class CompanyAdminDashboardComponent implements OnInit {
         sub: alertCount > 0 ? 'À réapprovisionner' : 'Tout est OK',
         icon: 'pi pi-exclamation-triangle',
         color: alertCount > 0 ? BRAND.danger : BRAND.secondary,
-        alert: alertCount > 0
+        alert: alertCount > 0,
+        routerLink: '/company-admin/products',
+        queryParams: { lowStock: '1' }
       }
     ];
   }
@@ -460,7 +465,16 @@ export class CompanyAdminDashboardComponent implements OnInit {
     ];
   }
 
-  trackByStatTitle(_index: number, stat: { title: string }): string {
+  onStatCardClick(stat: DashboardStatCard): void {
+    if (!stat.routerLink) {
+      return;
+    }
+    this.router.navigate([stat.routerLink], {
+      queryParams: stat.queryParams
+    });
+  }
+
+  trackByStatTitle(_index: number, stat: DashboardStatCard): string {
     return stat.title;
   }
 

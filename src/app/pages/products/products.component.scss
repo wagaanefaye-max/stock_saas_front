@@ -133,6 +133,24 @@
 
 /* Barre recherche + filtres — styles globaux dans _list-filters.scss */
 
+.filter-row--stock {
+  margin-top: 0.25rem;
+}
+
+.filter-field--checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  label {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-main);
+    cursor: pointer;
+  }
+}
+
 .products-table-card {
   ::ng-deep .p-card-body {
     padding: 0 !important;

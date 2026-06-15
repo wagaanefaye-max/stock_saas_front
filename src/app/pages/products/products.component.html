@@ -121,6 +121,16 @@
           </p-datepicker>
         </div>
       </div>
+      <div class="filter-row filter-row--stock">
+        <div class="filter-field filter-field--checkbox">
+          <p-checkbox
+            [(ngModel)]="filterLowStock"
+            [binary]="true"
+            inputId="filterLowStock">
+          </p-checkbox>
+          <label for="filterLowStock">Uniquement les produits en stock bas</label>
+        </div>
+      </div>
       <div class="filter-actions">
         <button pButton label="Filtrer" icon="pi pi-search" class="p-button-sm" (click)="applyFilters()"></button>
         <button pButton label="Réinitialiser" icon="pi pi-refresh" class="p-button-outlined p-button-sm" (click)="resetFilters()"></button>
