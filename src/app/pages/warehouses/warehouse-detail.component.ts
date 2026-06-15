@@ -223,8 +223,4 @@ export class WarehouseDetailComponent implements OnInit {
     }
     return new Date(warehouse.updatedAt).getTime() > new Date(warehouse.createdAt).getTime();
   }
-
-  trackByProductId(_index: number, product: { id?: number; productId?: number }): number {
-    return product.id ?? product.productId ?? _index;
-  }
 }

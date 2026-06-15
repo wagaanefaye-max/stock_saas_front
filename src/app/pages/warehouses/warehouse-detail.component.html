@@ -1,35 +1,39 @@
-<div class="warehouse-detail-page mobile-page entity-page">
-  <div class="page-header">
-    <div class="page-header__main">
-      <a [routerLink]="warehousesListPath" class="warehouse-detail-page__back">
-        <i class="pi pi-arrow-left" aria-hidden="true"></i>
-        Retour aux entrepôts
-      </a>
-      <h1>{{ warehouse?.name || 'Détail entrepôt' }}</h1>
-      <p class="text-muted mobile-page__subtitle" *ngIf="warehouse">
-        {{ warehouse.region || '—' }} · #{{ warehouse.id }}
-      </p>
+<div class="warehouse-detail-page mobile-page">
+  <header class="warehouse-detail-page__header">
+    <a [routerLink]="warehousesListPath" class="warehouse-detail-page__back">
+      <i class="pi pi-arrow-left" aria-hidden="true"></i>
+      <span>Retour aux entrepôts</span>
+    </a>
+    <div class="warehouse-detail-page__title-row">
+      <div class="warehouse-detail-page__title-block">
+        <h1>{{ warehouse?.name || 'Détail entrepôt' }}</h1>
+        <p class="warehouse-detail-page__subtitle" *ngIf="warehouse">
+          {{ warehouse.region || '—' }} · #{{ warehouse.id }}
+        </p>
+      </div>
+      <div class="warehouse-detail-page__actions" *ngIf="authService.isAdminEntreprise() && warehouse">
+        <button
+          pButton
+          label="Modifier"
+          icon="pi pi-pencil"
+          class="p-button-outlined p-button-sm hide-mobile"
+          (click)="editWarehouse()">
+        </button>
+        <button
+          pButton
+          icon="pi pi-pencil"
+          class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only show-mobile-only"
+          title="Modifier"
+          aria-label="Modifier"
+          (click)="editWarehouse()">
+        </button>
+      </div>
     </div>
-    <div class="page-header__actions" *ngIf="authService.isAdminEntreprise() && warehouse">
-      <button
-        pButton
-        label="Modifier"
-        icon="pi pi-pencil"
-        class="p-button-outlined p-button-sm hide-mobile"
-        (click)="editWarehouse()">
-      </button>
-      <button
-        pButton
-        icon="pi pi-pencil"
-        class="p-button-outlined p-button-sm p-button-rounded p-button-icon-only show-mobile-only"
-        title="Modifier"
-        aria-label="Modifier"
-        (click)="editWarehouse()">
-      </button>
-    </div>
-  </div>
+  </header>
 
-  <app-list-skeleton *ngIf="pageLoading" [count]="3"></app-list-skeleton>
+  <div class="warehouse-detail-page__body">
+
+    <app-list-skeleton *ngIf="pageLoading" [count]="3"></app-list-skeleton>
 
   <app-empty-state
     *ngIf="!pageLoading && pageLoadError"
@@ -124,56 +128,7 @@
         <span class="warehouse-detail__empty-hint">Les stocks apparaîtront après un mouvement d'entrée.</span>
       </div>
 
-      <ul *ngIf="!productsLoading && warehouseProducts.length > 0" class="warehouse-detail__product-list show-mobile-only">
-        <li
-          *ngFor="let product of warehouseProducts; trackBy: trackByProductId"
-          class="warehouse-detail__product-card"
-          [class.warehouse-detail__product-card--low]="product.lowStock">
-          <div class="warehouse-detail__product-top">
-            <div>
-              <strong class="warehouse-detail__product-name">{{ product.productName }}</strong>
-              <span class="warehouse-detail__product-meta">{{ product.sku || product.productReference || '—' }}</span>
-            </div>
-            <p-tag *ngIf="product.lowStock" value="Stock bas" severity="warn"></p-tag>
-          </div>
-          <div class="warehouse-detail__product-stats">
-            <div>
-              <span class="warehouse-detail__stat-label">Quantité</span>
-              <span class="warehouse-detail__stat-value" [class.warehouse-detail__stat-value--danger]="product.lowStock">
-                {{ product.quantity | number:'1.0-0' }}
-              </span>
-            </div>
-            <div>
-              <span class="warehouse-detail__stat-label">Seuil min.</span>
-              <ng-container *ngIf="authService.isAdminEntreprise(); else readOnlyThreshold">
-                <p-inputNumber
-                  [(ngModel)]="product.minThreshold"
-                  [min]="0"
-                  [showButtons]="true"
-                  buttonLayout="horizontal"
-                  [inputStyle]="{ width: '4rem' }">
-                </p-inputNumber>
-                <button
-                  pButton
-                  icon="pi pi-save"
-                  class="p-button-text p-button-sm warehouse-detail__save-threshold"
-                  pTooltip="Enregistrer"
-                  (click)="saveProductThreshold(product)">
-                </button>
-              </ng-container>
-              <ng-template #readOnlyThreshold>
-                <span class="warehouse-detail__stat-value">{{ product.minThreshold | number:'1.0-0' }}</span>
-              </ng-template>
-            </div>
-            <div>
-              <span class="warehouse-detail__stat-label">Prix</span>
-              <span class="warehouse-detail__stat-value">{{ formatMoney(product.price) }}</span>
-            </div>
-          </div>
-        </li>
-      </ul>
-
-      <div class="warehouse-detail__table-wrap hide-mobile" *ngIf="!productsLoading && warehouseProducts.length > 0">
+      <div class="warehouse-detail__table-wrap" *ngIf="!productsLoading && warehouseProducts.length > 0">
         <p-table
           [value]="warehouseProducts"
           [paginator]="warehouseProducts.length > 10"
@@ -234,5 +189,6 @@
         </p-table>
       </div>
     </section>
+  </div>
   </div>
 </div>
