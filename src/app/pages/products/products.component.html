@@ -287,12 +287,12 @@
       </span>
     </ng-template>
 
-    <div *ngIf="detailLoading" class="product-detail-loading">
+    <div *ngIf="detailLoading && !selectedProduct" class="product-detail-loading">
       <i class="pi pi-spin pi-spinner"></i>
       <span>Chargement…</span>
     </div>
 
-    <div *ngIf="selectedProduct && !detailLoading" class="app-dialog-detail product-detail">
+    <div *ngIf="selectedProduct" class="app-dialog-detail product-detail" [class.product-detail--refreshing]="detailLoading">
       <div class="product-detail__status-row">
         <p-tag
           [value]="selectedProduct.statusLabel || selectedProduct.status || 'N/A'"

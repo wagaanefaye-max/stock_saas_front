@@ -416,42 +416,54 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-  openDetail(product: { id: number }) {
+  openDetail(product: any) {
     this.detailDialogVisible = true;
+    this.selectedProduct = this.normalizeProductDetail(product);
     this.detailLoading = true;
-    this.selectedProduct = null;
+    this.cdr.markForCheck();
 
-    this.apiService.get<any>(`/products/${product.id}`).subscribe({
-      next: (p) => {
-        this.selectedProduct = {
-          ...p,
-          status: p.statusLabel || p.statusCode || 'N/A',
-          stock: p.stock ?? 0,
-          warehouseStocks: p.warehouseStocks ?? [],
-          price: p.price ?? 0,
-          purchasePrice: p.purchasePrice ?? 0,
-          minThreshold: p.minThreshold ?? 0,
-          lowStock: !!p.lowStock
-        };
+    this.apiService.get<any>(`/products/${product.id}`)
+      .pipe(finalize(() => {
         this.detailLoading = false;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
+      next: (p) => {
+        this.selectedProduct = this.normalizeProductDetail(p);
+        this.cdr.markForCheck();
       },
       error: () => {
-        this.detailLoading = false;
         this.detailDialogVisible = false;
+        this.selectedProduct = null;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
           detail: 'Impossible de charger le détail du produit',
           life: 4000
         });
+        this.cdr.markForCheck();
       }
     });
+  }
+
+  private normalizeProductDetail(p: any): any {
+    return {
+      ...p,
+      status: p.statusLabel || p.statusCode || p.status || 'N/A',
+      stock: p.stock ?? 0,
+      warehouseStocks: p.warehouseStocks ?? [],
+      price: p.price ?? 0,
+      purchasePrice: p.purchasePrice ?? 0,
+      minThreshold: p.minThreshold ?? 0,
+      lowStock: !!p.lowStock
+    };
   }
 
   closeDetail(): void {
     this.detailDialogVisible = false;
     this.selectedProduct = null;
     this.detailLoading = false;
+    this.cdr.markForCheck();
   }
 
   editFromDetail(): void {
