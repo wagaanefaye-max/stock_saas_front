@@ -139,35 +139,43 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
     const code = this.selectedPaymentProvider.code;
     if (code !== 'WAVE' && code !== 'ORANGE_MONEY') {
       this.activePaymentQrUrl = null;
+      this.cdr.markForCheck();
       return;
     }
     if (code === 'WAVE' && !this.paymentQrAvailability.wave) {
       this.activePaymentQrUrl = null;
+      this.cdr.markForCheck();
       return;
     }
     if (code === 'ORANGE_MONEY' && !this.paymentQrAvailability.orangeMoney) {
       this.activePaymentQrUrl = null;
+      this.cdr.markForCheck();
       return;
     }
 
     const cached = this.paymentQrCache[code];
     if (cached) {
       this.activePaymentQrUrl = cached;
+      this.cdr.markForCheck();
       return;
     }
 
     this.paymentQrLoading = true;
+    this.activePaymentQrUrl = null;
+    this.cdr.markForCheck();
     this.subscriptionService.getPaymentQrBlob(code).subscribe({
       next: (blob) => {
         this.paymentQrLoading = false;
         const url = URL.createObjectURL(blob);
         this.paymentQrCache[code] = url;
         this.activePaymentQrUrl = url;
+        this.cdr.markForCheck();
       },
       error: (err: { userMessage?: string }) => {
         this.paymentQrLoading = false;
         this.activePaymentQrUrl = null;
         this.paymentQrError = err?.userMessage || 'QR code non disponible.';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -328,6 +336,7 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
     if (row.proofUrl) {
       this.loadDetailProof(row.id);
     }
+    this.cdr.markForCheck();
   }
 
   closeDetail(): void {
@@ -336,18 +345,22 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
     this.revokeDetailProof();
     this.detailProofError = null;
     this.detailProofLoading = false;
+    this.cdr.markForCheck();
   }
 
   private loadDetailProof(recordId: number): void {
     this.detailProofLoading = true;
+    this.cdr.markForCheck();
     this.subscriptionService.getProofBlob(recordId).subscribe({
       next: (blob) => {
         this.detailProofUrl = URL.createObjectURL(blob);
         this.detailProofLoading = false;
+        this.cdr.markForCheck();
       },
       error: (err: { userMessage?: string }) => {
         this.detailProofLoading = false;
         this.detailProofError = err?.userMessage || 'Impossible d\'afficher le justificatif.';
+        this.cdr.markForCheck();
       }
     });
   }
