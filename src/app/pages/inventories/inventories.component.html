@@ -211,9 +211,14 @@
     [draggable]="false"
     [resizable]="false"
     [contentStyle]="{ overflow: 'auto' }"
-    (onHide)="selectedInventory = null">
+    (onHide)="onDetailDialogHide()">
+    <div *ngIf="detailLoading && !selectedInventory" class="inventory-detail-loading">
+      <i class="pi pi-spin pi-spinner"></i>
+      <span>Chargement…</span>
+    </div>
+
     <ng-container *ngIf="selectedInventory">
-      <div class="app-dialog-detail">
+      <div class="app-dialog-detail" [class.inventory-detail--refreshing]="detailLoading">
       <div class="detail-meta">
         <p-tag [value]="selectedInventory.statusLabel" [severity]="getStatusSeverity(selectedInventory.status)"></p-tag>
         <span class="text-muted" *ngIf="selectedInventory.createdByName">Créé par {{ selectedInventory.createdByName }}</span>

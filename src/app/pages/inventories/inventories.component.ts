@@ -91,6 +91,7 @@ export class InventoriesComponent implements OnInit {
   };
 
   selectedInventory: any = null;
+  detailLoading = false;
   savingLines = false;
   closing = false;
 
@@ -249,25 +250,48 @@ export class InventoriesComponent implements OnInit {
   }
 
   openDetail(inventory: any) {
-    this.apiService.get<any>(`/inventories/${inventory.id}`).subscribe({
+    this.displayDetailDialog = true;
+    this.selectedInventory = this.normalizeInventoryDetail(inventory);
+    this.detailLoading = true;
+    this.cdr.markForCheck();
+
+    this.apiService.get<any>(`/inventories/${inventory.id}`)
+      .pipe(finalize(() => {
+        this.detailLoading = false;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
       next: (inv) => {
-        this.selectedInventory = {
-          ...inv,
-          lines: (inv.lines || []).map((l: any) => ({
-            ...l,
-            countedQuantityEdit: l.countedQuantity != null ? l.countedQuantity : l.theoreticalQuantity
-          }))
-        };
-        this.displayDetailDialog = true;
+        this.selectedInventory = this.normalizeInventoryDetail(inv);
+        this.cdr.markForCheck();
       },
       error: () => {
+        this.displayDetailDialog = false;
+        this.selectedInventory = null;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
           detail: 'Impossible de charger l\'inventaire'
         });
+        this.cdr.markForCheck();
       }
     });
+  }
+
+  onDetailDialogHide(): void {
+    this.selectedInventory = null;
+    this.detailLoading = false;
+    this.cdr.markForCheck();
+  }
+
+  private normalizeInventoryDetail(inv: any): any {
+    return {
+      ...inv,
+      lines: (inv.lines || []).map((l: any) => ({
+        ...l,
+        countedQuantityEdit: l.countedQuantity != null ? l.countedQuantity : l.theoreticalQuantity
+      }))
+    };
   }
 
   /** Met à jour la quantité comptée d'une ligne (liaison explicite pour p-table). */
@@ -280,20 +304,19 @@ export class InventoriesComponent implements OnInit {
   saveLines() {
     if (!this.selectedInventory || this.selectedInventory.status === 'CLOSED') return;
     this.savingLines = true;
+    this.cdr.markForCheck();
     const lines = (this.selectedInventory.lines || []).map((l: any) => ({
       productId: Number(l.productId),
       countedQuantity: l.countedQuantityEdit != null && l.countedQuantityEdit !== '' ? Number(l.countedQuantityEdit) : (l.theoreticalQuantity != null ? Number(l.theoreticalQuantity) : 0)
     }));
-    this.apiService.patch<any>(`/inventories/${this.selectedInventory.id}/lines`, { lines }).subscribe({
-      next: (inv) => {
-        this.selectedInventory = {
-          ...inv,
-          lines: (inv.lines || []).map((l: any) => ({
-            ...l,
-            countedQuantityEdit: l.countedQuantity != null ? l.countedQuantity : l.theoreticalQuantity
-          }))
-        };
+    this.apiService.patch<any>(`/inventories/${this.selectedInventory.id}/lines`, { lines })
+      .pipe(finalize(() => {
         this.savingLines = false;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
+      next: (inv) => {
+        this.selectedInventory = this.normalizeInventoryDetail(inv);
         this.messageService.add({
           severity: 'success',
           summary: 'Succès',
@@ -302,7 +325,6 @@ export class InventoriesComponent implements OnInit {
         this.loadInventories();
       },
       error: () => {
-        this.savingLines = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
@@ -328,25 +350,30 @@ export class InventoriesComponent implements OnInit {
   saveLinesThenClose() {
     if (!this.selectedInventory || this.selectedInventory.status === 'CLOSED') return;
     this.closing = true;
+    this.cdr.markForCheck();
     const lines = (this.selectedInventory.lines || []).map((l: any) => ({
       productId: Number(l.productId),
       countedQuantity: l.countedQuantityEdit != null && l.countedQuantityEdit !== '' ? Number(l.countedQuantityEdit) : (l.theoreticalQuantity != null ? Number(l.theoreticalQuantity) : 0)
     }));
     this.apiService.patch<any>(`/inventories/${this.selectedInventory.id}/lines`, { lines }).subscribe({
       next: () => {
-        this.apiService.post<any>(`/inventories/${this.selectedInventory.id}/close`, {}).subscribe({
+        this.apiService.post<any>(`/inventories/${this.selectedInventory.id}/close`, {})
+          .pipe(finalize(() => {
+            this.closing = false;
+            this.cdr.markForCheck();
+          }))
+          .subscribe({
           next: (inv) => {
             this.selectedInventory = inv;
-            this.closing = false;
             this.messageService.add({
               severity: 'success',
               summary: 'Succès',
               detail: 'Quantités enregistrées et inventaire clôturé. Les ajustements de stock ont été appliqués.'
             });
             this.loadInventories();
+            this.cdr.markForCheck();
           },
           error: (err) => {
-            this.closing = false;
             this.messageService.add({
               severity: 'error',
               summary: 'Erreur',
@@ -357,6 +384,7 @@ export class InventoriesComponent implements OnInit {
       },
       error: () => {
         this.closing = false;
+        this.cdr.markForCheck();
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
@@ -369,19 +397,24 @@ export class InventoriesComponent implements OnInit {
   closeInventory() {
     if (!this.selectedInventory || this.selectedInventory.status === 'CLOSED') return;
     this.closing = true;
-    this.apiService.post<any>(`/inventories/${this.selectedInventory.id}/close`, {}).subscribe({
+    this.cdr.markForCheck();
+    this.apiService.post<any>(`/inventories/${this.selectedInventory.id}/close`, {})
+      .pipe(finalize(() => {
+        this.closing = false;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
       next: (inv) => {
         this.selectedInventory = inv;
-        this.closing = false;
         this.messageService.add({
           severity: 'success',
           summary: 'Succès',
           detail: 'Inventaire clôturé. Les ajustements de stock ont été appliqués.'
         });
         this.loadInventories();
+        this.cdr.markForCheck();
       },
       error: (err) => {
-        this.closing = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
