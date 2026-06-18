@@ -339,6 +339,7 @@ export class ProductsComponent implements OnInit {
     // Charger entrepôts (pour s'assurer que warehouseId existe bien)
     this.loadWarehouses();
     this.displayDialog = true;
+    this.cdr.markForCheck();
   }
 
   openCreateCategoryDialog() {
@@ -389,21 +390,16 @@ export class ProductsComponent implements OnInit {
   editProduct(product: any) {
     this.closeDetail();
     this.loadWarehouses();
-    this.apiService.get<any>(`/products/${product.id}`).subscribe({
+    this.product = this.mapProductToForm(product);
+    this.displayDialog = true;
+    this.cdr.markForCheck();
+
+    this.apiService.get<any>(`/products/${product.id}`)
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (p) => {
-        this.product = {
-          id: p.id,
-          reference: p.reference,
-          name: p.name,
-          categoryCode: p.categoryCode ?? p.category ?? null,
-          description: p.description ?? null,
-          price: p.price ?? 0,
-           purchasePrice: p.purchasePrice ?? 0,
-          quantity: p.stock ?? p.quantity ?? 0,
-          warehouseId: p.warehouseId ?? null,
-          minThreshold: p.minThreshold ?? 0
-        };
-        this.displayDialog = true;
+        this.product = this.mapProductToForm(p);
+        this.cdr.markForCheck();
       },
       error: () => {
         this.messageService.add({
@@ -412,8 +408,24 @@ export class ProductsComponent implements OnInit {
           detail: 'Impossible de charger le détail du produit',
           life: 4000
         });
+        this.cdr.markForCheck();
       }
     });
+  }
+
+  private mapProductToForm(p: any): any {
+    return {
+      id: p.id,
+      reference: p.reference,
+      name: p.name,
+      categoryCode: p.categoryCode ?? p.category ?? null,
+      description: p.description ?? null,
+      price: p.price ?? 0,
+      purchasePrice: p.purchasePrice ?? 0,
+      quantity: p.stock ?? p.quantity ?? 0,
+      warehouseId: p.warehouseId ?? null,
+      minThreshold: p.minThreshold ?? 0
+    };
   }
 
   openDetail(product: any) {
