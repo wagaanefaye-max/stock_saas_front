@@ -47,6 +47,7 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
   statusFilterOptions: { label: string; value: StatusFilter }[] = [];
   proofPreviewUrl: string | null = null;
   proofError: string | null = null;
+  proofLoading = false;
   proofDialogVisible = false;
   selectedRequest: SubscriptionRecord | null = null;
   rejectDialogVisible = false;
@@ -183,9 +184,18 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
     this.proofError = null;
     this.selectedRequest = req;
     this.proofDialogVisible = true;
-    this.subscriptionService.getProofBlob(req.id).subscribe({
+    this.proofLoading = true;
+    this.cdr.markForCheck();
+
+    this.subscriptionService.getProofBlob(req.id)
+      .pipe(finalize(() => {
+        this.proofLoading = false;
+        this.cdr.markForCheck();
+      }))
+      .subscribe({
       next: (blob) => {
         this.proofPreviewUrl = URL.createObjectURL(blob);
+        this.cdr.markForCheck();
       },
       error: (err: { userMessage?: string }) => {
         this.proofError = err?.userMessage || 'Impossible d\'afficher le justificatif.';
@@ -194,6 +204,7 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
           summary: 'Erreur',
           detail: this.proofError
         });
+        this.cdr.markForCheck();
       }
     });
   }
@@ -202,7 +213,9 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
     this.proofDialogVisible = false;
     this.revokeProofUrl();
     this.proofError = null;
+    this.proofLoading = false;
     this.selectedRequest = null;
+    this.cdr.markForCheck();
   }
 
   private revokeProofUrl(): void {
@@ -221,9 +234,13 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
       rejectLabel: 'Annuler',
       accept: () => {
         this.processingId = req.id;
+        this.cdr.markForCheck();
         this.subscriptionService
           .approveRequest(req.id)
-          .pipe(finalize(() => (this.processingId = null)))
+          .pipe(finalize(() => {
+            this.processingId = null;
+            this.cdr.markForCheck();
+          }))
           .subscribe({
             next: () => {
               this.messageService.add({
@@ -252,6 +269,7 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
     this.rejectSubmitting = false;
     this.proofDialogVisible = false;
     this.rejectDialogVisible = true;
+    this.cdr.markForCheck();
   }
 
   selectRejectPreset(preset: { key: string; label: string; message: string }): void {
@@ -309,6 +327,7 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
         finalize(() => {
           this.rejectSubmitting = false;
           this.processingId = null;
+          this.cdr.markForCheck();
         })
       )
       .subscribe({

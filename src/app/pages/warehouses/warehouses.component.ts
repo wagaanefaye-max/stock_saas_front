@@ -99,6 +99,7 @@ export class WarehousesComponent implements OnInit {
                 queryParams: {},
                 replaceUrl: true
               });
+              this.cdr.markForCheck();
             },
             error: () => {
               this.messageService.add({
@@ -223,6 +224,7 @@ export class WarehousesComponent implements OnInit {
       region: 'Dakar'
     };
     this.displayDialog = true;
+    this.cdr.markForCheck();
   }
 
   editWarehouse(warehouse: any) {
@@ -237,6 +239,7 @@ export class WarehousesComponent implements OnInit {
       status: warehouse.statusLabel || warehouse.status
     };
     this.displayDialog = true;
+    this.cdr.markForCheck();
   }
 
   saveWarehouse() {
@@ -268,7 +271,9 @@ export class WarehousesComponent implements OnInit {
 
     if (!this.warehouse.id) {
       // Création
-      this.apiService.post<any>('/warehouses', warehouseData).subscribe({
+      this.apiService.post<any>('/warehouses', warehouseData)
+        .pipe(finalize(() => this.cdr.markForCheck()))
+        .subscribe({
         next: (createdWarehouse) => {
           this.messageService.add({
             severity: 'success',
@@ -292,7 +297,9 @@ export class WarehousesComponent implements OnInit {
       });
     } else {
       // Mise à jour
-      this.apiService.put<any>(`/warehouses/${this.warehouse.id}`, warehouseData).subscribe({
+      this.apiService.put<any>(`/warehouses/${this.warehouse.id}`, warehouseData)
+        .pipe(finalize(() => this.cdr.markForCheck()))
+        .subscribe({
         next: (updatedWarehouse) => {
           this.messageService.add({
             severity: 'success',

@@ -279,9 +279,14 @@ export class CompaniesComponent implements OnInit, OnDestroy {
     this.companyLogo = null;
     this.companyLogoPreview = null;
     this.displayDialog = true;
+    this.cdr.markForCheck();
   }
 
   showDetail(company: Company) {
+    this.companyDetail = company;
+    this.displayDetailDialog = true;
+    this.cdr.markForCheck();
+
     this.apiService.get<Company>(`/companies/${company.id}`)
       .pipe(
         catchError(error => {
@@ -291,14 +296,15 @@ export class CompaniesComponent implements OnInit, OnDestroy {
             summary: 'Erreur',
             detail: 'Impossible de charger les détails de l\'entreprise'
           });
+          this.cdr.markForCheck();
           return of(null);
         })
       )
       .subscribe(fetchedCompany => {
         if (fetchedCompany) {
           this.companyDetail = fetchedCompany;
-          this.displayDetailDialog = true;
         }
+        this.cdr.markForCheck();
       });
   }
 
@@ -325,6 +331,7 @@ export class CompaniesComponent implements OnInit, OnDestroy {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.companyLogoPreview = e.target.result;
+        this.cdr.markForCheck();
       };
       reader.readAsDataURL(file);
     }

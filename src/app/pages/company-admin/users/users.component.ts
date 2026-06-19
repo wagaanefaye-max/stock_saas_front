@@ -214,9 +214,18 @@ export class CompanyUsersComponent implements OnInit {
       companyId: this.authService.getCurrentUser()?.companyId || null
     };
     this.displayDialog = true;
+    this.cdr.markForCheck();
   }
 
   editUser(user: User) {
+    this.user = {
+      ...user,
+      roleCode: user.roleCode,
+      companyId: user.companyId || null
+    };
+    this.displayDialog = true;
+    this.cdr.markForCheck();
+
     this.apiService.get<User>(`/users/${user.id}`)
       .pipe(
         catchError(error => {
@@ -226,18 +235,19 @@ export class CompanyUsersComponent implements OnInit {
             summary: 'Erreur',
             detail: 'Impossible de charger les détails de l\'utilisateur'
           });
+          this.cdr.markForCheck();
           return of(null);
         })
       )
       .subscribe(fetchedUser => {
         if (fetchedUser) {
-          this.user = { 
+          this.user = {
             ...fetchedUser,
             roleCode: fetchedUser.roleCode,
             companyId: fetchedUser.companyId || null
           };
-          this.displayDialog = true;
         }
+        this.cdr.markForCheck();
       });
   }
 
@@ -288,7 +298,8 @@ export class CompanyUsersComponent implements OnInit {
           detail: `L'utilisateur "${updatedUser.name}" a été mis à jour.`
         });
         this.displayDialog = false;
-        this.loadUsers(); // Reload data
+        this.loadUsers();
+        this.cdr.markForCheck();
       });
   }
 

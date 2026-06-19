@@ -378,6 +378,7 @@ export class MovementsComponent implements OnInit {
     };
     this.availableStockInWarehouse = null;
     this.displayDialog = true;
+    this.cdr.markForCheck();
   }
 
   resolveDefaultWarehouseId(warehouses: any[] = this.accessibleWarehouses): number | null {
@@ -393,6 +394,7 @@ export class MovementsComponent implements OnInit {
   openCreateProductDialog(): void {
     this.newProduct = { name: '' };
     this.displayProductDialog = true;
+    this.cdr.markForCheck();
   }
 
   saveNewProduct(): void {
@@ -413,7 +415,9 @@ export class MovementsComponent implements OnInit {
       warehouseId: this.defaultWarehouseId
     };
 
-    this.apiService.post<any>('/products', payload).subscribe({
+    this.apiService.post<any>('/products', payload)
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (createdProduct) => {
         this.products = [
           ...this.products,
@@ -458,7 +462,9 @@ export class MovementsComponent implements OnInit {
       return;
     }
 
-    this.apiService.get<any[]>(`/warehouses/${this.movement.warehouseId}/products`).subscribe({
+    this.apiService.get<any[]>(`/warehouses/${this.movement.warehouseId}/products`)
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (products) => {
         const match = (products ?? []).find((item) => item.productId === this.movement.productId);
         this.availableStockInWarehouse = match?.quantity != null ? Number(match.quantity) : 0;
@@ -546,7 +552,9 @@ export class MovementsComponent implements OnInit {
       justification: this.movement.justification || null
     };
 
-    this.apiService.post<any>('/movements', request).subscribe({
+    this.apiService.post<any>('/movements', request)
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (data) => {
         this.messageService.add({
           severity: 'success',
@@ -588,9 +596,12 @@ export class MovementsComponent implements OnInit {
     if (!this.movement.productId) {
       this.movement.warehouseId = this.defaultWarehouseId;
       this.availableStockInWarehouse = null;
+      this.cdr.markForCheck();
       return;
     }
-    this.apiService.get<any>(`/products/${this.movement.productId}`).subscribe({
+    this.apiService.get<any>(`/products/${this.movement.productId}`)
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (p) => {
         this.movement.warehouseId = p?.warehouseId ?? this.defaultWarehouseId;
         this.refreshAvailableStockInWarehouse();

@@ -345,6 +345,7 @@ export class ProductsComponent implements OnInit {
   openCreateCategoryDialog() {
     this.newCategory = { code: '', label: '' };
     this.displayCategoryDialog = true;
+    this.cdr.markForCheck();
   }
 
   createCategory() {
@@ -363,7 +364,9 @@ export class ProductsComponent implements OnInit {
       code: this.newCategory.code.trim()
     };
 
-    this.apiService.post<{ code: string; label: string }>('/categories', payload).subscribe({
+    this.apiService.post<{ code: string; label: string }>('/categories', payload)
+      .pipe(finalize(() => this.cdr.markForCheck()))
+      .subscribe({
       next: (created) => {
         this.messageService.add({
           severity: 'success',
@@ -549,7 +552,9 @@ export class ProductsComponent implements OnInit {
 
     if (!this.product.id) {
       // Création
-      this.apiService.post<any>('/products', productData).subscribe({
+      this.apiService.post<any>('/products', productData)
+        .pipe(finalize(() => this.cdr.markForCheck()))
+        .subscribe({
         next: (createdProduct) => {
           this.messageService.add({
             severity: 'success',
@@ -573,7 +578,9 @@ export class ProductsComponent implements OnInit {
       });
     } else {
       // Mise à jour
-      this.apiService.put<any>(`/products/${this.product.id}`, productData).subscribe({
+      this.apiService.put<any>(`/products/${this.product.id}`, productData)
+        .pipe(finalize(() => this.cdr.markForCheck()))
+        .subscribe({
         next: (updatedProduct) => {
           this.messageService.add({
             severity: 'success',
@@ -606,7 +613,9 @@ export class ProductsComponent implements OnInit {
       acceptLabel: 'Oui, supprimer',
       rejectLabel: 'Non, annuler',
       accept: () => {
-        this.apiService.delete(`/products/${product.id}`).subscribe({
+        this.apiService.delete(`/products/${product.id}`)
+          .pipe(finalize(() => this.cdr.markForCheck()))
+          .subscribe({
           next: () => {
             this.messageService.add({
               severity: 'success',

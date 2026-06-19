@@ -164,8 +164,12 @@
           [severity]="statusSeverity(selectedRequest.requestStatus)"
           styleClass="ml-2"></p-tag>
       </p>
-      <img *ngIf="proofPreviewUrl" [src]="proofPreviewUrl" alt="Capture paiement" class="proof-image" />
-      <p *ngIf="proofError && !proofPreviewUrl" class="proof-error">{{ proofError }}</p>
+      <div *ngIf="proofLoading" class="proof-loading">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>Chargement du justificatif…</span>
+      </div>
+      <img *ngIf="proofPreviewUrl && !proofLoading" [src]="proofPreviewUrl" alt="Capture paiement" class="proof-image" />
+      <p *ngIf="proofError && !proofLoading && !proofPreviewUrl" class="proof-error">{{ proofError }}</p>
       <div class="proof-actions dialog-footer-mobile" *ngIf="isPending(selectedRequest)">
         <button pButton label="Valider" icon="pi pi-check" class="p-button-success" (click)="approve(selectedRequest!)"></button>
         <button pButton label="Refuser" icon="pi pi-times" class="p-button-danger subscription-reject-btn" (click)="openReject(selectedRequest!)"></button>

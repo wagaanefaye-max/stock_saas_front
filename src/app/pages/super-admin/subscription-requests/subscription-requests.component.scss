@@ -76,6 +76,16 @@
 }
 
 .proof-dialog {
+  .proof-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 2rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
   .proof-image {
     width: 100%;
     max-height: 60vh;

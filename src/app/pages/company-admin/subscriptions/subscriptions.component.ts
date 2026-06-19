@@ -103,6 +103,7 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
   selectDuration(d: SubscriptionDuration): void {
     this.selectedDuration = d;
     this.refreshQuote();
+    this.cdr.markForCheck();
   }
 
   isPaymentProviderEnabled(provider: (typeof PAYMENT_PROVIDERS)[number]): boolean {
@@ -121,6 +122,7 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
     }
     this.selectedPaymentProvider = provider;
     this.loadPaymentQrForSelectedProvider();
+    this.cdr.markForCheck();
   }
 
   showPaymentQrPanel(): boolean {
@@ -249,6 +251,7 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
         this.revokePreview();
         this.proofFile = processed;
         this.proofPreviewUrl = URL.createObjectURL(processed);
+        this.cdr.markForCheck();
         if (processed.size < file.size) {
           const beforeKb = Math.round(file.size / 1024);
           const afterKb = Math.round(processed.size / 1024);
@@ -266,12 +269,14 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
           summary: 'Erreur',
           detail: 'Impossible de traiter l\'image'
         });
+        this.cdr.markForCheck();
       });
   }
 
   clearProof(): void {
     this.proofFile = null;
     this.revokePreview();
+    this.cdr.markForCheck();
   }
 
   private revokePreview(): void {
@@ -288,6 +293,7 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
     }
     this.subscriptionService
       .getQuote(this.selectedDuration.code)
+      .pipe(finalize(() => this.cdr.markForCheck()))
       .subscribe({
         next: (q) => (this.quoteTotal = q.totalPrice),
         error: () => {
@@ -301,13 +307,17 @@ export class CompanySubscriptionsComponent implements OnInit, OnDestroy {
     if (!this.isPaymentProviderEnabled(this.selectedPaymentProvider)) return;
 
     this.subscribing = true;
+    this.cdr.markForCheck();
     this.subscriptionService
       .submitRequest(
         this.selectedDuration.code,
         this.selectedPaymentProvider.code,
         this.proofFile
       )
-      .pipe(finalize(() => (this.subscribing = false)))
+      .pipe(finalize(() => {
+        this.subscribing = false;
+        this.cdr.markForCheck();
+      }))
       .subscribe({
         next: () => {
           this.clearProof();

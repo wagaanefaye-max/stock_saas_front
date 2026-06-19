@@ -213,16 +213,18 @@ export class PlatformUsersComponent implements OnInit {
       status: 'Actif'
     };
     this.displayDialog = true;
+    this.cdr.markForCheck();
   }
 
   editUser(user: User) {
-    this.user = { 
+    this.user = {
       ...user,
       entreprise: user.companyName || '',
       role: user.roleCode as UserRole,
       status: user.status || 'Actif'
     };
     this.displayDialog = true;
+    this.cdr.markForCheck();
   }
 
   saveUser() {
@@ -275,8 +277,9 @@ export class PlatformUsersComponent implements OnInit {
             detail: 'Utilisateur mis à jour avec succès'
           });
           this.displayDialog = false;
-          this.loadUsers(); // Recharger la liste
+          this.loadUsers();
         }
+        this.cdr.markForCheck();
       });
   }
 

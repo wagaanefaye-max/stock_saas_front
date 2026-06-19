@@ -151,11 +151,13 @@ export class PartnersComponent implements OnInit {
   openNew() {
     this.partner = { role: 'CLIENT' };
     this.displayDialog = true;
+    this.cdr.markForCheck();
   }
 
   editPartner(p: any) {
     this.partner = { ...p, phone: this.formatPhone(p.phone) || p.phone || '' };
     this.displayDialog = true;
+    this.cdr.markForCheck();
   }
 
   /** Format affichage/saisie : 78 900 88 77 */
@@ -184,7 +186,9 @@ export class PartnersComponent implements OnInit {
       description: this.partner.description || null
     };
     if (this.partner.id) {
-      this.apiService.put<any>(`/partners/${this.partner.id}`, payload).subscribe({
+      this.apiService.put<any>(`/partners/${this.partner.id}`, payload)
+        .pipe(finalize(() => this.cdr.markForCheck()))
+        .subscribe({
         next: () => {
           this.messageService.add({ severity: 'success', summary: 'Modifié', detail: 'Partenaire mis à jour', life: 4000 });
           this.displayDialog = false;
@@ -195,7 +199,9 @@ export class PartnersComponent implements OnInit {
         }
       });
     } else {
-      this.apiService.post<any>('/partners', payload).subscribe({
+      this.apiService.post<any>('/partners', payload)
+        .pipe(finalize(() => this.cdr.markForCheck()))
+        .subscribe({
         next: () => {
           this.messageService.add({ severity: 'success', summary: 'Créé', detail: 'Partenaire créé', life: 4000 });
           this.displayDialog = false;
