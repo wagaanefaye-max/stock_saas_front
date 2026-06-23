@@ -21,6 +21,53 @@
       </div>
 
       <div class="settings-card__body">
+        <fieldset class="form-block form-block--logo" *ngIf="authService.isAdminEntreprise()" [disabled]="isUploadingLogo || isRemovingLogo || !companyId">
+          <legend class="form-block__legend">Logo</legend>
+          <input
+            #logoInput
+            type="file"
+            class="logo-input-hidden"
+            accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+            (change)="onLogoSelected($event)" />
+
+          <div class="logo-upload">
+            <div class="logo-upload__preview" *ngIf="displayedLogoUrl; else logoPlaceholder">
+              <img [src]="displayedLogoUrl" [alt]="company.name + ' logo'" class="logo-upload__image" />
+            </div>
+            <ng-template #logoPlaceholder>
+              <div class="logo-upload__placeholder">
+                <i class="pi pi-image"></i>
+                <span>Aucun logo</span>
+              </div>
+            </ng-template>
+
+            <div class="logo-upload__actions">
+              <button
+                pButton
+                type="button"
+                [label]="isUploadingLogo ? 'Envoi…' : (displayedLogoUrl ? 'Changer le logo' : 'Ajouter un logo')"
+                icon="pi pi-upload"
+                class="p-button-outlined"
+                (click)="openLogoPicker()"
+                [disabled]="isUploadingLogo || isRemovingLogo || !companyId"
+                [loading]="isUploadingLogo">
+              </button>
+              <button
+                *ngIf="logoUrl"
+                pButton
+                type="button"
+                label="Supprimer"
+                icon="pi pi-trash"
+                class="p-button-text p-button-danger"
+                (click)="removeLogo()"
+                [disabled]="isUploadingLogo || isRemovingLogo || !companyId"
+                [loading]="isRemovingLogo">
+              </button>
+            </div>
+            <p class="logo-upload__hint text-muted">PNG, JPG, WebP ou GIF — 5 Mo max. Affiché sur les listes admin.</p>
+          </div>
+        </fieldset>
+
         <fieldset class="form-block" [disabled]="isSaving || !companyId">
           <legend class="form-block__legend">Contact</legend>
           <div class="form-grid">

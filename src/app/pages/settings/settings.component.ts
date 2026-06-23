@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -8,6 +8,7 @@ import { MessageService } from 'primeng/api';
 import { PhoneFormatDirective } from '../../directives/phone-format.directive';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
+import { compressImageIfNeeded, MAX_IMAGE_BYTES } from '../../utils/image-compress.util';
 import { catchError, finalize, of, throwError } from 'rxjs';
 
 interface CompanySettingsResponse {
@@ -19,6 +20,7 @@ interface CompanySettingsResponse {
   region: string | null;
   country: string | null;
   planCode: string | null;
+  logoUrl: string | null;
   notifLowStock: boolean | null;
   notifMovements: boolean | null;
   notifReports: boolean | null;
@@ -45,9 +47,16 @@ interface NotificationSettings {
   styleUrl: './settings.component.scss'
 })
 export class SettingsComponent implements OnInit {
+  @ViewChild('logoInput') logoInput?: ElementRef<HTMLInputElement>;
+
   companyId: number | null = null;
   isSaving = false;
   isSavingNotifications = false;
+  isUploadingLogo = false;
+  isRemovingLogo = false;
+  logoUrl: string | null = null;
+  logoPreviewUrl: string | null = null;
+  private logoObjectUrl: string | null = null;
   company = {
     name: '',
     email: '',
@@ -66,7 +75,7 @@ export class SettingsComponent implements OnInit {
   constructor(
     private messageService: MessageService,
     private apiService: ApiService,
-    private authService: AuthService
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -115,7 +124,141 @@ export class SettingsComponent implements OnInit {
           movements: data.notifMovements ?? true,
           reports: data.notifReports ?? false
         };
+        this.logoUrl = data.logoUrl ?? null;
+        this.revokeLogoPreview();
+        this.logoPreviewUrl = this.logoUrl;
       });
+  }
+
+  get displayedLogoUrl(): string | null {
+    return this.logoPreviewUrl;
+  }
+
+  openLogoPicker(): void {
+    this.logoInput?.nativeElement.click();
+  }
+
+  onLogoSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    (event.target as HTMLInputElement).value = '';
+    if (!file || !this.companyId) {
+      return;
+    }
+
+    if (!file.type.match(/image\/(png|jpg|jpeg|gif|webp)/)) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Format non accepté',
+        detail: 'Utilisez une image PNG, JPG, WebP ou GIF.',
+        life: 4000
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Fichier trop volumineux',
+        detail: 'Le logo ne doit pas dépasser 5 Mo.',
+        life: 4000
+      });
+      return;
+    }
+
+    compressImageIfNeeded(file, MAX_IMAGE_BYTES)
+      .then((processed) => this.uploadLogo(processed))
+      .catch(() => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de traiter l\'image.',
+          life: 4000
+        });
+      });
+  }
+
+  private uploadLogo(file: File): void {
+    if (!this.companyId) {
+      return;
+    }
+
+    const form = new FormData();
+    form.append('image', file);
+    this.isUploadingLogo = true;
+
+    this.apiService.postFormData<CompanySettingsResponse>(`/companies/${this.companyId}/logo`, form)
+      .pipe(finalize(() => {
+        this.isUploadingLogo = false;
+      }))
+      .subscribe({
+        next: (data) => {
+          this.logoUrl = data.logoUrl ?? null;
+          this.revokeLogoPreview();
+          this.logoPreviewUrl = this.withCacheBuster(this.logoUrl);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Logo enregistré',
+            detail: 'Le logo de votre entreprise a été mis à jour.',
+            life: 3500
+          });
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: error?.error?.message || 'Impossible d\'enregistrer le logo.',
+            life: 5000
+          });
+        }
+      });
+  }
+
+  removeLogo(): void {
+    if (!this.companyId || !this.logoUrl) {
+      return;
+    }
+
+    this.isRemovingLogo = true;
+    this.apiService.delete<CompanySettingsResponse>(`/companies/${this.companyId}/logo`)
+      .pipe(finalize(() => {
+        this.isRemovingLogo = false;
+      }))
+      .subscribe({
+        next: () => {
+          this.logoUrl = null;
+          this.revokeLogoPreview();
+          this.logoPreviewUrl = null;
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Logo supprimé',
+            detail: 'Votre entreprise n\'a plus de logo.',
+            life: 3500
+          });
+        },
+        error: (error) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: error?.error?.message || 'Impossible de supprimer le logo.',
+            life: 5000
+          });
+        }
+      });
+  }
+
+  private withCacheBuster(url: string | null): string | null {
+    if (!url) {
+      return null;
+    }
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}t=${Date.now()}`;
+  }
+
+  private revokeLogoPreview(): void {
+    if (this.logoObjectUrl) {
+      URL.revokeObjectURL(this.logoObjectUrl);
+      this.logoObjectUrl = null;
+    }
   }
 
   private buildCompanyPayload() {
