@@ -19,6 +19,12 @@ import { catchError, finalize, of } from 'rxjs';
 import { EmptyStateComponent } from '../../../components/shared/empty-state.component';
 import { ListSkeletonComponent } from '../../../components/shared/list-skeleton.component';
 
+interface PlatformCompany {
+  id: number;
+  name: string;
+  logoUrl?: string | null;
+}
+
 interface User {
   id: number;
   name: string;
@@ -87,7 +93,7 @@ export class PlatformUsersComponent implements OnInit {
   size = 10;
 
   // Liste des entreprises pour le dropdown
-  companies: any[] = [];
+  companies: PlatformCompany[] = [];
 
   constructor(
     private apiService: ApiService,
@@ -190,6 +196,30 @@ export class PlatformUsersComponent implements OnInit {
   getRoleLabel(roleCode: string): string {
     const user = this.users.find(u => u.roleCode === roleCode);
     return user?.roleLabel || roleCode;
+  }
+
+  getCompanyLogoUrl(companyId: number | null, companyName?: string | null): string | null {
+    if (companyId != null) {
+      const byId = this.companies.find((c) => c.id === companyId);
+      if (byId?.logoUrl) {
+        return byId.logoUrl;
+      }
+    }
+    if (companyName) {
+      const byName = this.companies.find((c) => c.name === companyName);
+      if (byName?.logoUrl) {
+        return byName.logoUrl;
+      }
+    }
+    return null;
+  }
+
+  getSelectedCompanyLogoUrl(): string | null {
+    return this.getCompanyLogoUrl(null, this.user?.entreprise);
+  }
+
+  onCompanySelectionChange(): void {
+    this.cdr.markForCheck();
   }
 
   formatDate(date: string | null): string {

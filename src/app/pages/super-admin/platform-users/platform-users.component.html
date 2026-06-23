@@ -75,8 +75,17 @@
             <span class="mobile-card__subtitle">{{ user.email }}</span>
           </div>
         </div>
-        <div class="mobile-card__row">
-          <span class="text-muted">{{ user.companyName || '—' }}</span>
+        <div class="mobile-card__row mobile-card__row--company">
+          <ng-container *ngIf="getCompanyLogoUrl(user.companyId, user.companyName) as logoUrl; else companyNameOnly">
+            <img
+              [src]="logoUrl"
+              [alt]="(user.companyName || 'Entreprise') + ' logo'"
+              class="company-logo">
+            <span class="company-name">{{ user.companyName || '—' }}</span>
+          </ng-container>
+          <ng-template #companyNameOnly>
+            <span class="text-muted">{{ user.companyName || '—' }}</span>
+          </ng-template>
         </div>
         <div class="mobile-card__row">
           <p-tag [value]="user.roleLabel || getRoleLabel(user.roleCode)" severity="info"></p-tag>
@@ -167,15 +176,24 @@
     </div>
     <div class="form-group">
       <label>Entreprise *</label>
-      <p-select
-        [(ngModel)]="user.entreprise"
-        [options]="companies"
-        optionLabel="name"
-        optionValue="name"
-        placeholder="Sélectionner une entreprise"
-        class="w-full"
-        required>
-      </p-select>
+      <div class="company-select-row">
+        <div class="company-logo-cell company-logo-cell--inline" *ngIf="getSelectedCompanyLogoUrl() as logoUrl">
+          <img
+            [src]="logoUrl"
+            [alt]="(user.entreprise || 'Entreprise') + ' logo'"
+            class="company-logo">
+        </div>
+        <p-select
+          [(ngModel)]="user.entreprise"
+          (ngModelChange)="onCompanySelectionChange()"
+          [options]="companies"
+          optionLabel="name"
+          optionValue="name"
+          placeholder="Sélectionner une entreprise"
+          class="w-full company-select"
+          required>
+        </p-select>
+      </div>
     </div>
     <div class="form-group">
       <label>Rôle *</label>

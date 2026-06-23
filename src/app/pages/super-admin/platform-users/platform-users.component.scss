@@ -33,6 +33,52 @@
       width: 100%;
     }
   }
+
+  .mobile-card__row--company {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2rem;
+  }
+
+  .company-name {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .company-select-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .company-select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .company-logo-cell {
+    flex-shrink: 0;
+
+    &--inline .company-logo {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+  }
+
+  .company-logo {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--border-color, #e2e8f0);
+    background: #fff;
+    display: block;
+  }
 }
 
 ::ng-deep .p-toolbar {
