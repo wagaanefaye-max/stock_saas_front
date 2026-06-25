@@ -53,6 +53,24 @@
       </nav>
     </section>
 
+    <section class="dashboard-section" aria-label="Santé produits">
+      <div class="dashboard-section__head">
+        <h2>Santé produits (plateforme)</h2>
+      </div>
+      <div class="stats-grid product-stats-grid">
+        <div *ngFor="let stat of productStats; trackBy: trackByStatTitle" class="stat-card">
+          <div class="stat-icon" [style.background-color]="stat.color + '18'">
+            <i [class]="stat.icon" [style.color]="stat.color"></i>
+          </div>
+          <div class="stat-content">
+            <p class="stat-title">{{ stat.title }}</p>
+            <h3 class="stat-value">{{ stat.value }}</h3>
+            <span class="stat-change" *ngIf="stat.change">{{ stat.change }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="dashboard-section" aria-label="Analyses">
       <div class="dashboard-section__head">
         <h2>Analyses</h2>
@@ -146,6 +164,47 @@
                 <td><p-tag [value]="company.plan" severity="info"></p-tag></td>
                 <td>{{ formatDate(company.createdAt) }}</td>
                 <td><p-tag [value]="company.status" [severity]="getStatusSeverity(company.status)"></p-tag></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </p-card>
+    </section>
+
+    <section class="dashboard-section dashboard-section--last" aria-label="Entreprises à risque produit">
+      <p-card class="recent-card">
+        <div class="recent-card__header">
+          <div>
+            <h3>Top entreprises à risque produit</h3>
+            <p class="recent-card__hint">Classement selon ruptures et stocks bas</p>
+          </div>
+          <a routerLink="/super-admin/companies" class="recent-card__link">
+            Gérer les entreprises
+            <i class="pi pi-arrow-right"></i>
+          </a>
+        </div>
+
+        <div *ngIf="topRiskCompanies.length === 0" class="recent-empty">
+          <i class="pi pi-check-circle"></i>
+          <p>Aucun risque produit majeur détecté</p>
+        </div>
+
+        <div class="recent-table" *ngIf="topRiskCompanies.length > 0">
+          <table>
+            <thead>
+              <tr>
+                <th>Entreprise</th>
+                <th>Ruptures</th>
+                <th>Stock bas</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of topRiskCompanies; trackBy: trackByRiskCompany">
+                <td class="recent-table__name">{{ row.companyName }}</td>
+                <td>{{ row.outOfStockProducts }}</td>
+                <td>{{ row.lowStockProducts }}</td>
+                <td><p-tag [value]="row.riskScore + ''" severity="warn"></p-tag></td>
               </tr>
             </tbody>
           </table>

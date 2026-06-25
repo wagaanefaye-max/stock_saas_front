@@ -23,6 +23,23 @@ interface MonthlySubscriptionPoint {
   pendingCount?: number;
 }
 
+interface CompanyProductRisk {
+  companyId: number;
+  companyName: string;
+  outOfStockProducts: number;
+  lowStockProducts: number;
+  riskScore: number;
+}
+
+interface ProductInsights {
+  totalProducts: number;
+  newProductsThisMonth: number;
+  outOfStockProducts: number;
+  lowStockProducts: number;
+  priceAnomalies: number;
+  topRiskCompanies: CompanyProductRisk[];
+}
+
 @Component({
   selector: 'app-super-admin-dashboard',
   standalone: true,
@@ -35,6 +52,8 @@ export class SuperAdminDashboardComponent implements OnInit {
   loading = true;
   stats: any[] = [];
   recentCompanies: any[] = [];
+  productStats: any[] = [];
+  topRiskCompanies: CompanyProductRisk[] = [];
 
   chartData: any;
   chartOptions: any;
@@ -101,6 +120,14 @@ export class SuperAdminDashboardComponent implements OnInit {
               monthlySubscriptionsData: [],
               planDistribution: [],
               recentCompanies: [],
+              productInsights: {
+                totalProducts: 0,
+                newProductsThisMonth: 0,
+                outOfStockProducts: 0,
+                lowStockProducts: 0,
+                priceAnomalies: 0,
+                topRiskCompanies: []
+              },
               companiesChange: 'Aucune nouvelle ce mois',
               usersChange: 'Aucun nouveau ce mois',
               revenueChange: 'Stable',
@@ -150,6 +177,7 @@ export class SuperAdminDashboardComponent implements OnInit {
         
         // Mettre à jour les entreprises récentes
         this.recentCompanies = data.recentCompanies || [];
+        this.updateProductInsights(data.productInsights);
         
         // Mettre à jour les graphiques avec les données réelles
         if (data.monthlyCompaniesData && data.monthlyCompaniesData.length > 0) {
@@ -336,6 +364,54 @@ export class SuperAdminDashboardComponent implements OnInit {
 
   trackByCompanyId(_index: number, company: { id?: number }): number {
     return company.id ?? _index;
+  }
+
+  trackByRiskCompany(_index: number, row: CompanyProductRisk): number {
+    return row.companyId ?? _index;
+  }
+
+  private updateProductInsights(raw: ProductInsights | null | undefined): void {
+    const insights: ProductInsights = {
+      totalProducts: raw?.totalProducts ?? 0,
+      newProductsThisMonth: raw?.newProductsThisMonth ?? 0,
+      outOfStockProducts: raw?.outOfStockProducts ?? 0,
+      lowStockProducts: raw?.lowStockProducts ?? 0,
+      priceAnomalies: raw?.priceAnomalies ?? 0,
+      topRiskCompanies: raw?.topRiskCompanies ?? []
+    };
+
+    const formatNumber = (num: number) => (num ?? 0).toLocaleString('fr-FR');
+    this.productStats = [
+      {
+        title: 'Produits actifs',
+        value: formatNumber(insights.totalProducts),
+        icon: 'pi pi-box',
+        color: 'var(--primary)',
+        change: `+${formatNumber(insights.newProductsThisMonth)} ce mois`
+      },
+      {
+        title: 'Ruptures de stock',
+        value: formatNumber(insights.outOfStockProducts),
+        icon: 'pi pi-exclamation-circle',
+        color: 'var(--danger)',
+        change: 'Stock cumulé = 0'
+      },
+      {
+        title: 'Stock bas',
+        value: formatNumber(insights.lowStockProducts),
+        icon: 'pi pi-chart-line',
+        color: 'var(--warning)',
+        change: 'Sous seuil minimum'
+      },
+      {
+        title: 'Anomalies prix',
+        value: formatNumber(insights.priceAnomalies),
+        icon: 'pi pi-dollar',
+        color: 'var(--secondary)',
+        change: 'Vente < achat'
+      }
+    ];
+    this.topRiskCompanies = insights.topRiskCompanies ?? [];
   }
 
   getStatusSeverity(status: string | null | undefined): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {

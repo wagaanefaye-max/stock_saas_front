@@ -116,6 +116,12 @@
     }
   }
 
+  .product-stats-grid {
+    .stat-card {
+      border-left: 3px solid color-mix(in srgb, var(--primary) 30%, transparent);
+    }
+  }
+
   .quick-actions {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
