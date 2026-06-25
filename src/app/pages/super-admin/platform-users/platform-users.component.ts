@@ -9,6 +9,7 @@ import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { ToolbarModule } from 'primeng/toolbar';
 import { SelectModule } from 'primeng/select';
+import { SelectButtonModule } from 'primeng/selectbutton';
 import { PasswordModule } from 'primeng/password';
 import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -48,6 +49,8 @@ interface PageResponse {
   last: boolean;
 }
 
+type StatusFilter = 'ALL' | 'Actif' | 'Inactif' | 'Suspendu';
+
 @Component({
   selector: 'app-platform-users',
   standalone: true,
@@ -62,6 +65,7 @@ interface PageResponse {
     TagModule,
     ToolbarModule,
     SelectModule,
+    SelectButtonModule,
     PasswordModule,
     PaginatorModule,
     EmptyStateComponent,
@@ -77,6 +81,13 @@ export class PlatformUsersComponent implements OnInit {
   displayDialog = false;
   user: any = {};
   globalFilter = '';
+  statusFilter: StatusFilter = 'ALL';
+  statusFilterOptions: { label: string; value: StatusFilter }[] = [
+    { label: 'Tous', value: 'ALL' },
+    { label: 'Actif', value: 'Actif' },
+    { label: 'Inactif', value: 'Inactif' },
+    { label: 'Suspendu', value: 'Suspendu' }
+  ];
   listLoading = true;
   listLoadError = false;
   readonly dialogStyle = APP_DIALOG_STYLE;
@@ -124,11 +135,22 @@ export class PlatformUsersComponent implements OnInit {
 
   loadUsers() {
     const search = this.globalFilter && this.globalFilter.trim() ? this.globalFilter.trim() : undefined;
+    const status = this.statusFilter === 'ALL' ? undefined : this.statusFilter;
+    const params = new URLSearchParams({
+      page: String(this.page),
+      size: String(this.size)
+    });
+    if (search) {
+      params.set('search', search);
+    }
+    if (status) {
+      params.set('status', status);
+    }
     this.listLoading = true;
     this.listLoadError = false;
     this.cdr.markForCheck();
 
-    this.apiService.get<PageResponse>(`/users?page=${this.page}&size=${this.size}${search ? `&search=${encodeURIComponent(search)}` : ''}`)
+    this.apiService.get<PageResponse>(`/users?${params.toString()}`)
       .pipe(finalize(() => {
         this.listLoading = false;
         this.cdr.markForCheck();
@@ -153,11 +175,17 @@ export class PlatformUsersComponent implements OnInit {
   }
 
   get hasActiveFilters(): boolean {
-    return !!this.globalFilter?.trim();
+    return !!this.globalFilter?.trim() || this.statusFilter !== 'ALL';
   }
 
   resetFilters(): void {
     this.globalFilter = '';
+    this.statusFilter = 'ALL';
+    this.page = 0;
+    this.loadUsers();
+  }
+
+  onStatusFilterChange(): void {
     this.page = 0;
     this.loadUsers();
   }

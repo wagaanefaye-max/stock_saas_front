@@ -20,6 +20,15 @@
           placeholder="Nom ou email…">
       </span>
     </div>
+    <div class="mobile-toolbar__chips show-mobile-only list-filter-chips list-filter-chips--scroll">
+      <p-selectButton
+        [options]="statusFilterOptions"
+        [(ngModel)]="statusFilter"
+        optionLabel="label"
+        optionValue="value"
+        (ngModelChange)="onStatusFilterChange()">
+      </p-selectButton>
+    </div>
     <p-card class="table-card hide-mobile">
       <div class="list-toolbar">
         <div class="list-toolbar__primary">
@@ -32,6 +41,15 @@
               (input)="onGlobalFilter()"
               placeholder="Nom ou email…">
           </span>
+        </div>
+        <div class="list-filter-chips list-filter-chips--scroll">
+          <p-selectButton
+            [options]="statusFilterOptions"
+            [(ngModel)]="statusFilter"
+            optionLabel="label"
+            optionValue="value"
+            (ngModelChange)="onStatusFilterChange()">
+          </p-selectButton>
         </div>
       </div>
     </p-card>
@@ -52,8 +70,8 @@
     <app-empty-state
       *ngIf="!listLoading && !listLoadError && users.length === 0 && hasActiveFilters"
       icon="pi pi-filter-slash"
-      message="Aucun utilisateur ne correspond à votre recherche."
-      actionLabel="Réinitialiser la recherche"
+      message="Aucun utilisateur ne correspond à vos filtres."
+      actionLabel="Réinitialiser les filtres"
       actionIcon="pi pi-refresh"
       (action)="resetFilters()">
     </app-empty-state>
