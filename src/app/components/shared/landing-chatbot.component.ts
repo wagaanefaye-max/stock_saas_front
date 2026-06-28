@@ -5,6 +5,8 @@ import {
   ElementRef,
   HostListener,
   Input,
+  OnDestroy,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -32,7 +34,7 @@ interface FaqEntry {
   styleUrl: './landing-chatbot.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LandingChatbotComponent {
+export class LandingChatbotComponent implements OnInit, OnDestroy {
   @Input() whatsappLink = '';
   @Input() contactEmail = '';
 
@@ -41,8 +43,13 @@ export class LandingChatbotComponent {
   isOpen = false;
   isTyping = false;
   draft = '';
+  autoSpeak = true;
+  speechSupported = false;
+  speakingMessageId: number | null = null;
   private messageSeq = 0;
   private typingTimer: ReturnType<typeof setTimeout> | null = null;
+  private frenchVoice: SpeechSynthesisVoice | null = null;
+  private voicesChangedHandler?: () => void;
 
   messages: ChatMessage[] = [];
   hasWelcomed = false;
@@ -84,7 +91,7 @@ export class LandingChatbotComponent {
       id: 'trial',
       question: 'Y a-t-il un essai gratuit ?',
       answer:
-        'Oui. Vous bénéficiez d\'un mois d\'essai gratuit pour tester toutes les fonctionnalités, sans engagement ni carte bancaire.',
+        'Oui. Vous bénéficiez d\'un mois d\'essai gratuit pour tester toutes les fonctionnalités, sans engagement.',
       keywords: ['essai', 'gratuit', 'trial', 'mois', 'tester', 'demo']
     },
     {
@@ -119,6 +126,31 @@ export class LandingChatbotComponent {
 
   constructor(private cdr: ChangeDetectorRef) {}
 
+  ngOnInit(): void {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      return;
+    }
+
+    this.speechSupported = true;
+    const loadVoices = (): void => {
+      this.frenchVoice = this.pickFrenchVoice();
+      this.cdr.markForCheck();
+    };
+    loadVoices();
+    this.voicesChangedHandler = loadVoices;
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+  }
+
+  ngOnDestroy(): void {
+    this.stopSpeech();
+    if (this.typingTimer) {
+      clearTimeout(this.typingTimer);
+    }
+    if (this.voicesChangedHandler && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.removeEventListener('voiceschanged', this.voicesChangedHandler);
+    }
+  }
+
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.isOpen) {
@@ -141,8 +173,32 @@ export class LandingChatbotComponent {
   }
 
   close(): void {
+    this.stopSpeech();
     this.isOpen = false;
     this.cdr.markForCheck();
+  }
+
+  toggleAutoSpeak(): void {
+    this.autoSpeak = !this.autoSpeak;
+    if (!this.autoSpeak) {
+      this.stopSpeech();
+    }
+    this.cdr.markForCheck();
+  }
+
+  toggleMessageAudio(msg: ChatMessage): void {
+    if (!this.speechSupported) {
+      return;
+    }
+    if (this.speakingMessageId === msg.id) {
+      this.stopSpeech();
+      return;
+    }
+    this.speakText(msg.text, msg.id);
+  }
+
+  isSpeakingMessage(messageId: number): boolean {
+    return this.speakingMessageId === messageId;
   }
 
   askQuestion(question: string): void {
@@ -170,9 +226,13 @@ export class LandingChatbotComponent {
   }
 
   private pushBotMessage(text: string): void {
-    this.messages = [...this.messages, { id: ++this.messageSeq, from: 'bot', text }];
+    const id = ++this.messageSeq;
+    this.messages = [...this.messages, { id, from: 'bot', text }];
     this.cdr.markForCheck();
     this.scrollToBottom();
+    if (this.autoSpeak && this.speechSupported) {
+      setTimeout(() => this.speakText(text, id), 80);
+    }
   }
 
   private replyWithDelay(answer: string): void {
@@ -261,5 +321,71 @@ export class LandingChatbotComponent {
     if (el) {
       el.scrollTop = el.scrollHeight;
     }
+  }
+
+  private speakText(text: string, messageId: number): void {
+    if (!this.speechSupported || typeof window === 'undefined') {
+      return;
+    }
+
+    const spoken = this.sanitizeForSpeech(text);
+    if (!spoken) {
+      return;
+    }
+
+    this.stopSpeech(false);
+
+    const utterance = new SpeechSynthesisUtterance(spoken);
+    utterance.lang = 'fr-FR';
+    if (this.frenchVoice) {
+      utterance.voice = this.frenchVoice;
+    }
+    utterance.rate = 0.96;
+    utterance.pitch = 1;
+
+    utterance.onend = () => {
+      if (this.speakingMessageId === messageId) {
+        this.speakingMessageId = null;
+        this.cdr.markForCheck();
+      }
+    };
+    utterance.onerror = () => {
+      if (this.speakingMessageId === messageId) {
+        this.speakingMessageId = null;
+        this.cdr.markForCheck();
+      }
+    };
+
+    this.speakingMessageId = messageId;
+    this.cdr.markForCheck();
+    window.speechSynthesis.speak(utterance);
+  }
+
+  private stopSpeech(markCheck = true): void {
+    if (!this.speechSupported || typeof window === 'undefined') {
+      return;
+    }
+    window.speechSynthesis.cancel();
+    this.speakingMessageId = null;
+    if (markCheck) {
+      this.cdr.markForCheck();
+    }
+  }
+
+  private pickFrenchVoice(): SpeechSynthesisVoice | null {
+    const voices = window.speechSynthesis.getVoices();
+    return (
+      voices.find(v => v.lang.toLowerCase() === 'fr-fr') ??
+      voices.find(v => v.lang.toLowerCase().startsWith('fr')) ??
+      null
+    );
+  }
+
+  private sanitizeForSpeech(text: string): string {
+    return text
+      .replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu, '')
+      .replace(/«|»/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 }

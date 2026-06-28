@@ -102,7 +102,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       question: 'L\'essai gratuit engage-t-il à quelque chose ?',
-      answer: 'Non. Vous disposez d\'un mois complet pour tester toutes les fonctionnalités, sans engagement ni carte bancaire.'
+      answer: 'Non. Vous disposez d\'un mois complet pour tester toutes les fonctionnalités, sans engagement.'
     },
     {
       question: 'Comment contacter le support ?',

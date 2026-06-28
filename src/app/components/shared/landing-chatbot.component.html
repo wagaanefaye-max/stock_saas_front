@@ -18,13 +18,24 @@
           </p>
         </div>
       </div>
-      <button
-        type="button"
-        class="landing-chatbot__close"
-        (click)="close()"
-        aria-label="Fermer l'assistant">
-        <i class="pi pi-times"></i>
-      </button>
+      <div class="landing-chatbot__header-actions">
+        <button
+          *ngIf="speechSupported"
+          type="button"
+          class="landing-chatbot__speak-toggle"
+          (click)="toggleAutoSpeak()"
+          [attr.aria-pressed]="autoSpeak"
+          [attr.aria-label]="autoSpeak ? 'Désactiver la lecture vocale' : 'Activer la lecture vocale'">
+          <i class="pi" [ngClass]="autoSpeak ? 'pi-volume-up' : 'pi-volume-off'"></i>
+        </button>
+        <button
+          type="button"
+          class="landing-chatbot__close"
+          (click)="close()"
+          aria-label="Fermer l'assistant">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
     </header>
 
     <div class="landing-chatbot__messages" #messagesViewport>
@@ -33,7 +44,22 @@
         class="landing-chatbot__message"
         [class.landing-chatbot__message--user]="msg.from === 'user'"
         [class.landing-chatbot__message--bot]="msg.from === 'bot'">
-        <div class="landing-chatbot__bubble">{{ msg.text }}</div>
+        <div
+          *ngIf="msg.from === 'bot'"
+          class="landing-chatbot__bubble landing-chatbot__bubble--bot">
+          <p class="landing-chatbot__bubble-text">{{ msg.text }}</p>
+          <button
+            *ngIf="speechSupported"
+            type="button"
+            class="landing-chatbot__audio"
+            [class.landing-chatbot__audio--active]="isSpeakingMessage(msg.id)"
+            (click)="toggleMessageAudio(msg)"
+            [attr.aria-label]="isSpeakingMessage(msg.id) ? 'Arrêter la lecture' : 'Écouter la réponse'">
+            <i class="pi" [ngClass]="isSpeakingMessage(msg.id) ? 'pi-stop' : 'pi-volume-up'"></i>
+            <span>{{ isSpeakingMessage(msg.id) ? 'Arrêter' : 'Écouter' }}</span>
+          </button>
+        </div>
+        <div *ngIf="msg.from === 'user'" class="landing-chatbot__bubble">{{ msg.text }}</div>
       </div>
 
       <div *ngIf="isTyping" class="landing-chatbot__message landing-chatbot__message--bot" aria-live="polite">
