@@ -16,7 +16,16 @@
         <h2>Indicateurs clés</h2>
       </div>
       <div class="stats-grid">
-        <div *ngFor="let stat of stats; trackBy: trackByStatTitle" class="stat-card">
+        <div
+          *ngFor="let stat of stats; trackBy: trackByStatTitle"
+          class="stat-card"
+          [class.stat-card--alert]="stat.alert"
+          [class.stat-card--link]="stat.routerLink"
+          [attr.role]="stat.routerLink ? 'link' : null"
+          [attr.tabindex]="stat.routerLink ? 0 : null"
+          (click)="onStatCardClick(stat)"
+          (keydown.enter)="onStatCardClick(stat)"
+          (keydown.space)="$event.preventDefault(); onStatCardClick(stat)">
           <div class="stat-icon" [style.background-color]="stat.color + '18'">
             <i [class]="stat.icon" [style.color]="stat.color"></i>
           </div>

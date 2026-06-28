@@ -3,7 +3,7 @@ import { buildBarChartOptions, buildDoughnutChartOptions, buildLineChartOptions 
 import { BRAND, CHART_PALETTE, chartFill, paletteColor } from '../../../utils/chart-colors.util';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ChartModule } from 'primeng/chart';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -15,6 +15,17 @@ import { RequestCacheService } from '../../../services/request-cache.service';
 import { catchError, finalize, of } from 'rxjs';
 
 type SubscriptionChartFilter = 'ALL' | 'APPROVED' | 'REJECTED';
+
+interface DashboardStatCard {
+  title: string;
+  value: string;
+  icon: string;
+  color: string;
+  change?: string;
+  routerLink?: string;
+  queryParams?: Record<string, string>;
+  alert?: boolean;
+}
 
 interface MonthlySubscriptionPoint {
   month: string;
@@ -50,7 +61,7 @@ interface ProductInsights {
 })
 export class SuperAdminDashboardComponent implements OnInit {
   loading = true;
-  stats: any[] = [];
+  stats: DashboardStatCard[] = [];
   recentCompanies: any[] = [];
   productStats: any[] = [];
   topRiskCompanies: CompanyProductRisk[] = [];
@@ -74,6 +85,7 @@ export class SuperAdminDashboardComponent implements OnInit {
     private apiService: ApiService,
     private requestCache: RequestCacheService,
     private messageService: MessageService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -150,28 +162,35 @@ export class SuperAdminDashboardComponent implements OnInit {
             value: formatNumber(data.activeCompanies || 0),
             icon: 'pi pi-building',
             color: 'var(--primary)',
-            change: data.companiesChange || 'Aucune nouvelle ce mois'
+            change: data.companiesChange || 'Aucune nouvelle ce mois',
+            routerLink: '/super-admin/companies'
           },
           {
             title: 'Utilisateurs totaux',
             value: formatNumber(data.totalUsers || 0),
             icon: 'pi pi-users',
             color: 'var(--secondary)',
-            change: data.usersChange || 'Aucun nouveau ce mois'
+            change: data.usersChange || 'Aucun nouveau ce mois',
+            routerLink: '/super-admin/platform-users'
           },
           {
             title: 'Revenus mensuels',
             value: data.monthlyRevenue || '0 FCFA',
             icon: 'pi pi-money-bill',
             color: 'var(--warning)',
-            change: data.revenueChange || 'Stable'
+            change: data.revenueChange || 'Stable',
+            routerLink: '/super-admin/subscription-requests',
+            queryParams: { status: 'APPROVED' }
           },
           {
             title: 'Souscriptions en attente',
             value: formatNumber(data.supportTickets || 0),
             icon: 'pi pi-clock',
             color: 'var(--danger)',
-            change: data.ticketsChange || 'Stable'
+            change: data.ticketsChange || 'Stable',
+            routerLink: '/super-admin/subscription-requests',
+            queryParams: { status: 'PENDING' },
+            alert: (data.supportTickets || 0) > 0
           }
         ];
         
@@ -360,6 +379,15 @@ export class SuperAdminDashboardComponent implements OnInit {
 
   trackByStatTitle(_index: number, stat: { title: string }): string {
     return stat.title;
+  }
+
+  onStatCardClick(stat: DashboardStatCard): void {
+    if (!stat.routerLink) {
+      return;
+    }
+    this.router.navigate([stat.routerLink], {
+      queryParams: stat.queryParams
+    });
   }
 
   trackByCompanyId(_index: number, company: { id?: number }): number {

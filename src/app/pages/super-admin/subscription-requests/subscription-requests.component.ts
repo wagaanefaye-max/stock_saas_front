@@ -9,6 +9,7 @@ import { InputTextarea } from 'primeng/inputtextarea';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { PaginatorModule } from 'primeng/paginator';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { SubscriptionRecord, SubscriptionService } from '../../../services/subscription.service';
 import { SuperAdminSubscriptionBadgeService } from '../../../services/super-admin-subscription-badge.service';
@@ -90,10 +91,22 @@ export class SubscriptionRequestsComponent implements OnInit, OnDestroy {
     private subscriptionBadgeService: SuperAdminSubscriptionBadgeService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
+    private route: ActivatedRoute,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    const status = this.route.snapshot.queryParamMap.get('status')?.toUpperCase();
+    if (status === 'PENDING' || status === 'APPROVED' || status === 'REJECTED') {
+      this.statusFilter = status as StatusFilter;
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        queryParamsHandling: '',
+        replaceUrl: true
+      });
+    }
     this.loadRequests();
   }
 
