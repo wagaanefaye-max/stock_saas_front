@@ -2,8 +2,8 @@
   display: block;
   position: fixed;
   right: 1.25rem;
-  bottom: 1.25rem;
-  z-index: 1200;
+  bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+  z-index: 9990;
   pointer-events: none;
 }
 
@@ -301,6 +301,8 @@
   }
 
   &__launcher {
+    position: relative;
+    z-index: 1;
     display: inline-flex;
     align-items: center;
     gap: 0.55rem;
@@ -375,7 +377,7 @@
 @media (max-width: 480px) {
   :host {
     right: 0.85rem;
-    bottom: 0.85rem;
+    bottom: max(0.85rem, env(safe-area-inset-bottom, 0px));
   }
 
   .landing-chatbot__panel {
