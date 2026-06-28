@@ -43,7 +43,6 @@ export class LandingChatbotComponent implements OnInit, OnDestroy {
   isOpen = false;
   isTyping = false;
   draft = '';
-  autoSpeak = true;
   speechSupported = false;
   speakingMessageId: number | null = null;
   private messageSeq = 0;
@@ -178,14 +177,6 @@ export class LandingChatbotComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  toggleAutoSpeak(): void {
-    this.autoSpeak = !this.autoSpeak;
-    if (!this.autoSpeak) {
-      this.stopSpeech();
-    }
-    this.cdr.markForCheck();
-  }
-
   toggleMessageAudio(msg: ChatMessage): void {
     if (!this.speechSupported) {
       return;
@@ -230,9 +221,6 @@ export class LandingChatbotComponent implements OnInit, OnDestroy {
     this.messages = [...this.messages, { id, from: 'bot', text }];
     this.cdr.markForCheck();
     this.scrollToBottom();
-    if (this.autoSpeak && this.speechSupported) {
-      setTimeout(() => this.speakText(text, id), 80);
-    }
   }
 
   private replyWithDelay(answer: string): void {

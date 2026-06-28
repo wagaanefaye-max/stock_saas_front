@@ -112,25 +112,6 @@
     }
   }
 
-  &__speak-toggle {
-    border: none;
-    background: rgba(255, 255, 255, 0.14);
-    color: #fff;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 999px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: background 0.15s ease;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.24);
-    }
-  }
-
   &__messages {
     flex: 1;
     min-height: 12rem;

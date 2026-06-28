@@ -20,15 +20,6 @@
       </div>
       <div class="landing-chatbot__header-actions">
         <button
-          *ngIf="speechSupported"
-          type="button"
-          class="landing-chatbot__speak-toggle"
-          (click)="toggleAutoSpeak()"
-          [attr.aria-pressed]="autoSpeak"
-          [attr.aria-label]="autoSpeak ? 'Désactiver la lecture vocale' : 'Activer la lecture vocale'">
-          <i class="pi" [ngClass]="autoSpeak ? 'pi-volume-up' : 'pi-volume-off'"></i>
-        </button>
-        <button
           type="button"
           class="landing-chatbot__close"
           (click)="close()"
