@@ -1,0 +1,95 @@
+<div class="landing-chatbot" [class.landing-chatbot--open]="isOpen">
+  <section
+    *ngIf="isOpen"
+    class="landing-chatbot__panel"
+    role="dialog"
+    aria-label="Assistant Stock SaaS"
+    aria-modal="false">
+    <header class="landing-chatbot__header">
+      <div class="landing-chatbot__header-main">
+        <span class="landing-chatbot__avatar" aria-hidden="true">
+          <i class="pi pi-sparkles"></i>
+        </span>
+        <div>
+          <h2 class="landing-chatbot__title">Assistant Stock SaaS</h2>
+          <p class="landing-chatbot__status">
+            <span class="landing-chatbot__status-dot" aria-hidden="true"></span>
+            En ligne — réponses instantanées
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="landing-chatbot__close"
+        (click)="close()"
+        aria-label="Fermer l'assistant">
+        <i class="pi pi-times"></i>
+      </button>
+    </header>
+
+    <div class="landing-chatbot__messages" #messagesViewport>
+      <div
+        *ngFor="let msg of messages; trackBy: trackByMessageId"
+        class="landing-chatbot__message"
+        [class.landing-chatbot__message--user]="msg.from === 'user'"
+        [class.landing-chatbot__message--bot]="msg.from === 'bot'">
+        <div class="landing-chatbot__bubble">{{ msg.text }}</div>
+      </div>
+
+      <div *ngIf="isTyping" class="landing-chatbot__message landing-chatbot__message--bot" aria-live="polite">
+        <div class="landing-chatbot__bubble landing-chatbot__bubble--typing">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="landing-chatbot__suggestions" *ngIf="!isTyping">
+      <p class="landing-chatbot__suggestions-label">Questions fréquentes</p>
+      <div class="landing-chatbot__chips">
+        <button
+          type="button"
+          class="landing-chatbot__chip"
+          *ngFor="let q of quickQuestions"
+          (click)="askQuestion(q)">
+          {{ q }}
+        </button>
+      </div>
+    </div>
+
+    <footer class="landing-chatbot__footer">
+      <form class="landing-chatbot__form" (ngSubmit)="onSubmit()">
+        <input
+          type="text"
+          class="landing-chatbot__input"
+          [(ngModel)]="draft"
+          name="chatDraft"
+          placeholder="Posez votre question…"
+          autocomplete="off"
+          [disabled]="isTyping"
+          maxlength="280" />
+        <button
+          type="submit"
+          class="landing-chatbot__send"
+          [disabled]="!draft.trim() || isTyping"
+          aria-label="Envoyer">
+          <i class="pi pi-send"></i>
+        </button>
+      </form>
+      <div class="landing-chatbot__cta">
+        <a routerLink="/register" class="landing-chatbot__cta-link">Créer un compte</a>
+        <span aria-hidden="true">·</span>
+        <a routerLink="/login" class="landing-chatbot__cta-link">Se connecter</a>
+      </div>
+    </footer>
+  </section>
+
+  <button
+    type="button"
+    class="landing-chatbot__launcher"
+    (click)="toggle()"
+    [attr.aria-expanded]="isOpen"
+    [attr.aria-label]="isOpen ? 'Fermer l\'assistant' : 'Ouvrir l\'assistant Stock SaaS'">
+    <i class="pi" [ngClass]="isOpen ? 'pi-times' : 'pi-comments'"></i>
+    <span class="landing-chatbot__launcher-label" *ngIf="!isOpen">Besoin d'aide ?</span>
+  </button>
+</div>

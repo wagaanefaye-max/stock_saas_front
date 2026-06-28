@@ -2,12 +2,13 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, Vie
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { LandingChatbotComponent } from '../../components/shared/landing-chatbot.component';
 import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LandingChatbotComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss'
 })
